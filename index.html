@@ -2577,28 +2577,32 @@
   setInterval(rotateWord, 2500);
 
   // ======== GSAP ENTRANCE ANIMATIONS ========
-  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+  function playEntrance() {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-  // 1. Columns stagger in
-  tl.to('.col-section', { opacity: 1, y: 0, duration: 0.7, stagger: 0.1 }, 0.2);
+    // 1. Columns stagger in
+    tl.to('.col-section', { opacity: 1, y: 0, duration: 0.7, stagger: 0.1 }, 0.2);
 
-  // 2. Statement fade in
-  tl.to('.statement', { opacity: 1, y: 0, duration: 0.8 }, 0.7);
+    // 2. Statement fade in
+    tl.to('.statement', { opacity: 1, y: 0, duration: 0.8 }, 0.7);
 
-  // 3. Bottom strip
-  tl.to('.bottom', { opacity: 1, y: 0, duration: 0.6 }, 1.0);
+    // 3. Bottom strip
+    tl.to('.bottom', { opacity: 1, y: 0, duration: 0.6 }, 1.0);
 
-  // 4. Footer ribbon
-  gsap.from('.footer-ribbon', { y: 30, opacity: 0, duration: 0.6, delay: 1.2, ease: 'power2.out' });
+    // 4. Footer ribbon
+    gsap.from('.footer-ribbon', { y: 30, opacity: 0, duration: 0.6, delay: 1.2, ease: 'power2.out' });
 
-  // 5. Project thumbs stagger (no scale/transform to avoid breaking scroll)
-  const thumbs = document.querySelectorAll('.project-thumb');
-  thumbs.forEach(t => t.style.opacity = '0');
-  tl.add(() => {
-    thumbs.forEach((t, i) => {
-      setTimeout(() => { t.style.opacity = '1'; t.style.transition = 'opacity 0.4s'; }, i * 50);
-    });
-  }, 1.1);
+    // 5. Project thumbs stagger (no scale/transform to avoid breaking scroll)
+    const thumbs = document.querySelectorAll('.project-thumb');
+    thumbs.forEach(t => t.style.opacity = '0');
+    tl.add(() => {
+      thumbs.forEach((t, i) => {
+        setTimeout(() => { t.style.opacity = '1'; t.style.transition = 'opacity 0.4s'; }, i * 50);
+      });
+    }, 1.1);
+  }
+
+  playEntrance();
 
   // 7. (removed avatar float)
 
