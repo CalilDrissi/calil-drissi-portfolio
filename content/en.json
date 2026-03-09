@@ -30,22 +30,16 @@
     "previousLabel": "Previous",
     "previous": ["Agency Projects", "Startup Contracts", "Open Source"]
   },
-  "recognition": {
-    "header": "Recognition",
-    "tags": ["Awwwards", "CSSDA", "GSAP", "ProductHunt"],
-    "awards": [
-      "03x Site Of The Day",
-      "05x Developer Award",
-      "02x Mobile Excellence",
-      "12x Honors/Special Kudos",
-      "01x Innovation Award"
+  "ventures": {
+    "header": "Ventures",
+    "list": [
+      { "name": "DevKit CLI", "desc": "Open-source CLI toolkit for scaffolding and automating dev workflows", "status": "Active" },
+      { "name": "MotionLib", "desc": "Lightweight React animation library built on GSAP", "status": "Active" },
+      { "name": "Pagerank", "desc": "SEO audit tool for developers — Lighthouse + Core Web Vitals in one dashboard", "status": "Beta" },
+      { "name": "Dotfiles", "desc": "Personal dev environment config — Neovim, tmux, Warp, and more", "status": "Ongoing" }
     ],
-    "featuresLabel": "Features",
-    "features": [
-      "CSS-Tricks /Smashing Mag",
-      "Dev.to /Hashnode /HackerNews",
-      "GSAP Showcase /CodePen"
-    ]
+    "changelogLabel": "Changelog",
+    "changelog": ["DevKit CLI v2.3 — Mar 2026", "MotionLib v1.1 — Feb 2026", "Pagerank Beta — Jan 2026"]
   },
   "articles": {
     "header": "Articles",

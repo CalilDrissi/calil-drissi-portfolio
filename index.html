@@ -73,7 +73,7 @@
     :root {
       --bg: #121212;
       --fg: #ffffff;
-      --fg-dim: rgba(255,255,255,0.6);
+      --fg-dim: rgba(255,255,255,0.8);
       --fg-faint: rgba(255,255,255,0.22);
       --accent: #5e2bff;
       --border: rgba(255,255,255,0.08);
@@ -293,6 +293,7 @@
 
     /* Position column */
     .position-studio {
+      color: var(--fg-dim);
       font-weight: 500;
       margin-bottom: 2px;
     }
@@ -320,27 +321,61 @@
     }
 
     /* Recognition column */
-    .recognition-tags {
+    .ventures-list {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: 4px;
       margin-bottom: 12px;
     }
-    .recognition-tags span {
-      background: var(--fg-faint);
-      padding: 2px 7px;
-      border-radius: 2px;
-      font-size: calc(var(--label) - 1px);
-      letter-spacing: 0;
+    .venture-item {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      cursor: default;
     }
-    .recognition-list {
+    .venture-item:hover .venture-name { color: var(--accent); }
+    .venture-name {
+      color: var(--fg-dim);
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .venture-status {
+      font-size: calc(var(--label) - 2px);
+      padding: 1px 6px;
+      border-radius: 2px;
+      background: var(--fg-faint);
+      color: var(--fg-dim);
+      letter-spacing: 0.02em;
+    }
+    .ventures-stats {
       color: var(--fg-dim);
       display: flex;
       flex-direction: column;
       gap: 1px;
     }
-    .recognition-features {
-      margin-top: 12px;
+    #venturePreview {
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+      background: #1a1a1a;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 12px 14px;
+      width: 220px;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+    #venturePreview.visible { opacity: 1; }
+    #venturePreview .vp-name {
+      font-weight: 600;
+      font-size: 11px;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    #venturePreview .vp-desc {
+      font-size: 11px;
+      color: var(--fg-dim);
+      line-height: 1.45;
     }
 
     /* Articles column */
@@ -358,7 +393,7 @@
       display: block;
     }
     .articles-list a:hover {
-      color: var(--fg);
+      color: var(--accent);
     }
     .article-preview {
       position: fixed;
@@ -423,7 +458,7 @@
       transition: color 0.15s;
     }
     .connect-links a:hover {
-      color: var(--fg);
+      color: var(--accent);
       text-decoration: none;
     }
     .connect-avail {
@@ -1388,27 +1423,18 @@
 
     <!-- RECOGNITION -->
     <div class="col-section">
-      <div class="col-header">Recognition</div>
-      <div class="recognition-tags">
-        <span>Awwwards</span>
-        <span>CSSDA</span>
-        <span>GSAP</span>
-        <span>ProductHunt</span>
+      <div class="col-header">Ventures</div>
+      <div class="ventures-list" id="venturesList">
+        <div class="venture-item" data-desc="Open-source CLI toolkit for scaffolding and automating dev workflows"><span class="venture-name">DevKit CLI</span><span class="venture-status">Active</span></div>
+        <div class="venture-item" data-desc="Lightweight React animation library built on GSAP"><span class="venture-name">MotionLib</span><span class="venture-status">Active</span></div>
+        <div class="venture-item" data-desc="SEO audit tool for developers — Lighthouse + Core Web Vitals in one dashboard"><span class="venture-name">Pagerank</span><span class="venture-status">Beta</span></div>
+        <div class="venture-item" data-desc="Personal dev environment config — Neovim, tmux, Warp, and more"><span class="venture-name">Dotfiles</span><span class="venture-status">Ongoing</span></div>
       </div>
-      <div class="recognition-list">
-        <span>03x Site Of The Day</span>
-        <span>05x Developer Award</span>
-        <span>02x Mobile Excellence</span>
-        <span>12x Honors/Special Kudos</span>
-        <span>01x Innovation Award</span>
-      </div>
-      <div class="recognition-features">
-        <div class="sub-label">Features</div>
-        <div class="recognition-list">
-          <span>CSS-Tricks /Smashing Mag</span>
-          <span>Dev.to /Hashnode /HackerNews</span>
-          <span>GSAP Showcase /CodePen</span>
-        </div>
+      <div class="sub-label">Changelog</div>
+      <div class="ventures-stats">
+        <span>DevKit CLI v2.3 — Mar 2026</span>
+        <span>MotionLib v1.1 — Feb 2026</span>
+        <span>Pagerank Beta — Jan 2026</span>
       </div>
     </div>
 
@@ -1648,6 +1674,11 @@
     <span id="articlePreviewTags"></span>
     <span id="articlePreviewDate"></span>
   </div>
+</div>
+
+<div id="venturePreview">
+  <div class="vp-name" id="vpName"></div>
+  <div class="vp-desc" id="vpDesc"></div>
 </div>
 
 <script>
@@ -2480,6 +2511,35 @@
       positionPreview(e);
     };
   });
+
+  // ======== VENTURE HOVER PREVIEW ========
+  const venturePreview = document.getElementById('venturePreview');
+  const vpName = document.getElementById('vpName');
+  const vpDesc = document.getElementById('vpDesc');
+  document.querySelectorAll('#venturesList .venture-item').forEach(item => {
+    item.onmouseenter = function(e) {
+      vpName.textContent = item.querySelector('.venture-name').textContent;
+      vpDesc.textContent = item.dataset.desc;
+      venturePreview.classList.add('visible');
+      positionVenture(e);
+    };
+    item.onmouseleave = function() {
+      venturePreview.classList.remove('visible');
+    };
+    item.onmousemove = function(e) {
+      positionVenture(e);
+    };
+  });
+  function positionVenture(e) {
+    if (!venturePreview) return;
+    const pw = 228, ph = 80;
+    let x = e.clientX + 14;
+    if (x + pw > window.innerWidth) x = e.clientX - pw - 14;
+    let y = e.clientY + 8;
+    if (y + ph > window.innerHeight) y = e.clientY - ph - 8;
+    venturePreview.style.left = Math.max(8, x) + 'px';
+    venturePreview.style.top = Math.max(8, y) + 'px';
+  }
 
   // ======== ROTATING WORDS ========
   const rotateWords = ['performance', 'scalability', 'precision', 'elegance', 'innovation', 'quality'];

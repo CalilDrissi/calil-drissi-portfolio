@@ -76,23 +76,18 @@ function render(template, data, lang) {
 `
   );
 
-  // RECOGNITION section
+  // VENTURES section
   html = html.replace(
     /<!-- RECOGNITION -->[\s\S]*?(?=\n\s*<!-- ARTICLES -->)/,
     `<!-- RECOGNITION -->
     <div class="col-section">
-      <div class="col-header">${data.recognition.header}</div>
-      <div class="recognition-tags">
-        ${data.recognition.tags.map(t => `<span>${t}</span>`).join('\n        ')}
+      <div class="col-header">${data.ventures.header}</div>
+      <div class="ventures-list" id="venturesList">
+        ${data.ventures.list.map(v => `<div class="venture-item" data-desc="${v.desc}"><span class="venture-name">${v.name}</span><span class="venture-status">${v.status}</span></div>`).join('\n        ')}
       </div>
-      <div class="recognition-list">
-        ${data.recognition.awards.map(a => `<span>${a}</span>`).join('\n        ')}
-      </div>
-      <div class="recognition-features">
-        <div class="sub-label">${data.recognition.featuresLabel}</div>
-        <div class="recognition-list">
-          ${data.recognition.features.map(f => `<span>${f}</span>`).join('\n          ')}
-        </div>
+      <div class="sub-label">${data.ventures.changelogLabel}</div>
+      <div class="ventures-stats">
+        ${data.ventures.changelog.map(s => `<span>${s}</span>`).join('\n        ')}
       </div>
     </div>
 `
