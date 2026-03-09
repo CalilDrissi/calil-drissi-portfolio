@@ -1572,12 +1572,20 @@
     },
 
     close(win) {
-      win.el.classList.remove('open');
-      setTimeout(() => {
-        win.el.remove();
-        this.windows = this.windows.filter(w => w !== win);
+      win.el.classList.remove('open', 'focused');
+      if (win.persistent) {
+        // Pre-existing windows (about popup) — just hide, don't remove
+        win.minimized = false;
+        win.maximized = false;
+        win.el.classList.remove('maximized');
         this.updateTaskbar();
-      }, 300);
+      } else {
+        setTimeout(() => {
+          win.el.remove();
+          this.windows = this.windows.filter(w => w !== win);
+          this.updateTaskbar();
+        }, 300);
+      }
     },
 
     minimize(win) {
@@ -1786,6 +1794,7 @@
   // ---- ABOUT ME WINDOW ----
   const aboutPopup = document.getElementById('aboutPopup');
   const aboutWin = WM.register(aboutPopup, 'About Me');
+  aboutWin.persistent = true;
 
   document.getElementById('introIdentity').addEventListener('click', () => {
     if (aboutPopup.classList.contains('open') && !aboutWin.minimized) {
