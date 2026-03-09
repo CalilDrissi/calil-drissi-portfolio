@@ -577,29 +577,68 @@
       color: rgba(255,255,255,0.7);
     }
 
-    /* ---- MOBILE ---- */
+    /* ---- TABLET ---- */
     @media (max-width: 1024px) {
       body { overflow: auto; height: auto; }
       .page {
         height: auto;
         min-height: 100vh;
-        gap: 32px;
+        gap: 24px;
+        padding: var(--edge);
       }
       .top-grid {
         grid-template-columns: 1fr 1fr;
-        gap: 24px;
+        gap: 20px;
+        padding: 0;
+        border: none;
       }
-      .top-grid .col-section:nth-child(n+4) {
-        display: none;
-      }
+      /* Show all sections — reorganize into 2-col grid */
+      .top-grid .col-section { display: block !important; }
       .middle { padding: 20px 0; }
       .statement { max-width: 100%; font-size: clamp(20px, 5vw, 28px); }
+      .code-bg { display: none; }
+      /* Windows go full-screen on tablet */
+      .win.open {
+        width: calc(100vw - 20px) !important;
+        height: calc(100vh - 20px) !important;
+        top: 10px !important;
+        left: 10px !important;
+        border-radius: 8px;
+      }
+      .win-resize { display: none; }
+      .scroll-indicator { display: none; }
     }
 
+    /* ---- MOBILE ---- */
     @media (max-width: 640px) {
-      .top-grid { grid-template-columns: 1fr; gap: 20px; }
-      .top-grid .col-section:nth-child(n+3) { display: none; }
+      :root {
+        --edge: 16px;
+        --col-gap: 16px;
+      }
+      .page { gap: 20px; }
+      .top-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .top-grid .col-section { display: block !important; }
+      .middle { padding: 16px 0; min-height: 200px; }
+      .statement { font-size: clamp(18px, 6vw, 24px); padding: 0 var(--edge); }
       .connect-ctas { flex-direction: column; }
+      .bottom-bar { padding: 0 var(--edge); }
+      .project-strip { padding: 0 var(--edge); }
+      .ribbon { height: 28px; }
+      .ribbon-track span { font-size: 9px; padding: 0 16px; }
+      /* Windows full-screen on mobile */
+      .win.open {
+        width: 100vw !important;
+        height: 100vh !important;
+        top: 0 !important;
+        left: 0 !important;
+        border-radius: 0;
+      }
+      .win-resize { display: none; }
+      .win-taskbar { bottom: 4px; }
+      .scroll-indicator { display: none; }
     }
 
     /* Initial hidden state — GSAP animates in */
@@ -1109,23 +1148,17 @@
     }
     .chat-send:hover { background: #7c4dff; }
 
-    @media (max-width: 768px) {
-      .about-popup {
-        width: calc(100vw - 20px);
-        max-height: calc(100vh - 20px);
-      }
+    @media (max-width: 1024px) {
       .about-details-grid { grid-template-columns: 1fr; }
-      .about-bio { padding: 20px; }
+      .about-bio { padding: 16px; }
+      .about-bio-text { font-size: 12px; }
+      .about-tabs { flex-wrap: wrap; }
     }
-
-    @media (max-width: 768px) {
-      .win-popup {
-        width: calc(100vw - 20px);
-        max-height: calc(100vh - 20px);
-        border-radius: 6px;
-      }
+    @media (max-width: 1024px) {
       .win-hero-img { height: 200px; }
-      .win-content { padding: 20px; }
+      .win-content { padding: 16px; }
+      .win-project-title { font-size: 20px; }
+      .win-tags { flex-wrap: wrap; }
     }
   </style>
 </head>
