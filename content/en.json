@@ -47,21 +47,16 @@
       "GSAP Showcase /CodePen"
     ]
   },
-  "brands": {
-    "header": "Brands",
+  "articles": {
+    "header": "Articles",
     "list": [
-      "Fintech Startup (Series A)",
-      "E-Commerce Platform",
-      "SaaS Analytics Co.",
-      "Health Tech Startup",
-      "Digital Agency (Paris)",
-      "Real Estate Platform",
-      "EdTech Company",
-      "Crypto/Web3 Project",
-      "Travel & Hospitality",
-      "AI/ML Startup",
-      "Media Company",
-      "NGO / Nonprofit"
+      { "label": "GSAP Scroll Animations", "href": "/blog/gsap-scroll-animations/", "img": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=560&h=280&fit=crop", "title": "Mastering Scroll Animations with GSAP ScrollTrigger", "excerpt": "A deep dive into creating buttery-smooth scroll-driven animations with GSAP's ScrollTrigger plugin — from basic reveals to complex parallax effects.", "tags": "GSAP, Animation", "date": "2026-01" },
+      { "label": "Performant Dashboards", "href": "/blog/building-performant-dashboards/", "img": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=560&h=280&fit=crop", "title": "Building Performant Real-Time Dashboards", "excerpt": "Strategies for building dashboards that handle thousands of data points without dropping frames — virtualization, WebSockets, and smart re-rendering.", "tags": "React, Performance", "date": "2026-01" },
+      { "label": "C++ for Web Devs", "href": "#", "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=560&h=280&fit=crop", "title": "Modern C++ Patterns for Web Developers", "excerpt": "How concepts from modern C++ like RAII, move semantics, and compile-time computation can improve how you think about JavaScript and TypeScript.", "tags": "C++, Architecture", "date": "2025-11" },
+      { "label": "Scalable Design Systems", "href": "#", "img": "https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=560&h=280&fit=crop", "title": "Design Systems That Scale: From Tokens to Components", "excerpt": "Building a design system from scratch — design tokens, component APIs, documentation, and the tooling that ties it all together.", "tags": "Design Systems, CSS", "date": "2025-09" },
+      { "label": "Edge Computing", "href": "#", "img": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=560&h=280&fit=crop", "title": "Edge Computing with Cloudflare Workers and Durable Objects", "excerpt": "Deploying stateful applications at the edge — real-time collaboration, rate limiting, and session management without a traditional backend.", "tags": "Edge, Cloudflare", "date": "2025-07" },
+      { "label": "Wasm in Production", "href": "#", "img": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=560&h=280&fit=crop", "title": "WebAssembly in Production: Lessons Learned", "excerpt": "Practical experiences integrating Wasm modules into production web apps — image processing, crypto, and computational geometry at near-native speed.", "tags": "WebAssembly, Rust", "date": "2025-05" },
+      { "label": "Art of Code Review", "href": "#", "img": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=560&h=280&fit=crop", "title": "The Art of Code Review: Beyond Syntax Checking", "excerpt": "How to give reviews that improve architecture, mentorship, and team velocity — not just catch bugs.", "tags": "Engineering, Teams", "date": "2025-03" }
     ]
   },
   "connect": {

@@ -158,22 +158,31 @@
       filter: grayscale(1);
       position: relative;
     }
-    .intro-identity::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 50%;
-      width: 32px; height: 32px;
-      transform: translate(0, -50%);
-      border-radius: 50%;
-      border: 1.5px solid var(--accent);
-      animation: avatarPulse 2.5s ease-out infinite;
+    .heartbeat-svg {
+      display: inline-block;
+      width: 48px;
+      height: 16px;
+      vertical-align: middle;
+      margin-left: 6px;
+      overflow: visible;
     }
-    @keyframes avatarPulse {
-      0% { transform: translate(0, -50%) scale(1); opacity: 0.6; }
-      70% { transform: translate(0, -50%) scale(1.8); opacity: 0; }
-      100% { transform: translate(0, -50%) scale(1.8); opacity: 0; }
+    .heartbeat-svg .hb-line {
+      fill: none;
+      stroke: rgba(255,255,255,0.3);
+      stroke-width: 0.8;
+      stroke-linecap: square;
+      stroke-linejoin: miter;
+      stroke-dasharray: 120;
+      stroke-dashoffset: 120;
+      animation: hbDraw 2s ease-in-out infinite;
     }
-    .intro-identity:hover::before { animation: none; opacity: 0; }
+    @keyframes hbDraw {
+      0% { stroke-dashoffset: 120; opacity: 0.15; }
+      15% { opacity: 0.5; }
+      60% { stroke-dashoffset: 0; opacity: 0.5; }
+      80% { opacity: 0.15; }
+      100% { stroke-dashoffset: -120; opacity: 0; }
+    }
     .intro-name { font-weight: 500; }
     .intro-title {
       color: var(--fg-dim);
@@ -307,18 +316,73 @@
       margin-top: 12px;
     }
 
-    /* Brands column */
-    .brands-list {
+    /* Articles column */
+    .articles-list {
       display: flex;
       flex-direction: column;
       gap: 1px;
       color: var(--fg-dim);
+      position: relative;
     }
-    .brands-list span {
+    .articles-list a {
+      color: var(--fg-dim);
+      text-decoration: none;
       transition: color 0.15s;
+      display: block;
     }
-    .brands-list span:hover {
+    .articles-list a:hover {
       color: var(--fg);
+    }
+    .article-preview {
+      position: fixed;
+      width: 280px;
+      background: #1a1a1a;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 1000;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    .article-preview.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .article-preview img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      display: block;
+    }
+    .article-preview-body {
+      padding: 12px 14px;
+    }
+    .article-preview-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--fg);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .article-preview-excerpt {
+      font-size: 10px;
+      color: var(--fg-dim);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .article-preview-meta {
+      padding: 8px 14px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 9px;
+      color: var(--fg-faint);
+      display: flex;
+      gap: 12px;
     }
 
     /* Connect column */
@@ -386,12 +450,12 @@
     }
     .code-bg-lines {
       position: absolute;
-      right: 0; top: 10px; bottom: 30px;
-      width: 45%;
+      right: -120px; top: 10px; bottom: 30px;
+      width: 55%;
       font-family: var(--mono);
-      font-size: 12px;
+      font-size: 11px;
       line-height: 2;
-      color: rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.12);
       white-space: pre;
       overflow: hidden;
       padding: 24px 20px;
@@ -402,23 +466,27 @@
     .code-bg-line {
       display: block;
     }
-    .code-bg-line .kw { color: rgba(94,43,255,0.55); }
-    .code-bg-line .fn { color: rgba(40,200,64,0.45); }
-    .code-bg-line .str { color: rgba(254,188,46,0.4); }
-    .code-bg-line .cm { color: rgba(255,255,255,0.1); font-style: italic; }
+    .code-bg-line .kw { color: rgba(130,80,255,0.4); }
+    .code-bg-line .fn { color: rgba(60,210,90,0.35); }
+    .code-bg-line .str { color: rgba(254,188,46,0.3); }
+    .code-bg-line .cm { color: rgba(255,255,255,0.08); font-style: italic; }
+    .code-bg-line .tp { color: rgba(80,180,255,0.35); }
+    .code-bg-line .num { color: rgba(255,120,80,0.3); }
+    .code-bg-line .op { color: rgba(255,255,255,0.15); }
+    .code-bg-line .pp { color: rgba(200,140,255,0.35); }
     /* Gradient overlay — strong left fade for text readability */
     .code-bg::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(90deg, var(--bg) 38%, rgba(18,18,18,0.15) 70%, rgba(18,18,18,0.6) 100%);
+      background: linear-gradient(90deg, var(--bg) 35%, rgba(18,18,18,0.7) 45%, rgba(18,18,18,0.4) 58%, rgba(18,18,18,0.15) 72%, rgba(18,18,18,0.4) 88%, var(--bg) 100%);
       z-index: 1;
     }
     .code-bg::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, var(--bg) 0%, transparent 5%, transparent 95%, var(--bg) 100%);
+      background: linear-gradient(180deg, var(--bg) 0%, rgba(18,18,18,0.4) 3%, transparent 8%, transparent 92%, rgba(18,18,18,0.4) 97%, var(--bg) 100%);
       z-index: 1;
     }
     /* Blinking cursor at end of code */
@@ -785,11 +853,13 @@
       min-height: 260px;
       opacity: 0;
       transform: scale(0.92);
+      pointer-events: none;
       transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s;
     }
     .win.open {
       opacity: 1;
       transform: scale(1);
+      pointer-events: auto;
     }
     .win.focused {
       box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08);
@@ -1249,7 +1319,7 @@
         <div class="intro-hover-pill">Play — Click to discover</div>
         <img class="intro-avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" alt="CD" />
         <div>
-          <div class="intro-name">Calil Drissi</div>
+          <div class="intro-name">Calil Drissi<svg class="heartbeat-svg" viewBox="0 0 48 16"><polyline class="hb-line" points="0,8 10,8 13,8 16,2 19,14 22,5 25,10 28,8 38,8 48,8"/></svg></div>
           <div class="intro-title">Software Developer</div>
         </div>
       </div>
@@ -1314,22 +1384,17 @@
       </div>
     </div>
 
-    <!-- BRANDS -->
+    <!-- ARTICLES -->
     <div class="col-section">
-      <div class="col-header">Brands</div>
-      <div class="brands-list">
-        <span>Fintech Startup (Series A)</span>
-        <span>E-Commerce Platform</span>
-        <span>SaaS Analytics Co.</span>
-        <span>Health Tech Startup</span>
-        <span>Digital Agency (Paris)</span>
-        <span>Real Estate Platform</span>
-        <span>EdTech Company</span>
-        <span>Crypto/Web3 Project</span>
-        <span>Travel &amp; Hospitality</span>
-        <span>AI/ML Startup</span>
-        <span>Media Company</span>
-        <span>NGO / Nonprofit</span>
+      <div class="col-header">Articles</div>
+      <div class="articles-list" id="articlesList">
+        <a href="/blog/gsap-scroll-animations/" data-img="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=560&h=280&fit=crop" data-title="Mastering Scroll Animations with GSAP ScrollTrigger" data-excerpt="A deep dive into creating buttery-smooth scroll-driven animations with GSAP's ScrollTrigger plugin — from basic reveals to complex parallax effects." data-tags="GSAP, Animation" data-date="2026-01">GSAP Scroll Animations</a>
+        <a href="/blog/building-performant-dashboards/" data-img="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=560&h=280&fit=crop" data-title="Building Performant Real-Time Dashboards" data-excerpt="Strategies for building dashboards that handle thousands of data points without dropping frames — virtualization, WebSockets, and smart re-rendering." data-tags="React, Performance" data-date="2026-01">Performant Dashboards</a>
+        <a href="#" data-img="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=560&h=280&fit=crop" data-title="Modern C++ Patterns for Web Developers" data-excerpt="How concepts from modern C++ like RAII, move semantics, and compile-time computation can improve how you think about JavaScript and TypeScript." data-tags="C++, Architecture" data-date="2025-11">C++ for Web Devs</a>
+        <a href="#" data-img="https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=560&h=280&fit=crop" data-title="Design Systems That Scale: From Tokens to Components" data-excerpt="Building a design system from scratch — design tokens, component APIs, documentation, and the tooling that ties it all together." data-tags="Design Systems, CSS" data-date="2025-09">Scalable Design Systems</a>
+        <a href="#" data-img="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=560&h=280&fit=crop" data-title="Edge Computing with Cloudflare Workers and Durable Objects" data-excerpt="Deploying stateful applications at the edge — real-time collaboration, rate limiting, and session management without a traditional backend." data-tags="Edge, Cloudflare" data-date="2025-07">Edge Computing</a>
+        <a href="#" data-img="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=560&h=280&fit=crop" data-title="WebAssembly in Production: Lessons Learned" data-excerpt="Practical experiences integrating Wasm modules into production web apps — image processing, crypto, and computational geometry at near-native speed." data-tags="WebAssembly, Rust" data-date="2025-05">Wasm in Production</a>
+        <a href="#" data-img="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=560&h=280&fit=crop" data-title="The Art of Code Review: Beyond Syntax Checking" data-excerpt="How to give reviews that improve architecture, mentorship, and team velocity — not just catch bugs." data-tags="Engineering, Teams" data-date="2025-03">Art of Code Review</a>
       </div>
     </div>
 
@@ -1545,10 +1610,23 @@
 <div class="cursor-dot" id="cursorDot"></div>
 <div class="cursor-ring" id="cursorRing"></div>
 
+<div class="article-preview" id="articlePreview">
+  <img id="articlePreviewImg" src="" alt="" />
+  <div class="article-preview-body">
+    <div class="article-preview-title" id="articlePreviewTitle"></div>
+    <div class="article-preview-excerpt" id="articlePreviewExcerpt"></div>
+  </div>
+  <div class="article-preview-meta">
+    <span id="articlePreviewTags"></span>
+    <span id="articlePreviewDate"></span>
+  </div>
+</div>
+
 <script>
   // ======== CUSTOM CURSOR ========
   const cursorDot = document.getElementById('cursorDot');
   const cursorRing = document.getElementById('cursorRing');
+  if (!cursorDot || !cursorRing) { console.warn('Custom cursor elements not found'); }
   let mouseX = -100, mouseY = -100, ringX = -100, ringY = -100;
 
   document.addEventListener('mousemove', e => {
@@ -2056,85 +2134,157 @@
   // Multiple code blocks that cycle through
   const codeBlocks = [
     [
-      { text: 'import { NextResponse } from "next/server";', kw: [0,6], str: [33,48] },
-      { text: 'import { db } from "@/lib/database";', kw: [0,6], str: [19,35] },
+      { text: '// Thread-safe concurrent memory pool with lock-free fast path allocation and automatic block expansion', cm: true },
+      { text: 'template <typename T, std::size_t BlockSize = 4096, typename Allocator = std::allocator<T>>', kw: [0,8], tp: [10,18,20,21,23,34,37,41,43,52,55,74,76,77] },
+      { text: 'class PoolAllocator final : private Allocator {', kw: [0,5,21,26,29,36] },
+      { text: 'public:', kw: [0,7] },
+      { text: '    using value_type = T;', kw: [4,9], tp: [22,23] },
+      { text: '    using pointer = typename std::allocator_traits<Allocator>::pointer;', kw: [4,9,18,26], tp: [27,49,50,63] },
+      { text: '    using size_type = std::size_t;', kw: [4,9], tp: [22,34] },
+      { text: '    using difference_type = typename std::allocator_traits<Allocator>::difference_type;', kw: [4,9,26,34], tp: [35,57,58,74] },
       { text: '' },
-      { text: '// API route handler', cm: true },
-      { text: 'export async function GET(request: Request) {', kw: [0,21] },
-      { text: '  const { searchParams } = new URL(request.url);', kw: [2,7,28,31] },
-      { text: '  const query = searchParams.get("q");', kw: [2,7], str: [32,35] },
+      { text: '    [[nodiscard]] constexpr pointer allocate(size_type count, const void* hint = nullptr) {', kw: [4,18,19,28], tp: [29,36,46,55,62,67,70,77] },
+      { text: '        if (count == 1 && !free_list_.empty()) [[likely]] {', kw: [8,10,49,57] },
+      { text: '            std::lock_guard<std::mutex> guard(mutex_);', tp: [12,27,28,39] },
+      { text: '            pointer result = free_list_.back();', tp: [12,19] },
+      { text: '            free_list_.pop_back();' },
+      { text: '            return result;', kw: [12,18] },
+      { text: '        }' },
+      { text: '        return std::allocator_traits<Allocator>::allocate(underlying_allocator(), count, hint);', kw: [8,14], tp: [15,37,38,47] },
+      { text: '    }' },
       { text: '' },
-      { text: '  const projects = await db.project.findMany({', kw: [2,7,20,25] },
-      { text: '    where: { status: "published" },', str: [21,32] },
-      { text: '    orderBy: { createdAt: "desc" },', str: [25,31] },
-      { text: '    include: { tags: true, client: true },', kw: [18,22,32,36] },
-      { text: '  });' },
+      { text: '    constexpr void deallocate(pointer ptr, size_type count) noexcept {', kw: [4,13,14,18,55,63], tp: [19,26,27,34,36,45] },
+      { text: '        if (count == 1) [[likely]] {', kw: [8,10,23,31] },
+      { text: '            std::lock_guard<std::mutex> guard(mutex_);', tp: [12,27,28,39] },
+      { text: '            free_list_.emplace_back(ptr);' },
+      { text: '        } else {', kw: [10,14] },
+      { text: '            std::allocator_traits<Allocator>::deallocate(underlying_allocator(), ptr, count);', tp: [12,34,35,44] },
+      { text: '        }' },
+      { text: '    }' },
       { text: '' },
-      { text: '  const filtered = projects.filter(p =>', kw: [2,7] },
-      { text: '    p.title.toLowerCase().includes(query)' },
-      { text: '  );' },
+      { text: '    [[nodiscard]] constexpr size_type max_size() const noexcept {', kw: [4,18,19,28,49,54,55,63], tp: [29,38] },
+      { text: '        return std::allocator_traits<Allocator>::max_size(underlying_allocator());', kw: [8,14], tp: [15,37,38,47] },
+      { text: '    }' },
       { text: '' },
-      { text: '  return NextResponse.json({', kw: [2,8] },
-      { text: '    data: filtered,' },
-      { text: '    meta: { total: filtered.length },' },
-      { text: '  });' },
-      { text: '}' },
+      { text: 'private:', kw: [0,8] },
+      { text: '    std::vector<pointer> free_list_;', tp: [4,16,17,24] },
+      { text: '    mutable std::mutex mutex_;', kw: [4,11], tp: [12,23] },
+      { text: '    std::vector<std::unique_ptr<std::byte[]>> blocks_;', tp: [4,16,17,32,33,43] },
+      { text: '' },
+      { text: '    constexpr Allocator& underlying_allocator() noexcept { return static_cast<Allocator&>(*this); }', kw: [4,13,46,54], tp: [14,24,63,74,75,84] },
+      { text: '' },
+      { text: '    void expand_pool(std::size_t num_elements = BlockSize / sizeof(T)) {', kw: [4,8], tp: [9,20], num: [60,69] },
+      { text: '        auto block = std::make_unique<std::byte[]>(num_elements * sizeof(T));', kw: [8,12], tp: [24,39,40,50] },
+      { text: '        for (std::size_t idx = 0; idx < num_elements; ++idx) {', kw: [8,11], tp: [13,24], num: [31,32] },
+      { text: '            free_list_.push_back(reinterpret_cast<pointer>(block.get() + idx * sizeof(T)));', kw: [12,28], tp: [29,36] },
+      { text: '        }' },
+      { text: '        blocks_.emplace_back(std::move(block));' },
+      { text: '    }' },
+      { text: '};' },
     ],
     [
-      { text: 'import { useState, useEffect } from "react";', kw: [0,6], str: [35,42] },
-      { text: 'import { motion } from "framer-motion";', kw: [0,6], str: [22,38] },
+      { text: '// Lazy coroutine-based async task with exception propagation, continuations, and RAII handle management', cm: true },
+      { text: 'template <typename T>', kw: [0,8], tp: [10,18,19,20] },
+      { text: 'class [[nodiscard]] Task {', kw: [0,5,22,26] },
+      { text: '    using Handle = std::coroutine_handle<promise_type>;', kw: [4,9], tp: [12,18,21,43,44,56] },
       { text: '' },
-      { text: '// Animated project card', cm: true },
-      { text: 'export default function ProjectCard({ project }) {', kw: [0,22] },
-      { text: '  const [isHovered, setHovered] = useState(false);', kw: [2,7] },
-      { text: '  const [data, setData] = useState(null);', kw: [2,7] },
+      { text: 'public:', kw: [0,7] },
+      { text: '    struct promise_type {', kw: [4,10] },
+      { text: '        std::optional<T> result_;', tp: [8,23,24,25] },
+      { text: '        std::exception_ptr exception_ = nullptr;', tp: [8,28], kw: [42,49] },
+      { text: '        std::coroutine_handle<> continuation_ = std::noop_coroutine();', tp: [8,31] },
       { text: '' },
-      { text: '  useEffect(() => {', kw: [2,11] },
-      { text: '    fetch(`/api/projects/${project.id}`)', str: [10,38] },
-      { text: '      .then(res => res.json())' },
-      { text: '      .then(setData);' },
-      { text: '  }, [project.id]);' },
+      { text: '        Task get_return_object() noexcept { return Task{Handle::from_promise(*this)}; }', kw: [13,19,38,46,49,55], tp: [8,12] },
       { text: '' },
-      { text: '  return (', kw: [2,8] },
-      { text: '    <motion.div' },
-      { text: '      whileHover={{ scale: 1.02, y: -4 }}' },
-      { text: '      transition={{ type: "spring", stiffness: 300 }}', str: [24,30], str2: [45,48] },
-      { text: '      className="project-card"', str: [17,31] },
-      { text: '    >' },
-      { text: '      <img src={project.image} alt={project.title} />' },
-      { text: '      <h3>{project.title}</h3>' },
-      { text: '    </motion.div>' },
-      { text: '  );' },
-      { text: '}' },
+      { text: '        constexpr std::suspend_always initial_suspend() const noexcept { return {}; }', kw: [8,17], tp: [18,38], kw: [57,62,63,71] },
+      { text: '' },
+      { text: '        auto final_suspend() const noexcept {', kw: [8,12,31,36,37,45] },
+      { text: '            struct FinalAwaiter {', kw: [12,18] },
+      { text: '                constexpr bool await_ready() const noexcept { return false; }', kw: [16,25,26,30,47,52,53,61,71,76], tp: [31,35] },
+      { text: '                std::coroutine_handle<> await_suspend(std::coroutine_handle<promise_type> handle) noexcept {', tp: [16,39,56,91], kw: [99,107] },
+      { text: '                    if (auto continuation = handle.promise().continuation_; continuation && !continuation.done())', kw: [20,22,27,31] },
+      { text: '                        return continuation;', kw: [24,30] },
+      { text: '                    return std::noop_coroutine();', kw: [20,26] },
+      { text: '                }' },
+      { text: '                constexpr void await_resume() const noexcept {}', kw: [16,25,26,30,47,52,53,61] },
+      { text: '            };' },
+      { text: '            return FinalAwaiter{};', kw: [12,18] },
+      { text: '        }' },
+      { text: '' },
+      { text: '        template <typename U> void return_value(U&& value) requires std::is_convertible_v<U, T> {', kw: [8,16,18,26,27,31,56,64], tp: [17,25,32,33,35,36,65,86,87,88,90,91] },
+      { text: '            result_.emplace(std::forward<U>(std::move(value)));' },
+      { text: '        }' },
+      { text: '' },
+      { text: '        void unhandled_exception() noexcept { exception_ = std::current_exception(); }', kw: [8,12,37,45] },
+      { text: '    };' },
+      { text: '' },
+      { text: '    explicit Task(Handle handle) noexcept : handle_(handle) {}', kw: [4,12,30,38], tp: [13,17,18,24] },
+      { text: '    ~Task() { if (handle_) handle_.destroy(); }', kw: [8,10] },
+      { text: '    Task(Task&& other) noexcept : handle_(std::exchange(other.handle_, nullptr)) {}', kw: [4,8,22,30], tp: [9,13,14,15] },
+      { text: '    Task& operator=(Task&& other) noexcept { std::swap(handle_, other.handle_); return *this; }', kw: [4,8,13,24,36,44], tp: [9,13,25,29,30,31] },
+      { text: '' },
+      { text: '    [[nodiscard]] bool await_ready() const noexcept { return handle_.done(); }', kw: [4,18,35,40,41,49], tp: [19,23] },
+      { text: '    std::coroutine_handle<> await_suspend(std::coroutine_handle<> caller) noexcept {', tp: [4,27,44,67], kw: [76,84] },
+      { text: '        handle_.promise().continuation_ = caller;', },
+      { text: '        return handle_;', kw: [8,14] },
+      { text: '    }' },
+      { text: '' },
+      { text: '    T await_resume() { if (handle_.promise().exception_) std::rethrow_exception(handle_.promise().exception_); return std::move(*handle_.promise().result_); }', tp: [4,5], kw: [22,24] },
+      { text: '' },
+      { text: 'private:', kw: [0,8] },
+      { text: '    Handle handle_ = nullptr;', tp: [4,10], kw: [22,29] },
+      { text: '};' },
     ],
     [
-      { text: 'import prisma from "@/lib/prisma";', kw: [0,6], str: [19,33] },
-      { text: 'import { hash, verify } from "bcrypt";', kw: [0,6], str: [29,36] },
+      { text: '// Compile-time constexpr matrix with full arithmetic, decomposition, and static dimension checking', cm: true },
+      { text: 'template <std::floating_point T, std::size_t Rows, std::size_t Cols>', kw: [0,8], tp: [10,31,33,34,36,47,49,60] },
+      { text: 'class Matrix {', kw: [0,5] },
+      { text: '    std::array<T, Rows * Cols> data_{};', tp: [4,15,16,17] },
       { text: '' },
-      { text: '// Authentication service', cm: true },
-      { text: 'export class AuthService {', kw: [0,12] },
-      { text: '  async register(email: string, password: string) {', kw: [2,7] },
-      { text: '    const hashed = await hash(password, 12);', kw: [4,9,18,23] },
+      { text: 'public:', kw: [0,7] },
+      { text: '    constexpr T& operator()(std::size_t row, std::size_t col) noexcept {', kw: [4,13,60,68], tp: [14,15,27,39,45,56] },
+      { text: '        return data_[row * Cols + col];', kw: [8,14] },
+      { text: '    }' },
       { text: '' },
-      { text: '    const user = await prisma.user.create({', kw: [4,9,18,23] },
-      { text: '      data: { email, password: hashed },' },
-      { text: '    });' },
+      { text: '    constexpr const T& operator()(std::size_t row, std::size_t col) const noexcept {', kw: [4,13,14,19,66,71,72,80], tp: [20,21,33,45,51,62] },
+      { text: '        return data_[row * Cols + col];', kw: [8,14] },
+      { text: '    }' },
       { text: '' },
-      { text: '    return this.generateToken(user);', kw: [4,10] },
-      { text: '  }' },
+      { text: '    [[nodiscard]] constexpr auto fill(T value) noexcept -> Matrix& {', kw: [4,18,19,28,29,33,46,54], tp: [34,35,57,63] },
+      { text: '        std::ranges::fill(data_, value);', },
+      { text: '        return *this;', kw: [8,14] },
+      { text: '    }' },
       { text: '' },
-      { text: '  async login(email: string, password: string) {', kw: [2,7] },
-      { text: '    const user = await prisma.user.findUnique({', kw: [4,9,18,23] },
-      { text: '      where: { email },' },
-      { text: '    });' },
+      { text: '    template <std::size_t OtherCols>', kw: [4,12], tp: [14,25] },
+      { text: '    [[nodiscard]] constexpr auto operator*(const Matrix<T, Cols, OtherCols>& rhs) const -> Matrix<T, Rows, OtherCols> {', kw: [4,18,19,28,29,33,85,90], tp: [34,40,41,42,48,57,93,99,100,101,107,116] },
+      { text: '        Matrix<T, Rows, OtherCols> result{};', tp: [8,14,15,16,22,31] },
+      { text: '        for (std::size_t i = 0; i < Rows; ++i)', kw: [8,11], tp: [13,24], num: [29,30] },
+      { text: '            for (std::size_t j = 0; j < OtherCols; ++j)', kw: [12,15], tp: [17,28], num: [33,34] },
+      { text: '                for (std::size_t k = 0; k < Cols; ++k)', kw: [16,19], tp: [21,32], num: [37,38] },
+      { text: '                    result(i, j) += (*this)(i, k) * rhs(k, j);' },
+      { text: '        return result;', kw: [8,14] },
+      { text: '    }' },
       { text: '' },
-      { text: '    if (!user) throw new Error("Invalid credentials");', kw: [4,6,18,21], str: [32,53] },
-      { text: '    const valid = await verify(password, user.password);', kw: [4,9,18,23] },
-      { text: '    if (!valid) throw new Error("Invalid credentials");', kw: [4,6,19,22], str: [33,54] },
+      { text: '    [[nodiscard]] constexpr auto transpose() const noexcept -> Matrix<T, Cols, Rows> {', kw: [4,18,19,28,29,33,48,53,54,62], tp: [65,71,72,73,79,83] },
+      { text: '        Matrix<T, Cols, Rows> result{};', tp: [8,14,15,16,22,26] },
+      { text: '        for (std::size_t i = 0; i < Rows; ++i)', kw: [8,11], tp: [13,24], num: [29,30] },
+      { text: '            for (std::size_t j = 0; j < Cols; ++j)', kw: [12,15], tp: [17,28], num: [33,34] },
+      { text: '                result(j, i) = (*this)(i, j);' },
+      { text: '        return result;', kw: [8,14] },
+      { text: '    }' },
       { text: '' },
-      { text: '    return this.generateToken(user);', kw: [4,10] },
-      { text: '  }' },
-      { text: '}' },
+      { text: '    [[nodiscard]] constexpr T determinant() const requires (Rows == Cols) {', kw: [4,18,19,28,44,49,50,58], tp: [29,30] },
+      { text: '        static_assert(Rows == Cols, "determinant requires a square matrix");', kw: [8,21], str: [34,70], num: [22,26,30,34] },
+      { text: '        if constexpr (Rows == 1) return data_[0];', kw: [8,10,19,28,33], num: [29,30,42,43] },
+      { text: '        if constexpr (Rows == 2) return data_[0] * data_[3] - data_[1] * data_[2];', kw: [8,10,19,28,33], num: [29,30,44,45,55,56,66,67,77,78] },
+      { text: '        T det = T{};', tp: [8,9,14,15] },
+      { text: '        for (std::size_t col = 0; col < Cols; ++col) {', kw: [8,11], tp: [13,24], num: [31,32] },
+      { text: '            const T sign = (col % 2 == 0) ? T{1} : T{-1};', kw: [12,17], tp: [18,19,48,49,55,56], num: [34,35,50,51,57,59] },
+      { text: '            det += sign * data_[col] * minor(0, col).determinant();', num: [48,49] },
+      { text: '        }' },
+      { text: '        return det;', kw: [8,14] },
+      { text: '    }' },
+      { text: '};' },
     ]
   ];
 
@@ -2212,14 +2362,15 @@
 
       if (line.cm) {
         charSpan.className = 'cm';
-      } else if (line.kw) {
-        for (let k = 0; k < line.kw.length; k += 2) {
-          if (charIdx >= line.kw[k] && charIdx < line.kw[k+1]) { charSpan.className = 'kw'; break; }
-        }
-      }
-      if (line.str) {
-        for (let k = 0; k < line.str.length; k += 2) {
-          if (charIdx >= line.str[k] && charIdx < line.str[k+1]) { charSpan.className = 'str'; break; }
+      } else {
+        const classes = ['kw','str','tp','num','op','pp'];
+        for (const cls of classes) {
+          if (line[cls]) {
+            for (let k = 0; k < line[cls].length; k += 2) {
+              if (charIdx >= line[cls][k] && charIdx < line[cls][k+1]) { charSpan.className = cls; break; }
+            }
+            if (charSpan.className) break;
+          }
         }
       }
 
@@ -2246,6 +2397,51 @@
     typeNextChar();
     document.querySelector('.statement').classList.add('revealed');
   }, 1000);
+
+  // ======== ARTICLE PREVIEW ON HOVER ========
+  const articlePreview = document.getElementById('articlePreview');
+  const articleLinks = document.querySelectorAll('#articlesList a');
+  let previewVisible = false;
+
+  function positionPreview(e) {
+    if (!articlePreview) return;
+    const cx = e.clientX || 0, cy = e.clientY || 0;
+    const pw = 296, ph = 320;
+    // Flip left if too close to right edge
+    let x = cx + 16;
+    if (x + pw > window.innerWidth) x = cx - pw - 16;
+    // Flip up if too close to bottom
+    let y = cy + 8;
+    if (y + ph > window.innerHeight) y = cy - ph - 8;
+    articlePreview.style.left = Math.max(8, x) + 'px';
+    articlePreview.style.top = Math.max(8, y) + 'px';
+  }
+
+  articleLinks.forEach(link => {
+    link.onmouseenter = (e) => {
+      const pImg = document.getElementById('articlePreviewImg');
+      const pTitle = document.getElementById('articlePreviewTitle');
+      const pExcerpt = document.getElementById('articlePreviewExcerpt');
+      const pTags = document.getElementById('articlePreviewTags');
+      const pDate = document.getElementById('articlePreviewDate');
+      if (pImg) pImg.src = link.dataset.img || '';
+      if (pTitle) pTitle.textContent = link.dataset.title || '';
+      if (pExcerpt) pExcerpt.textContent = link.dataset.excerpt || '';
+      if (pTags) pTags.textContent = link.dataset.tags || '';
+      if (pDate) pDate.textContent = link.dataset.date || '';
+      positionPreview(e);
+      previewVisible = true;
+      if (articlePreview) articlePreview.classList.add('visible');
+    };
+    link.onmouseleave = () => {
+      previewVisible = false;
+      if (articlePreview) articlePreview.classList.remove('visible');
+    };
+    link.onmousemove = (e) => {
+      if (!previewVisible) return;
+      positionPreview(e);
+    };
+  });
 
   // ======== ROTATING WORDS ========
   const rotateWords = ['performance', 'scalability', 'precision', 'elegance', 'innovation', 'quality'];

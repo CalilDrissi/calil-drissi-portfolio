@@ -36,7 +36,7 @@ function render(template, data, lang) {
         <div class="intro-hover-pill">${data.intro.hoverPill}</div>
         <img class="intro-avatar" src="${data.intro.avatarUrl}" alt="CD" />
         <div>
-          <div class="intro-name">${data.intro.name}</div>
+          <div class="intro-name">${data.intro.name}<svg class="heartbeat-svg" viewBox="0 0 48 16"><polyline class="hb-line" points="0,8 10,8 13,8 16,2 19,14 22,5 25,10 28,8 38,8 48,8"/></svg></div>
           <div class="intro-title">${data.intro.title}</div>
         </div>
       </div>
@@ -78,7 +78,7 @@ function render(template, data, lang) {
 
   // RECOGNITION section
   html = html.replace(
-    /<!-- RECOGNITION -->[\s\S]*?(?=\n\s*<!-- BRANDS -->)/,
+    /<!-- RECOGNITION -->[\s\S]*?(?=\n\s*<!-- ARTICLES -->)/,
     `<!-- RECOGNITION -->
     <div class="col-section">
       <div class="col-header">${data.recognition.header}</div>
@@ -98,14 +98,14 @@ function render(template, data, lang) {
 `
   );
 
-  // BRANDS section
+  // ARTICLES section
   html = html.replace(
-    /<!-- BRANDS -->[\s\S]*?(?=\n\s*<!-- CONNECT -->)/,
-    `<!-- BRANDS -->
+    /<!-- ARTICLES -->[\s\S]*?(?=\n\s*<!-- CONNECT -->)/,
+    `<!-- ARTICLES -->
     <div class="col-section">
-      <div class="col-header">${data.brands.header}</div>
-      <div class="brands-list">
-        ${data.brands.list.map(b => `<span>${b}</span>`).join('\n        ')}
+      <div class="col-header">${data.articles.header}</div>
+      <div class="articles-list" id="articlesList">
+        ${data.articles.list.map(a => `<a href="${a.href}" data-img="${a.img}" data-title="${a.title}" data-excerpt="${a.excerpt}" data-tags="${a.tags}" data-date="${a.date}">${a.label}</a>`).join('\n        ')}
       </div>
     </div>
 `

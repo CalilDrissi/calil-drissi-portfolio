@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CMS User Guide — calildrissi.dev</title>
+<style>
+  @page { margin: 1in; size: A4; }
+  body {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #1a1a1a;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+  h1 { font-size: 24px; margin-bottom: 4px; }
+  h1 + p { color: #666; margin-bottom: 32px; font-size: 13px; }
+  h2 { font-size: 17px; margin-top: 36px; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #e0e0e0; }
+  h3 { font-size: 14px; margin-top: 20px; margin-bottom: 8px; }
+  p, li { margin-bottom: 6px; }
+  ul, ol { padding-left: 20px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12.5px; }
+  th, td { text-align: left; padding: 8px 12px; border: 1px solid #ddd; }
+  th { background: #f5f5f5; font-weight: 600; }
+  td code, p code, li code { background: #f0f0f0; padding: 1px 5px; border-radius: 3px; font-size: 12px; font-family: 'SF Mono', Menlo, monospace; }
+  pre { background: #1e1e1e; color: #d4d4d4; padding: 14px 16px; border-radius: 6px; overflow-x: auto; font-size: 11.5px; line-height: 1.6; margin: 12px 0; }
+  pre code { background: none; padding: 0; color: inherit; }
+  .note { background: #f0f4ff; border-left: 3px solid #4a7aff; padding: 10px 14px; border-radius: 0 4px 4px 0; margin: 12px 0; font-size: 12.5px; }
+  .flow { background: #fafafa; border: 1px solid #e8e8e8; border-radius: 6px; padding: 16px; margin: 12px 0; font-family: 'SF Mono', Menlo, monospace; font-size: 11.5px; line-height: 2; }
+  .flow span { color: #888; }
+  a { color: #4a7aff; text-decoration: none; }
+  hr { border: none; border-top: 1px solid #e0e0e0; margin: 28px 0; }
+</style>
+</head>
+<body>
+
+<h1>CMS User Guide</h1>
+<p>calildrissi.dev — Content Management System</p>
+
+<h2>1. Set Up Environment Variables</h2>
+<p>Go to <strong>Netlify Dashboard</strong> → <strong>Site settings</strong> → <strong>Environment variables</strong> and add:</p>
+
+<table>
+  <tr><th>Variable</th><th>Value</th></tr>
+  <tr><td><code>GITHUB_REPO</code></td><td><code>CalilDrissi/calil-drissi-portfolio</code></td></tr>
+  <tr><td><code>GITHUB_TOKEN</code></td><td>A GitHub Personal Access Token with <code>repo</code> scope<br><small>Generate at github.com/settings/tokens</small></td></tr>
+  <tr><td><code>ADMIN_PASSWORD</code></td><td>Any password you choose for admin login</td></tr>
+</table>
+
+<div class="note">After adding variables, trigger a redeploy: <strong>Deploys</strong> → <strong>Trigger deploy</strong> → <strong>Deploy site</strong>.</div>
+
+<h2>2. Access the Admin Panel</h2>
+<p>Navigate to <code>https://calil-drissi.netlify.app/admin/</code> and log in with your <code>ADMIN_PASSWORD</code>.</p>
+
+<h2>3. Edit Portfolio Content</h2>
+<ol>
+  <li>Select <strong>Portfolio</strong> in the sidebar</li>
+  <li>Switch between <strong>EN</strong> and <strong>FR</strong> tabs to edit each language</li>
+  <li>Edit any section: intro, projects, awards, about, recognition, brands, connect, statement, etc.</li>
+  <li>Click <strong>Save</strong> — this commits the JSON file directly to your GitHub repo</li>
+  <li>Netlify auto-rebuilds and redeploys the site within ~30 seconds</li>
+</ol>
+
+<h2>4. Manage Blog Posts</h2>
+<ol>
+  <li>Select <strong>Blog Posts</strong> in the sidebar</li>
+  <li>Switch between <strong>EN</strong> / <strong>FR</strong> tabs</li>
+</ol>
+
+<h3>Create a Post</h3>
+<p>Click <strong>New Post</strong>, fill in title, date, excerpt, tags, cover image, and write the body using the rich text editor (Quill). The slug is auto-generated from the title.</p>
+
+<h3>Edit a Post</h3>
+<p>Click on any existing post from the list to open it in the editor.</p>
+
+<h3>Delete a Post</h3>
+<p>Click the delete button on any post. A confirmation dialog will appear. Only blog files can be deleted.</p>
+
+<h2>5. How the Build Works</h2>
+
+<div class="flow">
+  content/en.json + content/fr.json <span>→</span> Portfolio pages (/ and /fr/)<br>
+  content/blog/en/*.json <span>→</span> Blog posts at /blog/{slug}/<br>
+  content/blog/fr/*.json <span>→</span> Blog posts at /fr/blog/{slug}/<br>
+  index.html <span>→</span> Template (don't edit in admin)<br>
+  build.js <span>→</span> Runs on deploy, generates static HTML
+</div>
+
+<p>Every save from the admin panel commits to GitHub → triggers Netlify build → <code>node build.js</code> runs → static HTML is generated and deployed.</p>
+
+<h2>6. Adding Content Locally</h2>
+<p>You can also edit the JSON files directly in your code editor:</p>
+
+<pre><code># Edit portfolio content
+vim content/en.json
+
+# Add a blog post
+cat > content/blog/en/my-post.json << 'EOF'
+{
+  "slug": "my-post",
+  "title": "My Post Title",
+  "date": "2026-03-09",
+  "excerpt": "A short description...",
+  "tags": ["JavaScript", "React"],
+  "coverImage": "https://images.unsplash.com/...",
+  "body": "&lt;p&gt;Your HTML content here.&lt;/p&gt;"
+}
+EOF
+
+# Build and preview locally
+node build.js
+open dist/index.html
+
+# Deploy
+git add . && git commit -m "Update content" && git push</code></pre>
+
+<h2>7. Site URLs</h2>
+<table>
+  <tr><th>Page</th><th>URL</th></tr>
+  <tr><td>Portfolio (EN)</td><td><code>https://calil-drissi.netlify.app</code></td></tr>
+  <tr><td>Portfolio (FR)</td><td><code>https://calil-drissi.netlify.app/fr/</code></td></tr>
+  <tr><td>Blog (EN)</td><td><code>https://calil-drissi.netlify.app/blog/</code></td></tr>
+  <tr><td>Blog (FR)</td><td><code>https://calil-drissi.netlify.app/fr/blog/</code></td></tr>
+  <tr><td>Admin Panel</td><td><code>https://calil-drissi.netlify.app/admin/</code></td></tr>
+</table>
+
+<h2>8. Blog Post JSON Format</h2>
+<table>
+  <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+  <tr><td><code>slug</code></td><td>string</td><td>URL-friendly identifier (auto-generated from title)</td></tr>
+  <tr><td><code>title</code></td><td>string</td><td>Post title</td></tr>
+  <tr><td><code>date</code></td><td>string</td><td>Publication date (YYYY-MM-DD)</td></tr>
+  <tr><td><code>excerpt</code></td><td>string</td><td>Short description for listing cards</td></tr>
+  <tr><td><code>tags</code></td><td>array</td><td>Category tags, e.g. ["React", "CSS"]</td></tr>
+  <tr><td><code>coverImage</code></td><td>string</td><td>URL for the cover image</td></tr>
+  <tr><td><code>body</code></td><td>string</td><td>HTML content of the post</td></tr>
+</table>
+
+<hr>
+<p style="color:#999; font-size:11px; text-align:center;">Generated March 2026 — calildrissi.dev CMS</p>
+
+</body>
+</html>

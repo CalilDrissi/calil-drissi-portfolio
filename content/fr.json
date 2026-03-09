@@ -47,21 +47,16 @@
       "GSAP Showcase /CodePen"
     ]
   },
-  "brands": {
-    "header": "Clients",
+  "articles": {
+    "header": "Articles",
     "list": [
-      "Startup Fintech (Série A)",
-      "Plateforme E-Commerce",
-      "SaaS Analytics",
-      "Startup Santé",
-      "Agence Digitale (Paris)",
-      "Plateforme Immobilière",
-      "Entreprise EdTech",
-      "Projet Crypto/Web3",
-      "Tourisme & Hôtellerie",
-      "Startup IA/ML",
-      "Société Média",
-      "ONG / Association"
+      { "label": "Animations GSAP au Scroll", "href": "/fr/blog/maitriser-les-animations-gsap/", "img": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=560&h=280&fit=crop", "title": "Maîtriser les Animations au Scroll avec GSAP ScrollTrigger", "excerpt": "Une plongée approfondie dans la création d'animations au scroll fluides avec le plugin ScrollTrigger de GSAP.", "tags": "GSAP, Animation", "date": "2026-01" },
+      { "label": "Dashboards Performants", "href": "/fr/blog/construire-des-dashboards-performants/", "img": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=560&h=280&fit=crop", "title": "Construire des Dashboards Temps Réel Performants", "excerpt": "Stratégies pour des dashboards gérant des milliers de points de données sans perte de frames.", "tags": "React, Performance", "date": "2026-01" },
+      { "label": "C++ pour le Web", "href": "#", "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=560&h=280&fit=crop", "title": "Patterns C++ Modernes pour Développeurs Web", "excerpt": "Comment les concepts du C++ moderne comme RAII et la sémantique de déplacement améliorent votre JavaScript.", "tags": "C++, Architecture", "date": "2025-11" },
+      { "label": "Design Systems Évolutifs", "href": "#", "img": "https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=560&h=280&fit=crop", "title": "Des Design Systems qui Passent à l'Échelle", "excerpt": "Construire un design system de zéro — tokens, APIs de composants, documentation et outillage.", "tags": "Design Systems, CSS", "date": "2025-09" },
+      { "label": "Edge Computing", "href": "#", "img": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=560&h=280&fit=crop", "title": "Edge Computing avec Cloudflare Workers et Durable Objects", "excerpt": "Déployer des applications stateful à la périphérie — collaboration temps réel et gestion de sessions.", "tags": "Edge, Cloudflare", "date": "2025-07" },
+      { "label": "Wasm en Production", "href": "#", "img": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=560&h=280&fit=crop", "title": "WebAssembly en Production : Retours d'Expérience", "excerpt": "Intégrer des modules Wasm en production — traitement d'images, crypto et géométrie computationnelle.", "tags": "WebAssembly, Rust", "date": "2025-05" },
+      { "label": "L'Art de la Code Review", "href": "#", "img": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=560&h=280&fit=crop", "title": "L'Art de la Code Review : Au-delà de la Syntaxe", "excerpt": "Comment donner des reviews qui améliorent l'architecture et la vélocité de l'équipe.", "tags": "Engineering, Équipes", "date": "2025-03" }
     ]
   },
   "connect": {
