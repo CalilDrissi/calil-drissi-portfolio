@@ -25,8 +25,8 @@
     "header": "Poste",
     "studio": "Freelance (Indépendant)",
     "focus": "Full-Stack & Focus Frontend",
-    "stackLabel": "Stack",
-    "stack": ["React /Next.js /TypeScript", "Node.js /Python /PostgreSQL", "Tailwind /GSAP /Three.js"],
+    "stackLabel": "Focus",
+    "stack": ["Applications Web & SPAs", "UI Interactive & Motion", "Design d'API & Systèmes", "Performance & Infrastructure"],
     "previousLabel": "Précédent",
     "previous": ["Projets en agence", "Contrats startup", "Open Source"]
   },

@@ -160,28 +160,42 @@
     }
     .heartbeat-svg {
       display: inline-block;
-      width: 48px;
-      height: 16px;
+      width: 108px;
+      height: 14px;
       vertical-align: middle;
-      margin-left: 6px;
+      margin-left: 5px;
       overflow: visible;
     }
     .heartbeat-svg .hb-line {
       fill: none;
-      stroke: rgba(255,255,255,0.3);
-      stroke-width: 0.8;
+      stroke: rgba(255,255,255,0.25);
+      stroke-width: 0.6;
       stroke-linecap: square;
       stroke-linejoin: miter;
-      stroke-dasharray: 120;
-      stroke-dashoffset: 120;
-      animation: hbDraw 2s ease-in-out infinite;
+      stroke-dasharray: 80;
+      stroke-dashoffset: 80;
+      animation: hbDraw 3s linear infinite;
+    }
+    .heartbeat-svg .hb-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 5px;
+      letter-spacing: 0.08em;
+      fill: rgba(255,255,255,0.35);
+      clip-path: inset(0 100% 0 0);
+      animation: mementoReveal 3s linear infinite;
     }
     @keyframes hbDraw {
-      0% { stroke-dashoffset: 120; opacity: 0.15; }
-      15% { opacity: 0.5; }
-      60% { stroke-dashoffset: 0; opacity: 0.5; }
-      80% { opacity: 0.15; }
-      100% { stroke-dashoffset: -120; opacity: 0; }
+      0% { stroke-dashoffset: 80; opacity: 0; }
+      3% { opacity: 0.55; }
+      25% { stroke-dashoffset: 0; opacity: 0.55; }
+      60% { stroke-dashoffset: 0; opacity: 0.55; }
+      75%, 100% { stroke-dashoffset: 0; opacity: 0; }
+    }
+    @keyframes mementoReveal {
+      0%, 18% { clip-path: inset(0 100% 0 0); opacity: 0.55; }
+      48% { clip-path: inset(0 0% 0 0); opacity: 0.55; }
+      60% { clip-path: inset(0 0% 0 0); opacity: 0.55; }
+      75%, 100% { clip-path: inset(0 0% 0 0); opacity: 0; }
     }
     .intro-name { font-weight: 500; }
     .intro-title {
@@ -201,32 +215,45 @@
       cursor: pointer;
     }
     .intro-hover-pill {
-      position: absolute;
-      inset: -4px -10px;
+      position: fixed;
+      transform: translate(-50%, -50%);
       background: var(--accent);
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      border-radius: 999px;
+      padding: 4px 0;
+      width: 120px;
+      overflow: hidden;
       font-family: var(--mono);
-      font-size: 10px;
-      font-weight: 500;
+      font-size: 8px;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.08em;
       color: #fff;
+      white-space: nowrap;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s ease;
-      z-index: 2;
+      z-index: 999;
     }
-    .intro-identity:hover .intro-hover-pill {
-      opacity: 1;
+    .intro-hover-pill .pill-track {
+      display: inline-block;
+      animation: pillScroll 6s linear infinite;
+      animation-play-state: paused;
     }
-    .intro-identity:hover .intro-avatar,
+    @keyframes pillScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .intro-identity:hover .pill-track {
+      animation-play-state: running;
+    }
+    .intro-identity:hover .intro-avatar {
+      opacity: 0.5;
+      transition: opacity 0.25s;
+    }
     .intro-identity:hover .intro-name,
     .intro-identity:hover .intro-title {
-      opacity: 0.15;
-      transition: opacity 0.2s;
+      opacity: 0.3;
+      transition: opacity 0.25s;
     }
     .intro-meta {
       color: var(--fg-dim);
@@ -521,9 +548,9 @@
       z-index: 2;
     }
     .statement em {
-      font-family: var(--serif);
-      font-style: italic;
-      font-weight: 400;
+      font-family: var(--sans);
+      font-style: normal;
+      font-weight: 700;
       color: #fff;
     }
     .statement .superscript {
@@ -1316,10 +1343,10 @@
     <div class="col-section">
       <div class="col-header">Intro</div>
       <div class="intro-identity" id="introIdentity">
-        <div class="intro-hover-pill">Play — Click to discover</div>
+        <div class="intro-hover-pill"><span class="pill-track">Play — Click to discover&nbsp;&nbsp;&nbsp;⬥&nbsp;&nbsp;&nbsp;Play — Click to discover&nbsp;&nbsp;&nbsp;⬥&nbsp;&nbsp;&nbsp;</span></div>
         <img class="intro-avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" alt="CD" />
         <div>
-          <div class="intro-name">Calil Drissi<svg class="heartbeat-svg" viewBox="0 0 48 16"><polyline class="hb-line" points="0,8 10,8 13,8 16,2 19,14 22,5 25,10 28,8 38,8 48,8"/></svg></div>
+          <div class="intro-name">Calil Drissi<svg class="heartbeat-svg" viewBox="0 0 90 12"><polyline class="hb-line" points="0,6 8,6 11,6 14,1.5 17,10.5 20,4 23,8 26,6 34,6"/><text class="hb-text" x="34.5" y="7.2">memento mori</text></svg></div>
           <div class="intro-title">Software Developer</div>
         </div>
       </div>
@@ -1343,11 +1370,12 @@
       <div class="position-studio">Freelance (Independent)</div>
       <div class="position-revenue">Full-Stack &amp; Frontend Focus</div>
 
-      <div class="sub-label">Stack</div>
+      <div class="sub-label">Focus</div>
       <div class="position-cost">
-        React /Next.js /TypeScript<br />
-        Node.js /Python /PostgreSQL<br />
-        Tailwind /GSAP /Three.js
+        Web Applications &amp; SPAs<br />
+        Interactive UI &amp; Motion<br />
+        API Design &amp; Systems<br />
+        Performance &amp; Infrastructure
       </div>
 
       <div class="sub-label">Previous</div>
@@ -2047,6 +2075,16 @@
   const aboutPopup = document.getElementById('aboutPopup');
   const aboutWin = WM.register(aboutPopup, 'About Me');
   aboutWin.persistent = true;
+
+  // Pill follows cursor
+  const introId = document.getElementById('introIdentity');
+  const hoverPill = introId.querySelector('.intro-hover-pill');
+  introId.addEventListener('mousemove', (e) => {
+    hoverPill.style.left = e.clientX + 'px';
+    hoverPill.style.top = e.clientY + 'px';
+  });
+  introId.addEventListener('mouseenter', () => { hoverPill.style.opacity = '1'; });
+  introId.addEventListener('mouseleave', () => { hoverPill.style.opacity = '0'; });
 
   document.getElementById('introIdentity').addEventListener('click', () => {
     if (aboutPopup.classList.contains('open') && !aboutWin.minimized) {

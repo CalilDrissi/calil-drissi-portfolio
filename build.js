@@ -33,10 +33,10 @@ function render(template, data, lang) {
     <div class="col-section">
       <div class="col-header">${data.intro.header}</div>
       <div class="intro-identity" id="introIdentity">
-        <div class="intro-hover-pill">${data.intro.hoverPill}</div>
+        <div class="intro-hover-pill"><span class="pill-track">${data.intro.hoverPill}&nbsp;&nbsp;&nbsp;⬥&nbsp;&nbsp;&nbsp;${data.intro.hoverPill}&nbsp;&nbsp;&nbsp;⬥&nbsp;&nbsp;&nbsp;</span></div>
         <img class="intro-avatar" src="${data.intro.avatarUrl}" alt="CD" />
         <div>
-          <div class="intro-name">${data.intro.name}<svg class="heartbeat-svg" viewBox="0 0 48 16"><polyline class="hb-line" points="0,8 10,8 13,8 16,2 19,14 22,5 25,10 28,8 38,8 48,8"/></svg></div>
+          <div class="intro-name">${data.intro.name}<svg class="heartbeat-svg" viewBox="0 0 90 12"><polyline class="hb-line" points="0,6 8,6 11,6 14,1.5 17,10.5 20,4 23,8 26,6 34,6"/><text class="hb-text" x="34.5" y="7.2">memento mori</text></svg></div>
           <div class="intro-title">${data.intro.title}</div>
         </div>
       </div>
