@@ -1,0 +1,9 @@
+{
+  "slug": "maitriser-les-animations-gsap",
+  "title": "Maîtriser les Animations au Scroll avec GSAP ScrollTrigger",
+  "date": "2026-01-20",
+  "excerpt": "Une plongée approfondie dans la création d'animations au scroll fluides avec le plugin ScrollTrigger de GSAP — des révélations basiques aux effets parallax complexes.",
+  "tags": ["GSAP", "Animation", "CSS", "JavaScript"],
+  "coverImage": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=600&fit=crop",
+  "body": "<h2>Pourquoi GSAP ?</h2><p>Les animations CSS au scroll s'améliorent, mais GSAP offre toujours un contrôle inégalé, des options d'easing et une cohérence cross-browser. ScrollTrigger rend trivial le fait de lier n'importe quelle animation à la position du scroll.</p><h2>Les Bases</h2><p>Un simple fade-up à l'entrée du scroll ne prend que quelques lignes de code.</p><h2>Conclusion</h2><p>GSAP + ScrollTrigger est le standard d'excellence pour les animations au scroll en 2026. L'API est intuitive, les performances excellentes et les possibilités créatives infinies.</p>"
+}

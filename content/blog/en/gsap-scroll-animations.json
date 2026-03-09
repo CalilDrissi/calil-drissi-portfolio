@@ -1,0 +1,9 @@
+{
+  "slug": "gsap-scroll-animations",
+  "title": "Mastering Scroll Animations with GSAP ScrollTrigger",
+  "date": "2026-01-20",
+  "excerpt": "A deep dive into creating buttery-smooth scroll-driven animations using GSAP's ScrollTrigger plugin — from basic reveals to complex parallax effects.",
+  "tags": ["GSAP", "Animation", "CSS", "JavaScript"],
+  "coverImage": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=600&fit=crop",
+  "body": "<h2>Why GSAP?</h2><p>CSS scroll-driven animations are getting better, but GSAP still offers unmatched control, easing options, and cross-browser consistency. ScrollTrigger makes it trivial to tie any animation to scroll position.</p><h2>The Basics</h2><p>A simple fade-up on scroll entry takes just a few lines:</p><pre><code>gsap.from('.section', {\n  y: 60,\n  opacity: 0,\n  scrollTrigger: {\n    trigger: '.section',\n    start: 'top 80%',\n  }\n});</code></pre><h2>Advanced Techniques</h2><h3>Pinned Horizontal Scroll</h3><p>One of the most impressive effects is horizontal scrolling within a vertically scrolling page. The trick is pinning a container and translating its content based on scroll progress.</p><h3>Parallax Layers</h3><p>Creating depth with parallax is about moving elements at different speeds. I typically use 3-4 layers with scrub values between 0.5 and 2.</p><h2>Performance Tips</h2><ul><li>Use <code>will-change: transform</code> sparingly — only during active animations</li><li>Prefer <code>transform</code> and <code>opacity</code> — they're GPU-accelerated</li><li>Call <code>ScrollTrigger.refresh()</code> after dynamic content loads</li><li>Use <code>batch()</code> for staggering many elements efficiently</li></ul><h2>Conclusion</h2><p>GSAP + ScrollTrigger is the gold standard for scroll animations in 2026. The API is intuitive, the performance is excellent, and the creative possibilities are endless.</p>"
+}

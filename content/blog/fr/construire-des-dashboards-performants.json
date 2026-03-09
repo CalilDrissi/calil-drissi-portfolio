@@ -1,0 +1,9 @@
+{
+  "slug": "construire-des-dashboards-performants",
+  "title": "Construire des Dashboards Temps Réel Performants avec Next.js et D3",
+  "date": "2026-02-15",
+  "excerpt": "Comment j'ai construit un dashboard financier gérant plus de 10K points de données avec des animations fluides à 60fps en utilisant Next.js, D3.js et WebSocket.",
+  "tags": ["Next.js", "D3.js", "Performance", "WebSocket"],
+  "coverImage": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=600&fit=crop",
+  "body": "<h2>Le Défi</h2><p>Quand une startup fintech m'a contacté pour construire leur dashboard temps réel, les exigences étaient claires : afficher des milliers de points de données se mettant à jour chaque seconde, avec des animations fluides et zéro saccade.</p><h2>Choix d'Architecture</h2><p>J'ai choisi Next.js comme framework, D3.js pour la visualisation de données et WebSocket pour le streaming temps réel. L'insight clé était de séparer la couche de données de la couche de rendu.</p><h2>Résultats</h2><p>Le dashboard final maintient 60fps avec plus de 10K points de données en temps réel. Score Lighthouse : 96. Temps d'interaction : moins de 2 secondes.</p>"
+}

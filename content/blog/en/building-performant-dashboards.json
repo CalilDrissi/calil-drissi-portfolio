@@ -1,0 +1,9 @@
+{
+  "slug": "building-performant-dashboards",
+  "title": "Building Performant Real-Time Dashboards with Next.js and D3",
+  "date": "2026-02-15",
+  "excerpt": "How I built a financial dashboard that handles 10K+ data points with smooth 60fps animations using Next.js, D3.js, and WebSocket connections.",
+  "tags": ["Next.js", "D3.js", "Performance", "WebSocket"],
+  "coverImage": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=600&fit=crop",
+  "body": "<h2>The Challenge</h2><p>When a fintech startup approached me to build their real-time dashboard, the requirements were clear: display thousands of data points updating every second, with smooth animations and zero jank.</p><h2>Architecture Decisions</h2><p>I chose Next.js for the framework, D3.js for data visualization, and WebSocket for real-time data streaming. The key insight was to separate the data layer from the rendering layer.</p><h3>Data Layer</h3><p>WebSocket connections feed into a shared state store using Zustand. This keeps all components in sync without prop drilling or context re-renders.</p><h3>Rendering Layer</h3><p>D3 handles the heavy lifting of SVG manipulation. Instead of letting React reconcile SVG elements (which is slow for thousands of nodes), I use D3's enter/update/exit pattern inside useEffect hooks.</p><h2>Performance Tricks</h2><ul><li><strong>Canvas fallback</strong> — For datasets over 5K points, I switch from SVG to Canvas rendering</li><li><strong>Web Workers</strong> — Heavy calculations (moving averages, percentiles) run off the main thread</li><li><strong>Virtual scrolling</strong> — Table views only render visible rows</li><li><strong>Debounced resize</strong> — Chart redraws are debounced to prevent layout thrashing</li></ul><h2>Results</h2><p>The final dashboard maintains 60fps with 10K+ data points updating in real-time. Lighthouse performance score: 96. Time to interactive: under 2 seconds.</p>"
+}

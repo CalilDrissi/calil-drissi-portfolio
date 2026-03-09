@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Calil Drissi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #121212;
+      --bg-raised: #1a1a1a;
+      --bg-input: #1a1a1a;
+      --fg: #ffffff;
+      --fg-dim: rgba(255,255,255,0.6);
+      --fg-faint: rgba(255,255,255,0.22);
+      --accent: #5e2bff;
+      --accent-hover: #7b4fff;
+      --border: rgba(255,255,255,0.1);
+      --border-strong: rgba(255,255,255,0.2);
+      --danger: #ff4444;
+      --danger-hover: #ff6666;
+      --success: #22c55e;
+      --mono: 'DM Mono', 'Courier New', monospace;
+      --sidebar-w: 220px;
+      --radius: 6px;
+      --toast-bg: #1e1e1e;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--mono);
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 13px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Login Screen ── */
+    .login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .login-box {
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+    .login-box h1 {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    .login-box p {
+      color: var(--fg-dim);
+      font-size: 12px;
+      margin-bottom: 24px;
+    }
+    .login-box input {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--fg);
+      font-family: var(--mono);
+      font-size: 13px;
+      margin-bottom: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .login-box input:focus { border-color: var(--accent); }
+    .login-error {
+      color: var(--danger);
+      font-size: 11px;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: var(--danger-hover); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--fg-dim);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--border-strong); color: var(--fg); }
+    .btn-sm { padding: 5px 10px; font-size: 11px; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-full { width: 100%; justify-content: center; }
+
+    /* ── Layout ── */
+    .app { display: none; }
+    .app.visible { display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      width: var(--sidebar-w);
+      background: var(--bg-raised);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-header {
+      padding: 20px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-header h2 { font-size: 13px; font-weight: 500; }
+    .sidebar-header span { font-size: 11px; color: var(--fg-dim); }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .sidebar-nav button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 18px;
+      background: none;
+      border: none;
+      color: var(--fg-dim);
+      font-family: var(--mono);
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      text-align: left;
+    }
+    .sidebar-nav button:hover { background: rgba(255,255,255,0.04); color: var(--fg); }
+    .sidebar-nav button.active { background: rgba(94,43,255,0.12); color: var(--accent); }
+    .sidebar-nav button svg { width: 16px; height: 16px; opacity: 0.7; }
+    .sidebar-footer {
+      padding: 14px 18px;
+      border-top: 1px solid var(--border);
+    }
+    .sidebar-footer button {
+      background: none;
+      border: none;
+      color: var(--fg-dim);
+      font-family: var(--mono);
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .sidebar-footer button:hover { color: var(--danger); }
+
+    /* ── Mobile hamburger ── */
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 12px; left: 12px;
+      z-index: 200;
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px;
+      color: var(--fg);
+      cursor: pointer;
+    }
+    .mobile-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 99;
+    }
+
+    /* ── Main Content ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 32px 40px;
+      max-width: 900px;
+    }
+    .main h1 {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+
+    /* ── Lang Tabs ── */
+    .lang-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 3px;
+      width: fit-content;
+    }
+    .lang-tab {
+      padding: 6px 18px;
+      background: none;
+      border: none;
+      border-radius: 4px;
+      color: var(--fg-dim);
+      font-family: var(--mono);
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .lang-tab.active { background: var(--accent); color: #fff; }
+
+    /* ── Forms ── */
+    .section-block {
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .section-block h3 {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block;
+      font-size: 11px;
+      color: var(--fg-dim);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .field input, .field textarea, .field select {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--fg);
+      font-family: var(--mono);
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus {
+      border-color: var(--accent);
+    }
+    .field textarea { resize: vertical; min-height: 70px; }
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* ── Repeatable fields ── */
+    .repeatable-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+      align-items: center;
+    }
+    .repeatable-item input { flex: 1; }
+    .repeatable-item .btn-icon {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--fg-dim);
+      cursor: pointer;
+      font-size: 14px;
+      flex-shrink: 0;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .repeatable-item .btn-icon:hover { border-color: var(--border-strong); color: var(--fg); }
+    .repeatable-item .btn-icon.remove:hover { border-color: var(--danger); color: var(--danger); }
+    .repeatable-add {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 5px 12px;
+      color: var(--fg-dim);
+      font-family: var(--mono);
+      font-size: 11px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .repeatable-add:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Paired repeatable (label + url) ── */
+    .repeatable-pair {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+      align-items: center;
+    }
+    .repeatable-pair input { flex: 1; }
+    .repeatable-pair .btn-icon {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--fg-dim);
+      cursor: pointer;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .repeatable-pair .btn-icon.remove:hover { border-color: var(--danger); color: var(--danger); }
+
+    /* ── Project Cards ── */
+    .project-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 10px;
+      transition: border-color 0.15s;
+    }
+    .project-card:hover { border-color: var(--border-strong); }
+    .project-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .project-card-header h4 {
+      font-size: 12px;
+      font-weight: 400;
+    }
+    .project-card-header span {
+      font-size: 11px;
+      color: var(--fg-dim);
+    }
+    .project-card-header .card-actions {
+      display: flex;
+      gap: 4px;
+    }
+    .project-card-body { display: none; padding-top: 14px; }
+    .project-card-body.open { display: block; }
+    .project-card .drag-handle {
+      cursor: grab;
+      color: var(--fg-faint);
+      margin-right: 8px;
+      font-size: 14px;
+    }
+
+    /* ── Blog List ── */
+    .blog-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+    }
+    .blog-item-info h4 { font-size: 12px; font-weight: 400; }
+    .blog-item-info span { font-size: 11px; color: var(--fg-dim); }
+    .blog-item-actions { display: flex; gap: 6px; }
+
+    /* ── Quill overrides ── */
+    .ql-toolbar.ql-snow {
+      border-color: var(--border) !important;
+      background: var(--bg-raised) !important;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .ql-container.ql-snow {
+      border-color: var(--border) !important;
+      border-radius: 0 0 var(--radius) var(--radius);
+      min-height: 250px;
+    }
+    .ql-editor {
+      background: var(--bg) !important;
+      color: var(--fg) !important;
+      font-family: var(--mono) !important;
+      font-size: 13px !important;
+      min-height: 250px;
+    }
+    .ql-snow .ql-stroke { stroke: var(--fg-dim) !important; }
+    .ql-snow .ql-fill { fill: var(--fg-dim) !important; }
+    .ql-snow .ql-picker { color: var(--fg-dim) !important; }
+    .ql-snow .ql-picker-options {
+      background: var(--bg-raised) !important;
+      border-color: var(--border) !important;
+    }
+    .ql-snow .ql-picker-label:hover,
+    .ql-snow .ql-picker-item:hover { color: var(--fg) !important; }
+    .ql-snow .ql-active .ql-stroke { stroke: var(--accent) !important; }
+    .ql-snow .ql-active .ql-fill { fill: var(--accent) !important; }
+    .ql-snow .ql-active { color: var(--accent) !important; }
+    .ql-editor.ql-blank::before { color: var(--fg-faint) !important; }
+
+    /* ── Toast ── */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast {
+      background: var(--toast-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 20px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--fg);
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+      max-width: 340px;
+    }
+    .toast.success { border-left: 3px solid var(--success); }
+    .toast.error { border-left: 3px solid var(--danger); }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+
+    /* ── Save bar ── */
+    .save-bar {
+      position: sticky;
+      bottom: 0;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 14px 0;
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* ── Confirm dialog ── */
+    .confirm-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 9000;
+      align-items: center;
+      justify-content: center;
+    }
+    .confirm-overlay.visible { display: flex; }
+    .confirm-box {
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+    }
+    .confirm-box p { margin-bottom: 20px; font-size: 13px; }
+    .confirm-box .btn-row { display: flex; gap: 10px; justify-content: center; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .mobile-toggle { display: flex; }
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .mobile-overlay.visible { display: block; }
+      .main { margin-left: 0; padding: 60px 16px 32px; }
+      .field-row { grid-template-columns: 1fr; }
+    }
+
+    /* ── Loading spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--fg-faint);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--fg-faint); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--fg-dim); }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════ LOGIN ════════════════════ -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h1>Admin Panel</h1>
+    <p>calil-drissi.dev</p>
+    <input type="password" id="loginPassword" placeholder="Password" autofocus />
+    <div class="login-error" id="loginError">Invalid password. Try again.</div>
+    <button class="btn btn-primary btn-full" id="loginBtn">Sign In</button>
+  </div>
+</div>
+
+<!-- ════════════════════ APP ════════════════════ -->
+<div class="app" id="app">
+
+  <!-- Mobile toggle -->
+  <button class="mobile-toggle" id="mobileToggle">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Admin</h2>
+      <span>calil-drissi.dev</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="active" data-section="portfolio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Portfolio
+      </button>
+      <button data-section="blog">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+        Blog Posts
+      </button>
+      <button data-section="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="logoutBtn">Log Out</button>
+    </div>
+  </aside>
+
+  <!-- ════════════════ PORTFOLIO SECTION ════════════════ -->
+  <main class="main" id="sectionPortfolio">
+    <h1>Portfolio Content</h1>
+
+    <div class="lang-tabs">
+      <button class="lang-tab active" data-lang="en">EN</button>
+      <button class="lang-tab" data-lang="fr">FR</button>
+    </div>
+
+    <div id="portfolioForm">
+      <!-- Intro -->
+      <div class="section-block">
+        <h3>Intro</h3>
+        <div class="field">
+          <label>Name</label>
+          <input type="text" data-path="intro.name" />
+        </div>
+        <div class="field">
+          <label>Title</label>
+          <input type="text" data-path="intro.title" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Avatar URL</label>
+            <input type="text" data-path="intro.avatarUrl" />
+          </div>
+          <div class="field">
+            <label>Avatar Large URL</label>
+            <input type="text" data-path="intro.avatarLargeUrl" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Hover Pill Text</label>
+          <input type="text" data-path="intro.hoverPill" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Location</label>
+            <input type="text" data-path="intro.location" />
+          </div>
+          <div class="field">
+            <label>Tagline</label>
+            <input type="text" data-path="intro.tagline" />
+          </div>
+        </div>
+        <div class="field">
+          <label>What I Do Label</label>
+          <input type="text" data-path="intro.whatIDo" />
+        </div>
+        <div class="field">
+          <label>What I Do Description</label>
+          <input type="text" data-path="intro.whatIDoDesc" />
+        </div>
+        <div class="field">
+          <label>Stats</label>
+          <div id="rep-intro-stats"></div>
+          <button class="repeatable-add" onclick="addStatItem()">+ Add Stat</button>
+        </div>
+      </div>
+
+      <!-- Position -->
+      <div class="section-block">
+        <h3>Position</h3>
+        <div class="field">
+          <label>Header</label>
+          <input type="text" data-path="position.header" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Studio</label>
+            <input type="text" data-path="position.studio" />
+          </div>
+          <div class="field">
+            <label>Focus</label>
+            <input type="text" data-path="position.focus" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Stack Label</label>
+          <input type="text" data-path="position.stackLabel" />
+        </div>
+        <div class="field">
+          <label>Stack Lines</label>
+          <div id="rep-position-stack"></div>
+          <button class="repeatable-add" onclick="addRepeatableSimple('rep-position-stack', 'position.stack')">+ Add Line</button>
+        </div>
+        <div class="field">
+          <label>Previous Label</label>
+          <input type="text" data-path="position.previousLabel" />
+        </div>
+        <div class="field">
+          <label>Previous</label>
+          <div id="rep-position-previous"></div>
+          <button class="repeatable-add" onclick="addRepeatableSimple('rep-position-previous', 'position.previous')">+ Add Item</button>
+        </div>
+      </div>
+
+      <!-- Recognition -->
+      <div class="section-block">
+        <h3>Recognition</h3>
+        <div class="field">
+          <label>Header</label>
+          <input type="text" data-path="recognition.header" />
+        </div>
+        <div class="field">
+          <label>Tags</label>
+          <div id="rep-recognition-tags"></div>
+          <button class="repeatable-add" onclick="addRepeatableSimple('rep-recognition-tags', 'recognition.tags')">+ Add Tag</button>
+        </div>
+        <div class="field">
+          <label>Awards</label>
+          <div id="rep-recognition-awards"></div>
+          <button class="repeatable-add" onclick="addRepeatableSimple('rep-recognition-awards', 'recognition.awards')">+ Add Award</button>
+        </div>
+        <div class="field">
+          <label>Features Label</label>
+          <input type="text" data-path="recognition.featuresLabel" />
+        </div>
+        <div class="field">
+          <label>Features</label>
+          <div id="rep-recognition-features"></div>
+          <button class="repeatable-add" onclick="addRepeatableSimple('rep-recognition-features', 'recognition.features')">+ Add Feature</button>
+        </div>
+      </div>
+
+      <!-- Brands -->
+      <div class="section-block">
+        <h3>Brands</h3>
+        <div class="field">
+          <label>Header</label>
+          <input type="text" data-path="brands.header" />
+        </div>
+        <div class="field">
+          <label>Brand List</label>
+          <div id="rep-brands-list"></div>
+          <button class="repeatable-add" onclick="addRepeatableSimple('rep-brands-list', 'brands.list')">+ Add Brand</button>
+        </div>
+      </div>
+
+      <!-- Connect -->
+      <div class="section-block">
+        <h3>Connect</h3>
+        <div class="field">
+          <label>Header</label>
+          <input type="text" data-path="connect.header" />
+        </div>
+        <div class="field">
+          <label>Links</label>
+          <div id="rep-connect-links"></div>
+          <button class="repeatable-add" onclick="addPairItem('rep-connect-links', 'connect.links', 'label', 'url')">+ Add Link</button>
+        </div>
+        <div class="field">
+          <label>Availability Status</label>
+          <input type="text" data-path="connect.availStatus" />
+        </div>
+        <div class="field">
+          <label>Availability CTA</label>
+          <input type="text" data-path="connect.availCta" />
+        </div>
+        <div class="field">
+          <label>Buttons</label>
+          <div id="rep-connect-buttons"></div>
+          <button class="repeatable-add" onclick="addPairItem('rep-connect-buttons', 'connect.buttons', 'label', 'url')">+ Add Button</button>
+        </div>
+      </div>
+
+      <!-- Statement -->
+      <div class="section-block">
+        <h3>Statement</h3>
+        <div class="field">
+          <label>Text (use {rotate} for rotating word placement)</label>
+          <textarea data-path="statement.text" rows="3"></textarea>
+        </div>
+        <div class="field">
+          <label>Rotate Words</label>
+          <div id="rep-statement-rotateWords"></div>
+          <button class="repeatable-add" onclick="addRepeatableSimple('rep-statement-rotateWords', 'statement.rotateWords')">+ Add Word</button>
+        </div>
+      </div>
+
+      <!-- Ribbon -->
+      <div class="section-block">
+        <h3>Ribbon</h3>
+        <div class="field">
+          <label>Ribbon Items</label>
+          <div id="rep-ribbon"></div>
+          <button class="repeatable-add" onclick="addRepeatableSimple('rep-ribbon', 'ribbon')">+ Add Item</button>
+        </div>
+      </div>
+
+      <!-- Projects -->
+      <div class="section-block">
+        <h3>Projects</h3>
+        <div id="projectsList"></div>
+        <button class="repeatable-add" onclick="addProject()" style="margin-top: 10px;">+ Add Project</button>
+      </div>
+
+      <!-- Awards -->
+      <div class="section-block">
+        <h3>Awards Gallery</h3>
+        <div id="rep-awards-gallery"></div>
+        <button class="repeatable-add" onclick="addAwardGalleryItem()">+ Add Award</button>
+      </div>
+
+      <!-- About -->
+      <div class="section-block">
+        <h3>About</h3>
+        <div class="field">
+          <label>Titlebar Text</label>
+          <input type="text" data-path="about.titlebarText" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Email Button Label</label>
+            <input type="text" data-path="about.emailBtn.label" />
+          </div>
+          <div class="field">
+            <label>Email Button URL</label>
+            <input type="text" data-path="about.emailBtn.url" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Resume Button Label</label>
+            <input type="text" data-path="about.resumeBtn.label" />
+          </div>
+          <div class="field">
+            <label>Resume Button URL</label>
+            <input type="text" data-path="about.resumeBtn.url" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Tab: Bio Label</label>
+            <input type="text" data-path="about.tabs.bio" />
+          </div>
+          <div class="field">
+            <label>Tab: Chat Label</label>
+            <input type="text" data-path="about.tabs.chat" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Name</label>
+            <input type="text" data-path="about.name" />
+          </div>
+          <div class="field">
+            <label>Role</label>
+            <input type="text" data-path="about.role" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Bio Paragraphs</label>
+          <div id="rep-about-bio"></div>
+          <button class="repeatable-add" onclick="addRepeatableTextarea('rep-about-bio', 'about.bio')">+ Add Paragraph</button>
+        </div>
+        <div class="field">
+          <label>Detail Cards</label>
+          <div id="rep-about-details"></div>
+          <button class="repeatable-add" onclick="addPairItem('rep-about-details', 'about.details', 'label', 'value')">+ Add Detail</button>
+        </div>
+      </div>
+
+      <!-- Nav -->
+      <div class="section-block">
+        <h3>Navigation</h3>
+        <div class="field">
+          <label>Blog Link Text</label>
+          <input type="text" data-path="nav.blog" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Lang Toggle Label</label>
+            <input type="text" data-path="nav.langToggle.label" />
+          </div>
+          <div class="field">
+            <label>Lang Toggle URL</label>
+            <input type="text" data-path="nav.langToggle.url" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Projects / Awards Tab Labels -->
+      <div class="section-block">
+        <h3>Tab Labels</h3>
+        <div class="field-row">
+          <div class="field">
+            <label>Projects Tab Label</label>
+            <input type="text" data-path="projectsTab.label" />
+          </div>
+          <div class="field">
+            <label>Projects Tab Count</label>
+            <input type="text" data-path="projectsTab.count" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Awards Tab Label</label>
+            <input type="text" data-path="awardsTab.label" />
+          </div>
+          <div class="field">
+            <label>Awards Tab Count</label>
+            <input type="text" data-path="awardsTab.count" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Scroll Indicator</label>
+          <input type="text" data-path="scrollIndicator" />
+        </div>
+      </div>
+
+      <!-- Meta -->
+      <div class="section-block">
+        <h3>Meta</h3>
+        <div class="field">
+          <label>Page Title</label>
+          <input type="text" data-path="meta.title" />
+        </div>
+        <div class="field">
+          <label>Meta Description</label>
+          <textarea data-path="meta.description" rows="2"></textarea>
+        </div>
+        <div class="field">
+          <label>Language Code</label>
+          <input type="text" data-path="meta.lang" />
+        </div>
+      </div>
+
+      <!-- Chat -->
+      <div class="section-block">
+        <h3>Chat / AI Assistant</h3>
+        <div class="field">
+          <label>Greeting</label>
+          <textarea data-path="chat.greeting" rows="2"></textarea>
+        </div>
+        <div class="field">
+          <label>Sender Name</label>
+          <input type="text" data-path="chat.senderName" />
+        </div>
+        <div class="field">
+          <label>Response: Stack</label>
+          <textarea data-path="chat.responses.stack" rows="2"></textarea>
+        </div>
+        <div class="field">
+          <label>Response: Experience</label>
+          <textarea data-path="chat.responses.experience" rows="2"></textarea>
+        </div>
+        <div class="field">
+          <label>Response: Available</label>
+          <textarea data-path="chat.responses.available" rows="2"></textarea>
+        </div>
+        <div class="field">
+          <label>Response: Pricing</label>
+          <textarea data-path="chat.responses.pricing" rows="2"></textarea>
+        </div>
+        <div class="field">
+          <label>Response: Contact</label>
+          <textarea data-path="chat.responses.contact" rows="2"></textarea>
+        </div>
+        <div class="field">
+          <label>Response: Default</label>
+          <textarea data-path="chat.responses.default" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="save-bar">
+        <button class="btn btn-primary" id="savePortfolioBtn" onclick="savePortfolio()">Save Content</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ════════════════ BLOG SECTION ════════════════ -->
+  <main class="main" id="sectionBlog" style="display:none;">
+    <h1>Blog Posts</h1>
+
+    <!-- Blog List View -->
+    <div id="blogListView">
+      <div class="lang-tabs" style="margin-bottom: 16px;">
+        <button class="lang-tab active" data-blog-lang="en">EN</button>
+        <button class="lang-tab" data-blog-lang="fr">FR</button>
+      </div>
+      <div style="margin-bottom: 16px;">
+        <button class="btn btn-primary" onclick="showBlogEditor(null)">+ New Post</button>
+      </div>
+      <div id="blogList"></div>
+    </div>
+
+    <!-- Blog Editor View -->
+    <div id="blogEditorView" style="display:none;">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+        <button class="btn btn-ghost btn-sm" onclick="showBlogList()">&larr; Back</button>
+        <span style="color:var(--fg-dim); font-size:12px;" id="blogEditorTitle">New Post</span>
+      </div>
+
+      <div class="lang-tabs" style="margin-bottom: 20px;">
+        <button class="lang-tab active" data-editor-lang="en">EN</button>
+        <button class="lang-tab" data-editor-lang="fr">FR</button>
+      </div>
+
+      <div class="section-block">
+        <h3>Post Details</h3>
+        <div class="field">
+          <label>Title</label>
+          <input type="text" id="blogTitle" oninput="autoSlug()" />
+        </div>
+        <div class="field">
+          <label>Slug</label>
+          <input type="text" id="blogSlug" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Date</label>
+            <input type="date" id="blogDate" />
+          </div>
+          <div class="field">
+            <label>Cover Image URL</label>
+            <input type="text" id="blogCover" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Excerpt</label>
+          <textarea id="blogExcerpt" rows="2"></textarea>
+        </div>
+        <div class="field">
+          <label>Tags (comma separated)</label>
+          <input type="text" id="blogTags" />
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>Body</h3>
+        <div id="blogBodyEditor"></div>
+      </div>
+
+      <div class="save-bar">
+        <button class="btn btn-danger" id="deleteBlogBtn" onclick="deleteBlogPost()" style="margin-right:auto; display:none;">Delete Post</button>
+        <button class="btn btn-primary" onclick="saveBlogPost()">Save Post</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ════════════════ SETTINGS SECTION ════════════════ -->
+  <main class="main" id="sectionSettings" style="display:none;">
+    <h1>Settings</h1>
+
+    <div class="section-block">
+      <h3>Site Meta</h3>
+      <div class="field">
+        <label>Site Title</label>
+        <input type="text" id="settingSiteTitle" />
+      </div>
+      <div class="field">
+        <label>Site Description</label>
+        <textarea id="settingSiteDesc" rows="2"></textarea>
+      </div>
+      <div class="field">
+        <label>Author Name</label>
+        <input type="text" id="settingAuthor" />
+      </div>
+      <div class="field">
+        <label>Author Email</label>
+        <input type="text" id="settingEmail" />
+      </div>
+    </div>
+
+    <div class="section-block">
+      <h3>Social Links</h3>
+      <div class="field">
+        <label>LinkedIn URL</label>
+        <input type="text" id="settingLinkedin" />
+      </div>
+      <div class="field">
+        <label>GitHub URL</label>
+        <input type="text" id="settingGithub" />
+      </div>
+      <div class="field">
+        <label>Twitter / X URL</label>
+        <input type="text" id="settingTwitter" />
+      </div>
+      <div class="field">
+        <label>Email URL</label>
+        <input type="text" id="settingEmailUrl" />
+      </div>
+    </div>
+
+    <div class="save-bar">
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </main>
+
+</div>
+
+<!-- ════════════════ CONFIRM DIALOG ════════════════ -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <p id="confirmMessage">Are you sure?</p>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirmAction">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ TOASTS ════════════════ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ════════════════ QUILL ════════════════ -->
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════ */
+const API = '/.netlify/functions/save-content';
+let currentLang = 'en';
+let currentBlogLang = 'en';
+let currentEditorLang = 'en';
+let portfolioData = {};
+let blogPosts = [];
+let editingSlug = null;
+let quillEditor = null;
+let confirmCallback = null;
+
+function getPassword() { return localStorage.getItem('admin_password') || ''; }
+function setPassword(pw) { localStorage.setItem('admin_password', pw); }
+
+/* ═══════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════ */
+function toast(message, type) {
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type || 'success');
+  el.textContent = message;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+/* ═══════════════════════════════════════════════════════
+   CONFIRM DIALOG
+   ═══════════════════════════════════════════════════════ */
+function showConfirm(message, callback) {
+  document.getElementById('confirmMessage').textContent = message;
+  document.getElementById('confirmOverlay').classList.add('visible');
+  confirmCallback = callback;
+  document.getElementById('confirmAction').onclick = function() {
+    closeConfirm();
+    if (confirmCallback) confirmCallback();
+  };
+}
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('visible');
+  confirmCallback = null;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LOGIN
+   ═══════════════════════════════════════════════════════ */
+async function attemptLogin() {
+  const pw = document.getElementById('loginPassword').value.trim();
+  if (!pw) return;
+  document.getElementById('loginBtn').disabled = true;
+  document.getElementById('loginBtn').innerHTML = '<span class="spinner"></span>';
+  try {
+    const res = await fetch(API + '?file=content/en.json', {
+      headers: { 'X-Admin-Password': pw }
+    });
+    if (res.ok) {
+      setPassword(pw);
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').classList.add('visible');
+      loadPortfolioContent();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  } catch (e) {
+    document.getElementById('loginError').textContent = 'Network error. Check your connection.';
+    document.getElementById('loginError').style.display = 'block';
+  }
+  document.getElementById('loginBtn').disabled = false;
+  document.getElementById('loginBtn').textContent = 'Sign In';
+}
+
+document.getElementById('loginBtn').addEventListener('click', attemptLogin);
+document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') attemptLogin();
+});
+
+// Auto-login if password stored
+(function() {
+  const pw = getPassword();
+  if (pw) {
+    document.getElementById('loginPassword').value = pw;
+    attemptLogin();
+  }
+})();
+
+/* ═══════════════════════════════════════════════════════
+   LOGOUT
+   ═══════════════════════════════════════════════════════ */
+document.getElementById('logoutBtn').addEventListener('click', function() {
+  localStorage.removeItem('admin_password');
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginError').style.display = 'none';
+});
+
+/* ═══════════════════════════════════════════════════════
+   SIDEBAR NAVIGATION
+   ═══════════════════════════════════════════════════════ */
+document.querySelectorAll('.sidebar-nav button').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.sidebar-nav button').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    var section = btn.getAttribute('data-section');
+    document.getElementById('sectionPortfolio').style.display = section === 'portfolio' ? '' : 'none';
+    document.getElementById('sectionBlog').style.display = section === 'blog' ? '' : 'none';
+    document.getElementById('sectionSettings').style.display = section === 'settings' ? '' : 'none';
+    if (section === 'blog') loadBlogList();
+    if (section === 'settings') loadSettings();
+    // Close mobile sidebar
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('mobileOverlay').classList.remove('visible');
+  });
+});
+
+/* ═══════════════════════════════════════════════════════
+   MOBILE SIDEBAR
+   ═══════════════════════════════════════════════════════ */
+document.getElementById('mobileToggle').addEventListener('click', function() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('mobileOverlay').classList.toggle('visible');
+});
+document.getElementById('mobileOverlay').addEventListener('click', function() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('mobileOverlay').classList.remove('visible');
+});
+
+/* ═══════════════════════════════════════════════════════
+   API HELPERS
+   ═══════════════════════════════════════════════════════ */
+async function apiGet(file) {
+  const res = await fetch(API + '?file=' + encodeURIComponent(file), {
+    headers: { 'X-Admin-Password': getPassword() }
+  });
+  if (!res.ok) throw new Error('Failed to load ' + file);
+  return res.json();
+}
+
+async function apiSave(file, content) {
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: getPassword(), file: file, content: content })
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(function() { return {}; });
+    throw new Error(data.error || 'Save failed');
+  }
+  return res.json();
+}
+
+async function apiDelete(file) {
+  const res = await fetch(API, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: getPassword(), file: file })
+  });
+  if (!res.ok) throw new Error('Delete failed');
+  return res.json();
+}
+
+/* ═══════════════════════════════════════════════════════
+   LANGUAGE TABS — PORTFOLIO
+   ═══════════════════════════════════════════════════════ */
+document.querySelectorAll('.lang-tab[data-lang]').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.lang-tab[data-lang]').forEach(function(t) { t.classList.remove('active'); });
+    tab.classList.add('active');
+    currentLang = tab.getAttribute('data-lang');
+    loadPortfolioContent();
+  });
+});
+
+/* ═══════════════════════════════════════════════════════
+   UTILITY: Deep get / set on objects by dot-path
+   ═══════════════════════════════════════════════════════ */
+function deepGet(obj, path) {
+  return path.split('.').reduce(function(o, k) { return o && o[k]; }, obj);
+}
+function deepSet(obj, path, value) {
+  var keys = path.split('.');
+  var last = keys.pop();
+  var target = keys.reduce(function(o, k) {
+    if (!o[k] || typeof o[k] !== 'object') o[k] = {};
+    return o[k];
+  }, obj);
+  target[last] = value;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PORTFOLIO: LOAD
+   ═══════════════════════════════════════════════════════ */
+async function loadPortfolioContent() {
+  try {
+    portfolioData = await apiGet('content/' + currentLang + '.json');
+    populatePortfolioForm();
+  } catch (e) {
+    toast('Failed to load content: ' + e.message, 'error');
+  }
+}
+
+function populatePortfolioForm() {
+  var data = portfolioData;
+
+  // Simple fields
+  document.querySelectorAll('#portfolioForm [data-path]').forEach(function(el) {
+    var val = deepGet(data, el.getAttribute('data-path'));
+    if (val !== undefined && val !== null) {
+      el.value = val;
+    } else {
+      el.value = '';
+    }
+  });
+
+  // Stats
+  renderStats(data.intro && data.intro.stats ? data.intro.stats : []);
+
+  // Simple repeatables
+  renderRepeatableSimple('rep-position-stack', data.position && data.position.stack ? data.position.stack : [], 'position.stack');
+  renderRepeatableSimple('rep-position-previous', data.position && data.position.previous ? data.position.previous : [], 'position.previous');
+  renderRepeatableSimple('rep-recognition-tags', data.recognition && data.recognition.tags ? data.recognition.tags : [], 'recognition.tags');
+  renderRepeatableSimple('rep-recognition-awards', data.recognition && data.recognition.awards ? data.recognition.awards : [], 'recognition.awards');
+  renderRepeatableSimple('rep-recognition-features', data.recognition && data.recognition.features ? data.recognition.features : [], 'recognition.features');
+  renderRepeatableSimple('rep-brands-list', data.brands && data.brands.list ? data.brands.list : [], 'brands.list');
+  renderRepeatableSimple('rep-statement-rotateWords', data.statement && data.statement.rotateWords ? data.statement.rotateWords : [], 'statement.rotateWords');
+  renderRepeatableSimple('rep-ribbon', data.ribbon ? data.ribbon : [], 'ribbon');
+
+  // Pair repeatables
+  renderRepeatablePair('rep-connect-links', data.connect && data.connect.links ? data.connect.links : [], 'connect.links', 'label', 'url');
+  renderRepeatablePair('rep-connect-buttons', data.connect && data.connect.buttons ? data.connect.buttons : [], 'connect.buttons', 'label', 'url');
+  renderRepeatablePair('rep-about-details', data.about && data.about.details ? data.about.details : [], 'about.details', 'label', 'value');
+
+  // Bio paragraphs (textarea repeatable)
+  renderRepeatableTextarea('rep-about-bio', data.about && data.about.bio ? data.about.bio : [], 'about.bio');
+
+  // Projects
+  renderProjects(data.projects || []);
+
+  // Awards gallery
+  renderAwardsGallery(data.awards || []);
+}
+
+/* ═══════════════════════════════════════════════════════
+   REPEATABLE: SIMPLE (array of strings)
+   ═══════════════════════════════════════════════════════ */
+function renderRepeatableSimple(containerId, items, dataKey) {
+  var container = document.getElementById(containerId);
+  container.innerHTML = '';
+  items.forEach(function(val, i) {
+    var div = document.createElement('div');
+    div.className = 'repeatable-item';
+    div.innerHTML = '<input type="text" value="' + escapeAttr(val) + '" data-rep="' + dataKey + '" data-index="' + i + '" />' +
+      '<button class="btn-icon remove" onclick="removeRepeatableSimple(\'' + containerId + '\', \'' + dataKey + '\', ' + i + ')" title="Remove">&times;</button>';
+    container.appendChild(div);
+  });
+}
+
+function addRepeatableSimple(containerId, dataKey) {
+  var arr = deepGet(portfolioData, dataKey);
+  if (!Array.isArray(arr)) {
+    deepSet(portfolioData, dataKey, []);
+    arr = deepGet(portfolioData, dataKey);
+  }
+  arr.push('');
+  renderRepeatableSimple(containerId, arr, dataKey);
+  // Focus new input
+  var inputs = document.getElementById(containerId).querySelectorAll('input');
+  if (inputs.length) inputs[inputs.length - 1].focus();
+}
+
+function removeRepeatableSimple(containerId, dataKey, index) {
+  var arr = deepGet(portfolioData, dataKey);
+  if (arr) {
+    collectRepeatableSimple(containerId, dataKey);
+    arr = deepGet(portfolioData, dataKey);
+    arr.splice(index, 1);
+    renderRepeatableSimple(containerId, arr, dataKey);
+  }
+}
+
+function collectRepeatableSimple(containerId, dataKey) {
+  var inputs = document.getElementById(containerId).querySelectorAll('input[data-rep="' + dataKey + '"]');
+  var arr = [];
+  inputs.forEach(function(inp) { arr.push(inp.value); });
+  deepSet(portfolioData, dataKey, arr);
+}
+
+/* ═══════════════════════════════════════════════════════
+   REPEATABLE: TEXTAREA (array of strings — long text)
+   ═══════════════════════════════════════════════════════ */
+function renderRepeatableTextarea(containerId, items, dataKey) {
+  var container = document.getElementById(containerId);
+  container.innerHTML = '';
+  items.forEach(function(val, i) {
+    var div = document.createElement('div');
+    div.className = 'repeatable-item';
+    div.style.alignItems = 'flex-start';
+    div.innerHTML = '<textarea data-rep="' + dataKey + '" data-index="' + i + '" rows="3" style="flex:1; width:100%; padding:8px 12px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); color:var(--fg); font-family:var(--mono); font-size:12px; resize:vertical;">' + escapeHTML(val) + '</textarea>' +
+      '<button class="btn-icon remove" onclick="removeRepeatableTextarea(\'' + containerId + '\', \'' + dataKey + '\', ' + i + ')" title="Remove">&times;</button>';
+    container.appendChild(div);
+  });
+}
+
+function addRepeatableTextarea(containerId, dataKey) {
+  var arr = deepGet(portfolioData, dataKey);
+  if (!Array.isArray(arr)) {
+    deepSet(portfolioData, dataKey, []);
+    arr = deepGet(portfolioData, dataKey);
+  }
+  arr.push('');
+  renderRepeatableTextarea(containerId, arr, dataKey);
+}
+
+function removeRepeatableTextarea(containerId, dataKey, index) {
+  collectRepeatableTextarea(containerId, dataKey);
+  var arr = deepGet(portfolioData, dataKey);
+  arr.splice(index, 1);
+  renderRepeatableTextarea(containerId, arr, dataKey);
+}
+
+function collectRepeatableTextarea(containerId, dataKey) {
+  var els = document.getElementById(containerId).querySelectorAll('textarea[data-rep="' + dataKey + '"]');
+  var arr = [];
+  els.forEach(function(el) { arr.push(el.value); });
+  deepSet(portfolioData, dataKey, arr);
+}
+
+/* ═══════════════════════════════════════════════════════
+   REPEATABLE: PAIR (array of {key1, key2} objects)
+   ═══════════════════════════════════════════════════════ */
+function renderRepeatablePair(containerId, items, dataKey, key1, key2) {
+  var container = document.getElementById(containerId);
+  container.innerHTML = '';
+  items.forEach(function(item, i) {
+    var div = document.createElement('div');
+    div.className = 'repeatable-pair';
+    div.innerHTML =
+      '<input type="text" placeholder="' + key1 + '" value="' + escapeAttr(item[key1] || '') + '" data-rep-pair="' + dataKey + '" data-key="' + key1 + '" data-index="' + i + '" />' +
+      '<input type="text" placeholder="' + key2 + '" value="' + escapeAttr(item[key2] || '') + '" data-rep-pair="' + dataKey + '" data-key="' + key2 + '" data-index="' + i + '" />' +
+      '<button class="btn-icon remove" onclick="removeRepeatablePair(\'' + containerId + '\', \'' + dataKey + '\', \'' + key1 + '\', \'' + key2 + '\', ' + i + ')" title="Remove">&times;</button>';
+    container.appendChild(div);
+  });
+}
+
+function addPairItem(containerId, dataKey, key1, key2) {
+  var arr = deepGet(portfolioData, dataKey);
+  if (!Array.isArray(arr)) {
+    deepSet(portfolioData, dataKey, []);
+    arr = deepGet(portfolioData, dataKey);
+  }
+  var obj = {};
+  obj[key1] = '';
+  obj[key2] = '';
+  arr.push(obj);
+  renderRepeatablePair(containerId, arr, dataKey, key1, key2);
+}
+
+function removeRepeatablePair(containerId, dataKey, key1, key2, index) {
+  collectRepeatablePair(containerId, dataKey, key1, key2);
+  var arr = deepGet(portfolioData, dataKey);
+  arr.splice(index, 1);
+  renderRepeatablePair(containerId, arr, dataKey, key1, key2);
+}
+
+function collectRepeatablePair(containerId, dataKey, key1, key2) {
+  var container = document.getElementById(containerId);
+  var items = container.querySelectorAll('.repeatable-pair');
+  var arr = [];
+  items.forEach(function(row) {
+    var inputs = row.querySelectorAll('input');
+    var obj = {};
+    obj[key1] = inputs[0].value;
+    obj[key2] = inputs[1].value;
+    arr.push(obj);
+  });
+  deepSet(portfolioData, dataKey, arr);
+}
+
+/* ═══════════════════════════════════════════════════════
+   REPEATABLE: STATS (value + label)
+   ═══════════════════════════════════════════════════════ */
+function renderStats(items) {
+  var container = document.getElementById('rep-intro-stats');
+  container.innerHTML = '';
+  items.forEach(function(item, i) {
+    var div = document.createElement('div');
+    div.className = 'repeatable-pair';
+    div.innerHTML =
+      '<input type="text" placeholder="value" value="' + escapeAttr(item.value || '') + '" data-stat-val="' + i + '" style="max-width:100px;" />' +
+      '<input type="text" placeholder="label" value="' + escapeAttr(item.label || '') + '" data-stat-label="' + i + '" />' +
+      '<button class="btn-icon remove" onclick="removeStatItem(' + i + ')" title="Remove">&times;</button>';
+    container.appendChild(div);
+  });
+}
+
+function addStatItem() {
+  if (!portfolioData.intro) portfolioData.intro = {};
+  if (!portfolioData.intro.stats) portfolioData.intro.stats = [];
+  collectStats();
+  portfolioData.intro.stats.push({ value: '', label: '' });
+  renderStats(portfolioData.intro.stats);
+}
+
+function removeStatItem(index) {
+  collectStats();
+  portfolioData.intro.stats.splice(index, 1);
+  renderStats(portfolioData.intro.stats);
+}
+
+function collectStats() {
+  if (!portfolioData.intro) portfolioData.intro = {};
+  var container = document.getElementById('rep-intro-stats');
+  var rows = container.querySelectorAll('.repeatable-pair');
+  var arr = [];
+  rows.forEach(function(row) {
+    var inputs = row.querySelectorAll('input');
+    arr.push({ value: inputs[0].value, label: inputs[1].value });
+  });
+  portfolioData.intro.stats = arr;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PROJECTS
+   ═══════════════════════════════════════════════════════ */
+function renderProjects(projects) {
+  var container = document.getElementById('projectsList');
+  container.innerHTML = '';
+  projects.forEach(function(proj, i) {
+    var card = document.createElement('div');
+    card.className = 'project-card';
+    card.setAttribute('data-project-index', i);
+
+    card.innerHTML =
+      '<div class="project-card-header" onclick="toggleProjectCard(this)">' +
+        '<div style="display:flex; align-items:center;">' +
+          '<span class="drag-handle" title="Drag to reorder">&#9776;</span>' +
+          '<h4>' + escapeHTML(proj.title || 'Untitled Project') + '</h4>' +
+          '<span style="margin-left:10px;">' + escapeHTML(proj.year || '') + ' &middot; ' + escapeHTML(proj.role || '') + '</span>' +
+        '</div>' +
+        '<div class="card-actions">' +
+          '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); moveProject(' + i + ', -1);">&uarr;</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); moveProject(' + i + ', 1);">&darr;</button>' +
+          '<button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="event.stopPropagation(); removeProject(' + i + ');">&times;</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="project-card-body" id="projectBody' + i + '">' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Title</label><input type="text" data-proj="' + i + '" data-proj-key="title" value="' + escapeAttr(proj.title || '') + '" /></div>' +
+          '<div class="field"><label>Subtitle</label><input type="text" data-proj="' + i + '" data-proj-key="subtitle" value="' + escapeAttr(proj.subtitle || '') + '" /></div>' +
+        '</div>' +
+        '<div class="field"><label>Description</label><textarea data-proj="' + i + '" data-proj-key="desc" rows="3">' + escapeHTML(proj.desc || '') + '</textarea></div>' +
+        '<div class="field"><label>Tags (comma separated)</label><input type="text" data-proj="' + i + '" data-proj-key="tags" value="' + escapeAttr((proj.tags || []).join(', ')) + '" /></div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Year</label><input type="text" data-proj="' + i + '" data-proj-key="year" value="' + escapeAttr(proj.year || '') + '" /></div>' +
+          '<div class="field"><label>Role</label><input type="text" data-proj="' + i + '" data-proj-key="role" value="' + escapeAttr(proj.role || '') + '" /></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Visit URL</label><input type="text" data-proj="' + i + '" data-proj-key="visit" value="' + escapeAttr(proj.visit || '') + '" /></div>' +
+          '<div class="field"><label>Code URL</label><input type="text" data-proj="' + i + '" data-proj-key="code" value="' + escapeAttr(proj.code || '') + '" /></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Image URL</label><input type="text" data-proj="' + i + '" data-proj-key="img" value="' + escapeAttr(proj.img || '') + '" /></div>' +
+          '<div class="field"><label>Thumbnail URL</label><input type="text" data-proj="' + i + '" data-proj-key="thumb" value="' + escapeAttr(proj.thumb || '') + '" /></div>' +
+        '</div>' +
+      '</div>';
+
+    container.appendChild(card);
+  });
+}
+
+function toggleProjectCard(header) {
+  var body = header.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+function addProject() {
+  collectProjects();
+  portfolioData.projects.push({
+    title: 'New Project',
+    subtitle: '',
+    desc: '',
+    tags: [],
+    year: new Date().getFullYear().toString(),
+    role: '',
+    visit: '#',
+    code: '#',
+    img: '',
+    thumb: ''
+  });
+  renderProjects(portfolioData.projects);
+  // Open the new card
+  var bodies = document.querySelectorAll('.project-card-body');
+  if (bodies.length) bodies[bodies.length - 1].classList.add('open');
+}
+
+function removeProject(index) {
+  collectProjects();
+  showConfirm('Delete this project?', function() {
+    portfolioData.projects.splice(index, 1);
+    renderProjects(portfolioData.projects);
+  });
+}
+
+function moveProject(index, direction) {
+  collectProjects();
+  var arr = portfolioData.projects;
+  var newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= arr.length) return;
+  var temp = arr[index];
+  arr[index] = arr[newIndex];
+  arr[newIndex] = temp;
+  renderProjects(arr);
+}
+
+function collectProjects() {
+  if (!portfolioData.projects) portfolioData.projects = [];
+  var cards = document.querySelectorAll('.project-card');
+  var arr = [];
+  cards.forEach(function(card, i) {
+    var proj = {};
+    card.querySelectorAll('[data-proj="' + i + '"]').forEach(function(el) {
+      var key = el.getAttribute('data-proj-key');
+      if (key === 'tags') {
+        proj[key] = el.value.split(',').map(function(t) { return t.trim(); }).filter(function(t) { return t; });
+      } else if (el.tagName === 'TEXTAREA') {
+        proj[key] = el.value;
+      } else {
+        proj[key] = el.value;
+      }
+    });
+    arr.push(proj);
+  });
+  portfolioData.projects = arr;
+}
+
+/* ═══════════════════════════════════════════════════════
+   AWARDS GALLERY
+   ═══════════════════════════════════════════════════════ */
+function renderAwardsGallery(items) {
+  var container = document.getElementById('rep-awards-gallery');
+  container.innerHTML = '';
+  items.forEach(function(item, i) {
+    var div = document.createElement('div');
+    div.className = 'repeatable-pair';
+    div.innerHTML =
+      '<input type="text" placeholder="label" value="' + escapeAttr(item.label || '') + '" data-award-gal="' + i + '" data-award-key="label" />' +
+      '<input type="text" placeholder="image URL" value="' + escapeAttr(item.img || '') + '" data-award-gal="' + i + '" data-award-key="img" />' +
+      '<button class="btn-icon remove" onclick="removeAwardGalleryItem(' + i + ')" title="Remove">&times;</button>';
+    container.appendChild(div);
+  });
+}
+
+function addAwardGalleryItem() {
+  collectAwardsGallery();
+  if (!portfolioData.awards) portfolioData.awards = [];
+  portfolioData.awards.push({ label: '', img: '' });
+  renderAwardsGallery(portfolioData.awards);
+}
+
+function removeAwardGalleryItem(index) {
+  collectAwardsGallery();
+  portfolioData.awards.splice(index, 1);
+  renderAwardsGallery(portfolioData.awards);
+}
+
+function collectAwardsGallery() {
+  var container = document.getElementById('rep-awards-gallery');
+  var rows = container.querySelectorAll('.repeatable-pair');
+  var arr = [];
+  rows.forEach(function(row) {
+    var inputs = row.querySelectorAll('input');
+    arr.push({ label: inputs[0].value, img: inputs[1].value });
+  });
+  portfolioData.awards = arr;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PORTFOLIO: SAVE
+   ═══════════════════════════════════════════════════════ */
+function collectAllPortfolio() {
+  // Collect simple fields
+  document.querySelectorAll('#portfolioForm [data-path]').forEach(function(el) {
+    deepSet(portfolioData, el.getAttribute('data-path'), el.value);
+  });
+
+  // Collect repeatables
+  collectRepeatableSimple('rep-position-stack', 'position.stack');
+  collectRepeatableSimple('rep-position-previous', 'position.previous');
+  collectRepeatableSimple('rep-recognition-tags', 'recognition.tags');
+  collectRepeatableSimple('rep-recognition-awards', 'recognition.awards');
+  collectRepeatableSimple('rep-recognition-features', 'recognition.features');
+  collectRepeatableSimple('rep-brands-list', 'brands.list');
+  collectRepeatableSimple('rep-statement-rotateWords', 'statement.rotateWords');
+  collectRepeatableSimple('rep-ribbon', 'ribbon');
+
+  // Collect pairs
+  collectRepeatablePair('rep-connect-links', 'connect.links', 'label', 'url');
+  collectRepeatablePair('rep-connect-buttons', 'connect.buttons', 'label', 'url');
+  collectRepeatablePair('rep-about-details', 'about.details', 'label', 'value');
+
+  // Collect textareas
+  collectRepeatableTextarea('rep-about-bio', 'about.bio');
+
+  // Collect stats
+  collectStats();
+
+  // Collect projects
+  collectProjects();
+
+  // Collect awards gallery
+  collectAwardsGallery();
+}
+
+async function savePortfolio() {
+  collectAllPortfolio();
+  var btn = document.getElementById('savePortfolioBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Saving...';
+  try {
+    await apiSave('content/' + currentLang + '.json', portfolioData);
+    toast('Portfolio content saved successfully!', 'success');
+  } catch (e) {
+    toast('Save failed: ' + e.message, 'error');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Save Content';
+}
+
+/* ═══════════════════════════════════════════════════════
+   BLOG: LIST
+   ═══════════════════════════════════════════════════════ */
+document.querySelectorAll('.lang-tab[data-blog-lang]').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.lang-tab[data-blog-lang]').forEach(function(t) { t.classList.remove('active'); });
+    tab.classList.add('active');
+    currentBlogLang = tab.getAttribute('data-blog-lang');
+    loadBlogList();
+  });
+});
+
+async function loadBlogList() {
+  var container = document.getElementById('blogList');
+  container.innerHTML = '<div style="padding:20px; color:var(--fg-dim);"><span class="spinner"></span> Loading posts...</div>';
+  try {
+    var data = await apiGet('content/blog/' + currentBlogLang + '/index.json');
+    blogPosts = Array.isArray(data) ? data : (data.posts || []);
+    renderBlogList();
+  } catch (e) {
+    blogPosts = [];
+    container.innerHTML = '<div style="padding:20px; color:var(--fg-dim);">No posts found or unable to load.</div>';
+  }
+}
+
+function renderBlogList() {
+  var container = document.getElementById('blogList');
+  if (blogPosts.length === 0) {
+    container.innerHTML = '<div style="padding:20px; color:var(--fg-dim);">No posts yet. Create your first post!</div>';
+    return;
+  }
+  container.innerHTML = '';
+  blogPosts.forEach(function(post) {
+    var div = document.createElement('div');
+    div.className = 'blog-item';
+    div.innerHTML =
+      '<div class="blog-item-info">' +
+        '<h4>' + escapeHTML(post.title || 'Untitled') + '</h4>' +
+        '<span>' + escapeHTML(post.date || '') + ' &middot; ' + escapeHTML(post.slug || '') + '</span>' +
+      '</div>' +
+      '<div class="blog-item-actions">' +
+        '<button class="btn btn-ghost btn-sm" onclick="editBlogPost(\'' + escapeAttr(post.slug) + '\')">Edit</button>' +
+        '<button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="deleteBlogFromList(\'' + escapeAttr(post.slug) + '\', \'' + escapeAttr(post.title) + '\')">&times;</button>' +
+      '</div>';
+    container.appendChild(div);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   BLOG: EDITOR
+   ═══════════════════════════════════════════════════════ */
+function initQuill() {
+  if (quillEditor) return;
+  quillEditor = new Quill('#blogBodyEditor', {
+    theme: 'snow',
+    placeholder: 'Write your post content here...',
+    modules: {
+      toolbar: [
+        [{ 'header': [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote', 'code-block'],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        ['link', 'image'],
+        ['clean']
+      ]
+    }
+  });
+}
+
+// Editor language tabs
+document.querySelectorAll('.lang-tab[data-editor-lang]').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.lang-tab[data-editor-lang]').forEach(function(t) { t.classList.remove('active'); });
+    tab.classList.add('active');
+    currentEditorLang = tab.getAttribute('data-editor-lang');
+  });
+});
+
+function showBlogEditor(slug) {
+  document.getElementById('blogListView').style.display = 'none';
+  document.getElementById('blogEditorView').style.display = '';
+  initQuill();
+  editingSlug = slug;
+
+  if (slug) {
+    document.getElementById('blogEditorTitle').textContent = 'Edit Post';
+    document.getElementById('deleteBlogBtn').style.display = '';
+    loadBlogPost(slug);
+  } else {
+    document.getElementById('blogEditorTitle').textContent = 'New Post';
+    document.getElementById('deleteBlogBtn').style.display = 'none';
+    document.getElementById('blogTitle').value = '';
+    document.getElementById('blogSlug').value = '';
+    document.getElementById('blogDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('blogCover').value = '';
+    document.getElementById('blogExcerpt').value = '';
+    document.getElementById('blogTags').value = '';
+    quillEditor.root.innerHTML = '';
+    // Set editor lang tabs to match blog list lang
+    currentEditorLang = currentBlogLang;
+    document.querySelectorAll('.lang-tab[data-editor-lang]').forEach(function(t) {
+      t.classList.toggle('active', t.getAttribute('data-editor-lang') === currentEditorLang);
+    });
+  }
+}
+
+function showBlogList() {
+  document.getElementById('blogListView').style.display = '';
+  document.getElementById('blogEditorView').style.display = 'none';
+  editingSlug = null;
+  loadBlogList();
+}
+
+async function loadBlogPost(slug) {
+  try {
+    var data = await apiGet('content/blog/' + currentBlogLang + '/' + slug + '.json');
+    document.getElementById('blogTitle').value = data.title || '';
+    document.getElementById('blogSlug').value = data.slug || slug;
+    document.getElementById('blogDate').value = data.date || '';
+    document.getElementById('blogCover').value = data.coverImage || '';
+    document.getElementById('blogExcerpt').value = data.excerpt || '';
+    document.getElementById('blogTags').value = (data.tags || []).join(', ');
+    quillEditor.root.innerHTML = data.body || '';
+    currentEditorLang = currentBlogLang;
+    document.querySelectorAll('.lang-tab[data-editor-lang]').forEach(function(t) {
+      t.classList.toggle('active', t.getAttribute('data-editor-lang') === currentEditorLang);
+    });
+  } catch (e) {
+    toast('Failed to load post: ' + e.message, 'error');
+  }
+}
+
+function editBlogPost(slug) {
+  showBlogEditor(slug);
+}
+
+function autoSlug() {
+  var title = document.getElementById('blogTitle').value;
+  var slug = title.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  document.getElementById('blogSlug').value = slug;
+}
+
+async function saveBlogPost() {
+  var slug = document.getElementById('blogSlug').value.trim();
+  if (!slug) {
+    toast('Slug is required.', 'error');
+    return;
+  }
+  var title = document.getElementById('blogTitle').value.trim();
+  if (!title) {
+    toast('Title is required.', 'error');
+    return;
+  }
+
+  var postData = {
+    slug: slug,
+    title: title,
+    date: document.getElementById('blogDate').value,
+    excerpt: document.getElementById('blogExcerpt').value,
+    tags: document.getElementById('blogTags').value.split(',').map(function(t) { return t.trim(); }).filter(function(t) { return t; }),
+    coverImage: document.getElementById('blogCover').value,
+    body: quillEditor.root.innerHTML
+  };
+
+  var file = 'content/blog/' + currentEditorLang + '/' + slug + '.json';
+
+  try {
+    await apiSave(file, postData);
+    toast('Blog post saved!', 'success');
+    editingSlug = slug;
+    document.getElementById('deleteBlogBtn').style.display = '';
+    document.getElementById('blogEditorTitle').textContent = 'Edit Post';
+  } catch (e) {
+    toast('Save failed: ' + e.message, 'error');
+  }
+}
+
+function deleteBlogPost() {
+  var slug = editingSlug || document.getElementById('blogSlug').value.trim();
+  if (!slug) return;
+  showConfirm('Delete this blog post permanently?', async function() {
+    try {
+      await apiDelete('content/blog/' + currentEditorLang + '/' + slug + '.json');
+      toast('Post deleted.', 'success');
+      showBlogList();
+    } catch (e) {
+      toast('Delete failed: ' + e.message, 'error');
+    }
+  });
+}
+
+function deleteBlogFromList(slug, title) {
+  showConfirm('Delete "' + title + '"?', async function() {
+    try {
+      await apiDelete('content/blog/' + currentBlogLang + '/' + slug + '.json');
+      toast('Post deleted.', 'success');
+      loadBlogList();
+    } catch (e) {
+      toast('Delete failed: ' + e.message, 'error');
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   SETTINGS
+   ═══════════════════════════════════════════════════════ */
+async function loadSettings() {
+  try {
+    var data = await apiGet('content/en.json');
+    document.getElementById('settingSiteTitle').value = (data.meta && data.meta.title) || '';
+    document.getElementById('settingSiteDesc').value = (data.meta && data.meta.description) || '';
+    document.getElementById('settingAuthor').value = (data.intro && data.intro.name) || '';
+    document.getElementById('settingEmail').value = '';
+
+    // Extract social links from connect section
+    var links = (data.connect && data.connect.links) || [];
+    links.forEach(function(link) {
+      var label = (link.label || '').toLowerCase();
+      if (label.indexOf('linkedin') !== -1) document.getElementById('settingLinkedin').value = link.url || '';
+      if (label.indexOf('github') !== -1) document.getElementById('settingGithub').value = link.url || '';
+      if (label.indexOf('twitter') !== -1 || label.indexOf('x') !== -1) document.getElementById('settingTwitter').value = link.url || '';
+      if (label.indexOf('email') !== -1) {
+        document.getElementById('settingEmailUrl').value = link.url || '';
+        document.getElementById('settingEmail').value = (link.url || '').replace('mailto:', '');
+      }
+    });
+  } catch (e) {
+    toast('Failed to load settings: ' + e.message, 'error');
+  }
+}
+
+async function saveSettings() {
+  try {
+    // Load both language files and update meta + connect links
+    var enData = await apiGet('content/en.json');
+    var frData = null;
+    try { frData = await apiGet('content/fr.json'); } catch (e) { /* fr may not exist */ }
+
+    // Update EN
+    if (!enData.meta) enData.meta = {};
+    enData.meta.title = document.getElementById('settingSiteTitle').value;
+    enData.meta.description = document.getElementById('settingSiteDesc').value;
+    if (enData.intro) enData.intro.name = document.getElementById('settingAuthor').value;
+
+    // Update connect links
+    if (enData.connect && enData.connect.links) {
+      enData.connect.links.forEach(function(link) {
+        var label = (link.label || '').toLowerCase();
+        if (label.indexOf('linkedin') !== -1) link.url = document.getElementById('settingLinkedin').value;
+        if (label.indexOf('github') !== -1) link.url = document.getElementById('settingGithub').value;
+        if (label.indexOf('twitter') !== -1 || label.indexOf('x') !== -1) link.url = document.getElementById('settingTwitter').value;
+        if (label.indexOf('email') !== -1) link.url = document.getElementById('settingEmailUrl').value;
+      });
+    }
+
+    await apiSave('content/en.json', enData);
+
+    // Update FR if it exists
+    if (frData) {
+      if (frData.connect && frData.connect.links) {
+        frData.connect.links.forEach(function(link) {
+          var label = (link.label || '').toLowerCase();
+          if (label.indexOf('linkedin') !== -1) link.url = document.getElementById('settingLinkedin').value;
+          if (label.indexOf('github') !== -1) link.url = document.getElementById('settingGithub').value;
+          if (label.indexOf('twitter') !== -1 || label.indexOf('x') !== -1) link.url = document.getElementById('settingTwitter').value;
+          if (label.indexOf('email') !== -1) link.url = document.getElementById('settingEmailUrl').value;
+        });
+      }
+      await apiSave('content/fr.json', frData);
+    }
+
+    toast('Settings saved!', 'success');
+  } catch (e) {
+    toast('Save failed: ' + e.message, 'error');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   HTML ESCAPE UTILITIES
+   ═══════════════════════════════════════════════════════ */
+function escapeHTML(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function escapeAttr(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+</script>
+</body>
+</html>

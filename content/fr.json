@@ -1,0 +1,151 @@
+{
+  "meta": {
+    "title": "Calil Drissi — Développeur Web",
+    "description": "Développeur web créant des expériences digitales performantes. Basé au Maroc, prêt pour la collaboration internationale.",
+    "lang": "fr"
+  },
+  "intro": {
+    "header": "Intro",
+    "name": "Calil Drissi",
+    "title": "Développeur Web",
+    "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
+    "avatarLargeUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&crop=face",
+    "hoverPill": "Cliquez pour découvrir",
+    "location": "Maroc. GMT+1.",
+    "tagline": "Disponible pour des collaborations internationales.",
+    "whatIDo": "Ce que je fais",
+    "whatIDoDesc": "Je conçois et développe des produits web.",
+    "stats": [
+      { "value": "15+", "label": "Projets livrés." },
+      { "value": "4+", "label": "Ans d'expérience." },
+      { "value": "100%", "label": "Satisfaction client." }
+    ]
+  },
+  "position": {
+    "header": "Poste",
+    "studio": "Freelance (Indépendant)",
+    "focus": "Full-Stack & Focus Frontend",
+    "stackLabel": "Stack",
+    "stack": ["React /Next.js /TypeScript", "Node.js /Python /PostgreSQL", "Tailwind /GSAP /Three.js"],
+    "previousLabel": "Précédent",
+    "previous": ["Projets en agence", "Contrats startup", "Open Source"]
+  },
+  "recognition": {
+    "header": "Reconnaissance",
+    "tags": ["Awwwards", "CSSDA", "GSAP", "ProductHunt"],
+    "awards": [
+      "03x Site du jour",
+      "05x Prix développeur",
+      "02x Excellence mobile",
+      "12x Mentions spéciales",
+      "01x Prix innovation"
+    ],
+    "featuresLabel": "Publications",
+    "features": [
+      "CSS-Tricks /Smashing Mag",
+      "Dev.to /Hashnode /HackerNews",
+      "GSAP Showcase /CodePen"
+    ]
+  },
+  "brands": {
+    "header": "Clients",
+    "list": [
+      "Startup Fintech (Série A)",
+      "Plateforme E-Commerce",
+      "SaaS Analytics",
+      "Startup Santé",
+      "Agence Digitale (Paris)",
+      "Plateforme Immobilière",
+      "Entreprise EdTech",
+      "Projet Crypto/Web3",
+      "Tourisme & Hôtellerie",
+      "Startup IA/ML",
+      "Société Média",
+      "ONG / Association"
+    ]
+  },
+  "connect": {
+    "header": "Contact",
+    "links": [
+      { "label": "LinkedIn", "url": "#" },
+      { "label": "Email", "url": "mailto:hello@calildrissi.dev" },
+      { "label": "GitHub", "url": "#" },
+      { "label": "Twitter / X", "url": "#" }
+    ],
+    "availStatus": "Disponible maintenant",
+    "availCta": "Réserver un appel découverte de 30 min",
+    "buttons": [
+      { "label": "Planifier un appel ↗", "url": "#" },
+      { "label": "Estimation de coût ↗", "url": "#" }
+    ]
+  },
+  "statement": {
+    "text": "Un développeur web expérimenté axé sur {rotate} et le <em>savoir-faire</em>. Un partenaire fiable pour les startups, agences et marques qui construisent le <em>web&nbsp;moderne</em><span class=\"superscript\">15</span>.",
+    "rotateWords": ["la performance", "la scalabilité", "la précision", "l'élégance", "l'innovation", "la qualité"]
+  },
+  "ribbon": ["Disponible", "React", "Next.js", "TypeScript", "Node.js", "Python", "GSAP", "Maroc GMT+1", "hello@calildrissi.dev"],
+  "projects": [
+    { "title": "Application Dashboard", "subtitle": "Startup Fintech — Application Web", "desc": "Un tableau de bord financier en temps réel avec des graphiques interactifs, suivi de portefeuille et reporting automatisé. Construit avec Next.js et D3.js pour une visualisation haute performance.", "tags": ["Next.js", "TypeScript", "D3.js", "PostgreSQL", "WebSocket"], "year": "2025", "role": "Développeur Principal", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=360&h=240&fit=crop" },
+    { "title": "Plateforme Analytics", "subtitle": "Entreprise SaaS — Produit Complet", "desc": "Plateforme d'analyse traitant des millions d'événements quotidiens. Constructeur de requêtes, tableaux de bord en temps réel et génération automatique d'insights.", "tags": ["React", "Python", "FastAPI", "ClickHouse", "Redis"], "year": "2024", "role": "Développeur Full-Stack", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=360&h=240&fit=crop" },
+    { "title": "E-Commerce", "subtitle": "Marque Retail — Boutique & CMS", "desc": "Plateforme e-commerce haute conversion avec CMS headless, filtrage dynamique de produits et tunnel de paiement personnalisé. Optimisé pour les Core Web Vitals avec un score Lighthouse de 98+.", "tags": ["Next.js", "Shopify API", "Tailwind", "Sanity", "Stripe"], "year": "2024", "role": "Lead Frontend", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=360&h=240&fit=crop" },
+    { "title": "Plateforme Sociale", "subtitle": "Startup — MVP au Lancement", "desc": "Plateforme sociale communautaire avec messagerie temps réel, flux de contenu et modération. Passage de MVP à 10K utilisateurs actifs en 3 mois.", "tags": ["React", "Node.js", "Socket.io", "MongoDB", "AWS"], "year": "2024", "role": "Co-fondateur Technique", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=360&h=240&fit=crop" },
+    { "title": "Produit IA", "subtitle": "Startup IA/ML — Design & Développement", "desc": "Interface IA conversationnelle avec réponses en streaming, gestion du contexte et entrées multimodales pour les workflows d'entreprise.", "tags": ["Next.js", "Python", "LangChain", "OpenAI", "Vercel AI SDK"], "year": "2025", "role": "Développeur Full-Stack", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=360&h=240&fit=crop" },
+    { "title": "Plateforme Cloud", "subtitle": "Outil DevOps — Infrastructure", "desc": "Tableau de bord de gestion d'infrastructure cloud avec déploiements automatisés, monitoring et optimisation des coûts.", "tags": ["React", "Go", "Terraform", "Docker", "Kubernetes"], "year": "2023", "role": "Développeur Backend", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=360&h=240&fit=crop" },
+    { "title": "Outils Dev", "subtitle": "Open Source — Expérience Développeur", "desc": "Suite d'outils CLI et extensions VS Code pour accélérer les workflows de développement.", "tags": ["TypeScript", "Node.js", "VS Code API", "CLI", "NPM"], "year": "2023", "role": "Créateur & Mainteneur", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=360&h=240&fit=crop" },
+    { "title": "Application Mobile", "subtitle": "Santé Tech — Multi-plateforme", "desc": "Application mobile de suivi santé avec synchronisation biométrique temps réel, insights personnalisés et intégration télémédecine.", "tags": ["React Native", "TypeScript", "Firebase", "HealthKit", "GraphQL"], "year": "2023", "role": "Développeur Mobile", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=360&h=240&fit=crop" },
+    { "title": "Plateforme Équipe", "subtitle": "Entreprise — Suite Collaboration", "desc": "Outil de collaboration interne avec gestion de projets, partage de documents et tableau blanc temps réel.", "tags": ["Next.js", "Prisma", "PostgreSQL", "tRPC", "Auth0"], "year": "2022", "role": "Développeur Principal", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=360&h=240&fit=crop" },
+    { "title": "Data Viz", "subtitle": "Société Média — Histoires Interactives", "desc": "Plateforme de visualisation de données interactive pour le storytelling éditorial avec graphiques animés, cartes et effets WebGL.", "tags": ["D3.js", "Three.js", "GSAP", "Mapbox", "Canvas API"], "year": "2022", "role": "Développeur Créatif", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=360&h=240&fit=crop" },
+    { "title": "Landing Pages", "subtitle": "Agence — Axé Conversion", "desc": "Landing pages haute performance avec animations GSAP au scroll, atteignant +40% de taux de conversion.", "tags": ["HTML", "CSS", "GSAP", "JavaScript", "Figma"], "year": "2022", "role": "Développeur Frontend", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1536104968055-4d61aa56f46a?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1536104968055-4d61aa56f46a?w=360&h=240&fit=crop" },
+    { "title": "Open Source", "subtitle": "Communauté — Bibliothèques & Outils", "desc": "Bibliothèques open-source maintenues dont un toolkit d'animation React et un boilerplate API Node.js. 2K+ étoiles GitHub.", "tags": ["TypeScript", "React", "Node.js", "GitHub Actions", "NPM"], "year": "2021–Présent", "role": "Créateur & Mainteneur", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop" }
+  ],
+  "awards": [
+    { "label": "SOTD — Awwwards", "img": "https://images.unsplash.com/photo-1559028012-481c04fa702d?w=360&h=240&fit=crop" },
+    { "label": "SOTD — CSSDA", "img": "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=360&h=240&fit=crop" },
+    { "label": "Prix Développeur", "img": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=360&h=240&fit=crop" },
+    { "label": "Excellence Mobile", "img": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=360&h=240&fit=crop" },
+    { "label": "Prix Innovation", "img": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=360&h=240&fit=crop" },
+    { "label": "Mentions Spéciales", "img": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=360&h=240&fit=crop" },
+    { "label": "GSAP Showcase", "img": "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=360&h=240&fit=crop" },
+    { "label": "Honors — Awwwards", "img": "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=360&h=240&fit=crop" },
+    { "label": "ProductHunt #3", "img": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=360&h=240&fit=crop" },
+    { "label": "CodePen Featured", "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop" }
+  ],
+  "about": {
+    "titlebarText": "calil drissi — à propos",
+    "emailBtn": { "label": "Email ↗", "url": "mailto:hello@calildrissi.dev" },
+    "resumeBtn": { "label": "CV ↗", "url": "#" },
+    "tabs": { "bio": "À propos", "chat": "Chat avec l'assistant IA" },
+    "name": "Calil Drissi",
+    "role": "Développeur Web · Maroc",
+    "bio": [
+      "Je suis un développeur web basé au Maroc avec plus de 4 ans d'expérience dans la création de produits web pour des startups, agences et marques du monde entier. Je me spécialise dans la création d'expériences digitales performantes et visuellement raffinées.",
+      "Mon travail couvre l'ensemble de la stack — des frontends pixel-perfect avec React et Next.js aux systèmes backend robustes avec Node.js et Python. Je suis passionné par l'animation, le design d'interaction et repousser les limites du possible sur le web.",
+      "Quand je ne code pas, vous me trouverez en train d'explorer de nouveaux outils, de contribuer à l'open source ou de mentorer des développeurs en herbe dans la communauté tech marocaine."
+    ],
+    "details": [
+      { "label": "Localisation", "value": "Maroc · GMT+1<br>Disponible pour le travail à distance dans le monde entier" },
+      { "label": "Langues", "value": "Arabe · Français · Anglais<br>Parlé et écrit couramment" },
+      { "label": "Formation", "value": "Informatique<br>Autodidacte + Formation continue" },
+      { "label": "Intérêts", "value": "Creative Coding · IA/ML<br>Open Source · Design Systems" }
+    ]
+  },
+  "chat": {
+    "greeting": "Salut ! 👋 Je suis l'assistant IA de Calil. Posez-moi vos questions sur son travail, son expérience, sa stack technique ou sa disponibilité. Je suis là pour vous aider !",
+    "senderName": "Assistant IA de Calil",
+    "responses": {
+      "stack": "Calil travaille principalement avec React, Next.js et TypeScript côté frontend, associés à Node.js, Python et PostgreSQL côté backend. Il maîtrise également Tailwind CSS, GSAP, Three.js et diverses plateformes cloud.",
+      "experience": "Calil a plus de 4 ans d'expérience professionnelle, ayant livré plus de 15 projets pour des startups, agences et marques. Il a travaillé dans la fintech, le e-commerce, la santé et le SaaS.",
+      "available": "Oui ! Calil est actuellement disponible pour de nouveaux projets. Il travaille à distance depuis le Maroc (GMT+1) et collabore avec des clients du monde entier. Vous pouvez planifier un appel découverte ou demander une estimation.",
+      "pricing": "Les tarifs de Calil dépendent de la portée et de la complexité du projet. Pour une estimation précise, le mieux est de planifier un appel découverte ou d'envoyer un brief à hello@calildrissi.dev.",
+      "contact": "Vous pouvez contacter Calil par email à hello@calildrissi.dev, ou sur LinkedIn, GitHub ou Twitter. Il répond généralement sous 24 heures.",
+      "default": "Bonne question ! Pour des demandes détaillées, le meilleur moyen d'obtenir une réponse complète est de contacter directement hello@calildrissi.dev ou de planifier un appel. Calil est toujours heureux de discuter de projets potentiels."
+    }
+  },
+  "projectsTab": { "label": "Projets", "count": "15" },
+  "awardsTab": { "label": "Prix", "count": "23" },
+  "scrollIndicator": "Défiler",
+  "nav": {
+    "blog": "Blog",
+    "langToggle": { "label": "EN", "url": "/" }
+  }
+}
