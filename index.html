@@ -1884,8 +1884,9 @@
 
     close(win) {
       win.el.classList.remove('open', 'focused');
+      win.closed = true;
       if (win.persistent) {
-        // Pre-existing windows (about popup) — just hide, don't remove
+        win.closed = false;
         win.minimized = false;
         win.maximized = false;
         win.el.classList.remove('maximized');
@@ -2016,6 +2017,14 @@
     },
 
     createProjectWindow(project, index) {
+      // Check if window for this project is already open
+      const existing = this.windows.find(w => w.title === project.title && !w.closed);
+      if (existing) {
+        if (existing.minimized) { this.restore(existing); }
+        else { this.focus(existing); }
+        return existing;
+      }
+
       const offset = this.spawnOffset * 30;
       this.spawnOffset = (this.spawnOffset + 1) % 8;
       const x = Math.min(window.innerWidth - 500, 80 + offset);

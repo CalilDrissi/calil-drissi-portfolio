@@ -137,6 +137,127 @@ git add . && git commit -m "Update content" && git push</code></pre>
   <tr><td><code>body</code></td><td>string</td><td>HTML content of the post</td></tr>
 </table>
 
+<h2>9. WordPress Local Setup (Alternative Blog Workflow)</h2>
+<p>You can use a local WordPress instance as a writing environment, then export posts as static JSON for the build.</p>
+
+<h3>9.1 Prerequisites</h3>
+<ul>
+  <li><a href="https://docs.docker.com/get-docker/">Docker Desktop</a> installed and running</li>
+  <li>Node.js 18+ (for native <code>fetch</code>)</li>
+</ul>
+
+<h3>9.2 Create docker-compose.yml</h3>
+<p>Create this file at the project root (<code>/v2/docker-compose.yml</code>):</p>
+
+<pre><code>version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    volumes:
+      - wp_db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: wppass
+
+  wordpress:
+    image: wordpress:latest
+    depends_on:
+      - db
+    ports:
+      - "8080:80"
+    volumes:
+      - wp_data:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: wppass
+      WORDPRESS_DB_NAME: wordpress
+
+volumes:
+  wp_db_data:
+  wp_data:</code></pre>
+
+<h3>9.3 Start WordPress</h3>
+<pre><code>docker compose up -d</code></pre>
+<p>Visit <code>http://localhost:8080</code> to complete the WordPress setup wizard. Choose English as the language.</p>
+
+<h3>9.4 Install Polylang (Multilingual)</h3>
+<ol>
+  <li>Go to <code>http://localhost:8080/wp-admin</code></li>
+  <li><strong>Plugins</strong> → <strong>Add New</strong> → Search "Polylang" → <strong>Install</strong> → <strong>Activate</strong></li>
+  <li><strong>Languages</strong> → Add <strong>English</strong> (en) and <strong>French</strong> (fr)</li>
+  <li>Set English as the default language</li>
+</ol>
+<div class="note">With Polylang active, the REST API supports <code>?lang=en</code> and <code>?lang=fr</code> to filter posts by language.</div>
+
+<h3>9.5 Writing Blog Posts</h3>
+<ol>
+  <li>Go to <strong>Posts</strong> → <strong>Add New</strong></li>
+  <li>Write your post with title, content, tags, and a featured image</li>
+  <li>Set the language to <strong>English</strong> in the Polylang box</li>
+  <li>Click <strong>Publish</strong></li>
+  <li>To add a French translation, click the <strong>+</strong> next to the FR flag in the Polylang box — this creates a linked translation</li>
+</ol>
+
+<h3>9.6 Export Posts to Static JSON</h3>
+<p>Run the sync script to fetch posts from WordPress and save them as JSON files:</p>
+
+<pre><code># Fetch all posts from local WordPress and write to content/blog/
+node sync-wp.js
+
+# This creates/updates:
+#   content/blog/en/{slug}.json
+#   content/blog/fr/{slug}.json</code></pre>
+
+<p>The sync script calls the WordPress REST API:</p>
+<pre><code>GET http://localhost:8080/wp-json/wp/v2/posts?lang=en&per_page=100&_embed
+GET http://localhost:8080/wp-json/wp/v2/posts?lang=fr&per_page=100&_embed</code></pre>
+
+<p>Each post is converted to the standard JSON format:</p>
+<pre><code>{
+  "slug": "my-post-title",
+  "title": "My Post Title",
+  "date": "2026-03-15",
+  "excerpt": "A short description...",
+  "tags": ["React", "Performance"],
+  "coverImage": "/blog/images/my-cover.jpg",
+  "body": "&lt;p&gt;Your HTML content...&lt;/p&gt;"
+}</code></pre>
+
+<div class="note"><strong>Images:</strong> The sync script downloads images from WordPress (<code>wp-content/uploads/</code>) into <code>dist/blog/images/</code> and rewrites URLs so they work in production. You can also use external image URLs (Unsplash, Cloudinary) directly in WordPress to skip this step.</div>
+
+<h3>9.7 Build and Deploy</h3>
+<pre><code># Build the static site (reads the JSON files as usual)
+node build.js
+
+# Preview locally
+npx http-server dist -p 3000
+
+# Commit the synced posts and deploy
+git add content/blog/
+git commit -m "Sync blog posts from WordPress"
+git push    # Netlify auto-builds</code></pre>
+
+<h3>9.8 Full Workflow Summary</h3>
+<div class="flow">
+  docker compose up -d <span>→</span> Start local WordPress<br>
+  Write posts at localhost:8080/wp-admin <span>→</span> Use Polylang for EN/FR<br>
+  node sync-wp.js <span>→</span> Fetch from WP API → save JSON files<br>
+  node build.js <span>→</span> Generate static HTML from JSON<br>
+  git push <span>→</span> Netlify deploys automatically
+</div>
+
+<h3>9.9 Stopping WordPress</h3>
+<pre><code># Stop containers (data persists)
+docker compose stop
+
+# Remove containers and volumes (deletes all data)
+docker compose down -v</code></pre>
+
+<div class="note"><strong>Netlify builds:</strong> WordPress does not need to be running for Netlify deploys. The build reads from the committed JSON files in <code>content/blog/</code>. Only run WordPress locally when writing new posts.</div>
+
 <hr>
 <p style="color:#999; font-size:11px; text-align:center;">Generated March 2026 — calildrissi.dev CMS</p>
 
