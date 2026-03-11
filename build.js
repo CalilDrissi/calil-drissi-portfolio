@@ -379,6 +379,8 @@ function blogListingHTML(data, posts, lang) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Blog — ${data.intro.name}</title>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="canonical" href="https://khalildrissi.com${prefix}/blog/" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1275,6 +1277,8 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${seo.title || post.title} — ${data.intro.name}</title>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <meta name="description" content="${seo.description || post.excerpt}" />
   ${seo.ogImage ? `<meta property="og:image" content="${seo.ogImage}" />` : ''}
   <meta property="og:title" content="${seo.title || post.title}" />
