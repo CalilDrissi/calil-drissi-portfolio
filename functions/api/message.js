@@ -95,31 +95,26 @@ async function uploadToGoogleDrive(accessToken, folderId, fileName, fileData, mi
     description: description,
   };
 
+  // Build multipart/related body with raw binary (not base64)
   const boundary = 'msg_boundary_' + Date.now();
-  const metadataPart = JSON.stringify(metadata);
+  const encoder = new TextEncoder();
 
-  const prefix = [
-    `--${boundary}`,
-    'Content-Type: application/json; charset=UTF-8',
-    '',
-    metadataPart,
-    `--${boundary}`,
-    `Content-Type: ${mimeType}`,
-    'Content-Transfer-Encoding: base64',
-    '',
-    '',
-  ].join('\r\n');
-
-  const suffix = `\r\n--${boundary}--`;
-
+  const metadataPart = encoder.encode(
+    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`
+  );
+  const fileHeader = encoder.encode(
+    `--${boundary}\r\nContent-Type: ${mimeType}\r\n\r\n`
+  );
+  const fileSuffix = encoder.encode(`\r\n--${boundary}--`);
   const fileBytes = new Uint8Array(fileData);
-  let binary = '';
-  for (let i = 0; i < fileBytes.length; i++) {
-    binary += String.fromCharCode(fileBytes[i]);
-  }
-  const fileBase64 = btoa(binary);
 
-  const body = prefix + fileBase64 + suffix;
+  // Concatenate all parts into a single Uint8Array
+  const body = new Uint8Array(metadataPart.length + fileHeader.length + fileBytes.length + fileSuffix.length);
+  let offset = 0;
+  body.set(metadataPart, offset); offset += metadataPart.length;
+  body.set(fileHeader, offset); offset += fileHeader.length;
+  body.set(fileBytes, offset); offset += fileBytes.length;
+  body.set(fileSuffix, offset);
 
   const res = await fetch(
     'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',
@@ -275,7 +270,7 @@ export async function onRequestPost(context) {
           driveLinks.push(result.link);
         } catch (err) {
           console.error('Drive upload error for', f.label, ':', err.message);
-          uploadErrors.push(f.label);
+          uploadErrors.push(f.label + ': ' + err.message);
         }
       }
     } catch (err) {
