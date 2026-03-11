@@ -887,8 +887,8 @@ function blogListingHTML(data, posts, lang) {
   const hoverExcerpt = document.getElementById('hoverExcerpt');
   const hoverTags = document.getElementById('hoverTags');
 
-  function showHoverCard(node, mx, my) {
-    const p = POSTS[node.postIndex];
+  function populateHoverCard(postIndex) {
+    const p = POSTS[postIndex];
     if (p.coverImage) { hoverImg.src = p.coverImage; hoverImg.style.display = 'block'; }
     else { hoverImg.style.display = 'none'; }
     hoverTitle.textContent = p.title;
@@ -897,9 +897,27 @@ function blogListingHTML(data, posts, lang) {
     const exc = p.excerpt.length > 120 ? p.excerpt.slice(0, 117) + '...' : p.excerpt;
     hoverExcerpt.textContent = exc;
     hoverTags.innerHTML = p.tags.map(t => '<span>' + t + '</span>').join('');
+  }
 
+  function showHoverCard(node, mx, my) {
+    populateHoverCard(node.postIndex);
     let left = mx + 16, top = my - 20;
     if (left + 310 > window.innerWidth) left = mx - 320;
+    if (top + 250 > window.innerHeight) top = window.innerHeight - 260;
+    if (top < 10) top = 10;
+    hoverCard.style.left = left + 'px';
+    hoverCard.style.top = top + 'px';
+    hoverCard.classList.add('visible');
+  }
+
+  function showHoverCardForSidebar(postIndex, itemEl) {
+    populateHoverCard(postIndex);
+    // Position over the graph panel area
+    const graphRect = canvas.getBoundingClientRect();
+    const itemRect = itemEl.getBoundingClientRect();
+    let left = graphRect.right - 320;
+    let top = itemRect.top;
+    if (left < graphRect.left + 10) left = graphRect.left + 10;
     if (top + 250 > window.innerHeight) top = window.innerHeight - 260;
     if (top < 10) top = 10;
     hoverCard.style.left = left + 'px';
@@ -1163,10 +1181,12 @@ function blogListingHTML(data, posts, lang) {
       item.addEventListener('mouseenter', () => {
         sidebarHoverIndex = i;
         focusedIndex = i;
+        showHoverCardForSidebar(i, item);
       });
       item.addEventListener('mouseleave', () => {
         sidebarHoverIndex = -1;
         focusedIndex = -1;
+        hideHoverCard();
       });
       postListEl.appendChild(item);
     }
