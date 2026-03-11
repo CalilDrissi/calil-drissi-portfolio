@@ -72,7 +72,7 @@
     "text": "An experienced software developer with a focus on {rotate} and <em>craft</em>. A reliable partner for startups, agencies, and brands building <em>across&nbsp;platforms</em><span class=\"superscript\">15</span>.",
     "rotateWords": ["performance", "scalability", "precision", "elegance", "innovation", "quality"]
   },
-  "ribbon": ["Available for Work", "React", "Next.js", "TypeScript", "Node.js", "Python", "GSAP", "khalil@drissi.org"],
+  "ribbon": ["Khalil Drissi", "Available for Collaboration", "khalil@drissi.org", "khalildrissi.com"],
   "projects": [
     { "title": "Dashboard App", "subtitle": "Fintech Startup — Web Application", "desc": "A real-time financial dashboard with interactive charts, portfolio tracking, and automated reporting. Built with Next.js and D3.js for high-performance data visualization across multiple asset classes.", "tags": ["Next.js", "TypeScript", "D3.js", "PostgreSQL", "WebSocket"], "year": "2025", "role": "Lead Developer", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=360&h=240&fit=crop" },
     { "title": "Analytics Platform", "subtitle": "SaaS Company — Full Product", "desc": "End-to-end analytics platform processing millions of events daily. Custom query builder, real-time dashboards, and automated insight generation.", "tags": ["React", "Python", "FastAPI", "ClickHouse", "Redis"], "year": "2024", "role": "Full-Stack Developer", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=360&h=240&fit=crop" },
