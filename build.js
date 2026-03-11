@@ -392,8 +392,8 @@ function blogListingHTML(data, posts, lang) {
     .blog-header-back svg { width: 14px; height: 14px; opacity: 0.5; }
     .blog-header-sep { width: 1px; height: 16px; background: rgba(255,255,255,0.1); }
     .blog-header h1 {
-      font-family: var(--mono); font-size: 24px; font-weight: 600;
-      text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg);
+      font-family: var(--mono); font-size: 11px; font-weight: 400;
+      text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg);
     }
     .blog-header-count {
       font-size: 10px; color: var(--fg-dim); margin-left: 6px;
