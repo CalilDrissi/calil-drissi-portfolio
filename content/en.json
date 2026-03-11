@@ -192,10 +192,10 @@
     ]
   },
   "ribbon": [
-    "",
     "Open for Collaboration",
-    "",
-    ""
+    "Open for Collaboration",
+    "Open for Collaboration",
+    "Open for Collaboration"
   ],
   "projects": [
     {
@@ -566,7 +566,7 @@
     ]
   },
   "chat": {
-    "greeting": "Hey! ð I'm Khalil's AI assistant. Ask me anything about his work, experience, tech stack, or availability. I'm here to help!",
+    "greeting": "Hey! I'm Khalil's AI assistant. Ask me anything about his work, experience, tech stack, or availability. I'm here to help!",
     "senderName": "Khalil's AI Assistant",
     "responses": {
       "stack": "Khalil works across the full spectrum â React, Next.js, and TypeScript on the frontend; Node.js, Python, and PostgreSQL on the backend; React Native, Flutter, and native iOS/Android for mobile; Electron for desktop; Godot for game dev; Rust/Go/C++ for systems programming; plus AI/ML and blockchain/Web3.",
