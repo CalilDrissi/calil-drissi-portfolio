@@ -3206,6 +3206,7 @@
 
   // ---- Custom player builder ----
   function cpFmtTime(s) {
+    if (!s || !isFinite(s) || isNaN(s)) return '00:00';
     const m = Math.floor(s / 60);
     const sec = Math.floor(s % 60);
     return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
@@ -3216,7 +3217,7 @@
   const volSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>';
   const muteSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
 
-  function buildCustomPlayer(src, type) {
+  function buildCustomPlayer(src, type, knownDuration) {
     const container = document.createElement('div');
     container.className = 'custom-player';
 
@@ -3267,14 +3268,22 @@
     const el = type === 'video' ? container._vid : media;
     container._media = el;
 
+    function getDur() {
+      return (isFinite(el.duration) && el.duration > 0) ? el.duration : (knownDuration || 0);
+    }
+
     el.addEventListener('loadedmetadata', () => {
-      timeEl.textContent = '00:00 / ' + cpFmtTime(el.duration);
+      timeEl.textContent = '00:00 / ' + cpFmtTime(getDur());
     });
 
+    // Set initial display with known duration
+    if (knownDuration) timeEl.textContent = '00:00 / ' + cpFmtTime(knownDuration);
+
     el.addEventListener('timeupdate', () => {
-      const pct = el.duration ? (el.currentTime / el.duration) * 100 : 0;
+      const dur = getDur();
+      const pct = dur ? (el.currentTime / dur) * 100 : 0;
       barFill.style.width = pct + '%';
-      timeEl.textContent = cpFmtTime(el.currentTime) + ' / ' + cpFmtTime(el.duration || 0);
+      timeEl.textContent = cpFmtTime(el.currentTime) + ' / ' + cpFmtTime(dur);
     });
 
     el.addEventListener('ended', () => {
@@ -3294,7 +3303,8 @@
     barWrap.addEventListener('click', (e) => {
       const rect = barWrap.getBoundingClientRect();
       const pct = (e.clientX - rect.left) / rect.width;
-      if (el.duration) el.currentTime = pct * el.duration;
+      const dur = getDur();
+      if (dur) el.currentTime = pct * dur;
     });
 
     let muted = false;
@@ -3378,7 +3388,7 @@
           const wrap = document.createElement('div');
           wrap.className = 'msg-preview-wrap';
           const blobUrl = URL.createObjectURL(blob);
-          const player = buildCustomPlayer(blobUrl, mediaType);
+          const player = buildCustomPlayer(blobUrl, mediaType, seconds);
           wrap.appendChild(player);
           const discard = document.createElement('button');
           discard.className = 'msg-discard-btn';
