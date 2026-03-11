@@ -5,16 +5,24 @@
 const GITHUB_API = 'https://api.github.com';
 
 async function githubRequest(method, path, body, env) {
-  const res = await fetch(`${GITHUB_API}${path}`, {
+  const url = `${GITHUB_API}${path}`;
+  const res = await fetch(url, {
     method,
     headers: {
       'Authorization': `token ${env.GITHUB_TOKEN}`,
       'Accept': 'application/vnd.github.v3+json',
       'Content-Type': 'application/json',
+      'User-Agent': 'khalildrissi-cms',
     },
     body: body ? JSON.stringify(body) : undefined,
   });
-  const data = await res.json();
+  const text = await res.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error(`GitHub returned non-JSON (${res.status}): ${text.substring(0, 200)}`);
+  }
   if (!res.ok) throw new Error(data.message || `GitHub API error: ${res.status}`);
   return data;
 }
@@ -69,7 +77,7 @@ export async function onRequestGet(context) {
 
   try {
     const data = await githubRequest('GET', `/repos/${repo}/contents/${filePath}`, null, env);
-    const content = JSON.parse(atob(data.content));
+    const content = JSON.parse(atob(data.content.replace(/\s/g, '')));
     return jsonResponse({ content, sha: data.sha });
   } catch (e) {
     if (e.message.includes('Not Found')) return jsonResponse({ error: 'File not found' }, 404);
