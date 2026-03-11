@@ -3465,6 +3465,10 @@
       sendBtn._blob = null;
 
       try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          statusEl.textContent = _t('Permission denied or not supported');
+          return;
+        }
         const constraints = mediaType === 'video'
           ? { audio: true, video: { width: 640, height: 480, facingMode: 'user' } }
           : { audio: true };
@@ -3478,10 +3482,23 @@
           liveVideo.play();
         }
 
-        const mimeType = mediaType === 'video'
-          ? (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus') ? 'video/webm;codecs=vp9,opus' : 'video/webm')
-          : (MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm');
-        const recorder = new MediaRecorder(stream, { mimeType });
+        if (typeof MediaRecorder === 'undefined') {
+          stream.getTracks().forEach(t => t.stop());
+          statusEl.textContent = _t('Permission denied or not supported');
+          return;
+        }
+        let mimeType = '';
+        if (mediaType === 'video') {
+          mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus') ? 'video/webm;codecs=vp9,opus'
+            : MediaRecorder.isTypeSupported('video/webm') ? 'video/webm'
+            : MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : '';
+        } else {
+          mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus'
+            : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm'
+            : MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
+        }
+        const recorderOpts = mimeType ? { mimeType } : {};
+        const recorder = new MediaRecorder(stream, recorderOpts);
         recorders[mediaType] = recorder;
         const chunks = [];
         let seconds = 0;
@@ -3503,7 +3520,7 @@
             liveVideo.srcObject = null;
           }
 
-          const blob = new Blob(chunks, { type: mimeType });
+          const blob = new Blob(chunks, { type: recorder.mimeType || mimeType || (mediaType === 'video' ? 'video/webm' : 'audio/webm') });
           sendBtn._blob = blob;
           sendBtn.disabled = false;
           timerEl.textContent = formatTime(seconds) + ' ' + _t('recorded');
@@ -3631,7 +3648,8 @@
       } else if (type === 'audio' || type === 'video') {
         const blob = btn._blob;
         if (!blob) { statusEl.textContent = _t('No recording found'); statusEl.className = 'msg-status error'; return; }
-        fd.append('file', blob, type + '-message.webm');
+        var ext = (blob.type && blob.type.includes('mp4')) ? 'mp4' : 'webm';
+        fd.append('file', blob, type + '-message.' + ext);
         if (msg) fd.append('message', msg);
       }
 

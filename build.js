@@ -1745,7 +1745,22 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
       var speedIdx = 0;
       var startTime = 0, elapsed = 0, totalEstimate = 0;
       var tickInterval = null;
+      var keepAliveInterval = null;
       var textContent = '';
+      var voicesReady = false;
+
+      // Wait for voices to load (Chrome loads them async)
+      function ensureVoices(cb) {
+        var voices = synth.getVoices();
+        if (voices.length > 0) { voicesReady = true; cb(); return; }
+        synth.addEventListener('voiceschanged', function handler() {
+          voicesReady = true;
+          synth.removeEventListener('voiceschanged', handler);
+          cb();
+        });
+        // Fallback: try anyway after 1s even if no voices event
+        setTimeout(function() { if (!voicesReady) { voicesReady = true; cb(); } }, 1000);
+      }
 
       // Extract plain text from article
       var body = document.querySelector('.post-body');
@@ -1778,9 +1793,9 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
         timeEl.textContent = fmt(remaining);
       }
 
-      // Pre-split text into chunks
+      // Pre-split text into chunks (smaller for reliability)
       var chunks = [];
-      var maxLen = 200;
+      var maxLen = 160;
       var words = textContent.split(' ');
       var chunk = '';
       for (var i = 0; i < words.length; i++) {
@@ -1795,10 +1810,26 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
       var currentChunk = 0;
       var speakGeneration = 0;
 
+      // Chrome bug workaround: synth stops after ~15s of continuous speech.
+      // Periodically pause/resume to keep it alive.
+      function startKeepAlive() {
+        stopKeepAlive();
+        keepAliveInterval = setInterval(function() {
+          if (synth.speaking && !synth.paused && playing && !paused) {
+            synth.pause();
+            synth.resume();
+          }
+        }, 10000);
+      }
+      function stopKeepAlive() {
+        if (keepAliveInterval) { clearInterval(keepAliveInterval); keepAliveInterval = null; }
+      }
+
       function speakFrom(idx) {
         synth.cancel();
         currentChunk = idx;
         var gen = ++speakGeneration;
+        startKeepAlive();
         function speakNext() {
           if (gen !== speakGeneration) return;
           if (currentChunk >= chunks.length) {
@@ -1815,7 +1846,7 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
           };
           utterance.onerror = function(e) {
             if (gen !== speakGeneration) return;
-            if (e.error !== 'canceled') stopSpeech();
+            if (e.error !== 'canceled' && e.error !== 'interrupted') stopSpeech();
           };
           synth.speak(utterance);
         }
@@ -1823,18 +1854,21 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
       }
 
       function startSpeech() {
-        totalEstimate = Math.round((wordCount / 150) * 60);
-        playing = true; paused = false;
-        startTime = Date.now();
-        elapsed = 0;
-        icon.innerHTML = pausePath;
-        titleEl.textContent = '${lang === 'fr' ? 'Lecture en cours...' : 'Playing...'}';
-        tickInterval = setInterval(tick, 250);
-        speakFrom(0);
+        ensureVoices(function() {
+          totalEstimate = Math.round((wordCount / 150) * 60);
+          playing = true; paused = false;
+          startTime = Date.now();
+          elapsed = 0;
+          icon.innerHTML = pausePath;
+          titleEl.textContent = '${lang === 'fr' ? 'Lecture en cours...' : 'Playing...'}';
+          tickInterval = setInterval(tick, 250);
+          speakFrom(0);
+        });
       }
 
       function stopSpeech() {
         synth.cancel();
+        stopKeepAlive();
         playing = false; paused = false;
         icon.innerHTML = playPath;
         progress.style.width = '0%';
@@ -1849,12 +1883,14 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
         } else if (!paused) {
           synth.pause();
           paused = true;
+          stopKeepAlive();
           icon.innerHTML = playPath;
           titleEl.textContent = '${lang === 'fr' ? 'En pause' : 'Paused'}';
           if (tickInterval) clearInterval(tickInterval);
         } else {
           synth.resume();
           paused = false;
+          startKeepAlive();
           icon.innerHTML = pausePath;
           titleEl.textContent = '${lang === 'fr' ? 'Lecture en cours...' : 'Playing...'}';
           startTime = Date.now() - (elapsed * 1000);
@@ -1873,7 +1909,7 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
       });
 
       // Cleanup on navigate away
-      window.addEventListener('beforeunload', function() { synth.cancel(); });
+      window.addEventListener('beforeunload', function() { synth.cancel(); stopKeepAlive(); });
     })();
 
     // ---- TOC ----
