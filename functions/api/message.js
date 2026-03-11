@@ -45,7 +45,6 @@ async function createJWT(serviceAccount) {
   const claimB64 = base64urlEncode(strToArrayBuffer(JSON.stringify(claim)));
   const unsignedToken = headerB64 + '.' + claimB64;
 
-  // Import the private key
   const pemContents = serviceAccount.private_key
     .replace(/-----BEGIN PRIVATE KEY-----/, '')
     .replace(/-----END PRIVATE KEY-----/, '')
@@ -90,11 +89,9 @@ async function uploadToGoogleDrive(accessToken, folderId, fileName, fileData, mi
     description: description,
   };
 
-  // Use multipart upload
   const boundary = 'msg_boundary_' + Date.now();
   const metadataPart = JSON.stringify(metadata);
 
-  // Build multipart body
   const prefix = [
     `--${boundary}`,
     'Content-Type: application/json; charset=UTF-8',
@@ -109,7 +106,6 @@ async function uploadToGoogleDrive(accessToken, folderId, fileName, fileData, mi
 
   const suffix = `\r\n--${boundary}--`;
 
-  // Convert file to base64
   const fileBytes = new Uint8Array(fileData);
   let binary = '';
   for (let i = 0; i < fileBytes.length; i++) {
@@ -152,7 +148,7 @@ async function uploadToGoogleDrive(accessToken, folderId, fileName, fileData, mi
   };
 }
 
-async function sendFormSubmitNotification(senderName, senderEmail, messageText, messageType, driveLink) {
+async function sendFormSubmitNotification(senderName, senderEmail, messageText, messageType, driveLinks) {
   const typeLabel = messageType.charAt(0).toUpperCase() + messageType.slice(1);
 
   const payload = {
@@ -163,12 +159,12 @@ async function sendFormSubmitNotification(senderName, senderEmail, messageText, 
     Name: senderName,
     Email: senderEmail,
     Type: typeLabel,
-    Message: messageText || '(no message)',
+    Message: messageText || '(no text message)',
   };
 
-  if (driveLink) {
-    payload.Attachment = driveLink;
-    payload['Note'] = '📎 This submission includes a file. Check your Google Drive to view it.';
+  if (driveLinks.length > 0) {
+    payload['Attachments'] = driveLinks.map((l, i) => `File ${i + 1}: ${l}`).join('\n');
+    payload['Note'] = `This submission includes ${driveLinks.length} file(s). Check your Google Drive or click the links above.`;
   }
 
   const res = await fetch('https://formsubmit.co/ajax/khalil@drissi.org', {
@@ -205,66 +201,94 @@ export async function onRequestPost(context) {
   const email = formData.get('email');
   const type = formData.get('type');
   const message = formData.get('message') || '';
-  const file = formData.get('file');
+  const file = formData.get('file'); // recording blob
+  const attachments = formData.getAll('attachment'); // additional file attachments
 
   if (!name || !email || !type) {
     return jsonResponse({ error: 'Missing required fields (name, email, type)' }, 400);
   }
 
-  // Validate email format
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return jsonResponse({ error: 'Invalid email address' }, 400);
   }
 
-  // Validate type
   if (!['text', 'audio', 'video', 'file'].includes(type)) {
     return jsonResponse({ error: 'Invalid message type' }, 400);
   }
 
-  // Text type requires a message
-  if (type === 'text' && !message) {
+  if (type === 'text' && !message && attachments.length === 0) {
     return jsonResponse({ error: 'Message is required for text type' }, 400);
   }
 
-  // Audio, video, file types require a file
-  if (['audio', 'video', 'file'].includes(type) && !file) {
-    return jsonResponse({ error: 'File is required for this message type' }, 400);
+  if (['audio', 'video'].includes(type) && !file) {
+    return jsonResponse({ error: 'Recording is required for this message type' }, 400);
   }
 
-  // Check file size (25 MB)
-  if (file && file.size > 25 * 1024 * 1024) {
-    return jsonResponse({ error: 'File too large (max 25 MB)' }, 400);
+  // Collect all files to upload (recording + attachments)
+  const filesToUpload = [];
+  if (file) {
+    if (file.size > 25 * 1024 * 1024) {
+      return jsonResponse({ error: 'File too large (max 25 MB)' }, 400);
+    }
+    filesToUpload.push({ blob: file, label: type + '-recording' });
+  }
+  for (const att of attachments) {
+    if (att && att.size) {
+      if (att.size > 25 * 1024 * 1024) continue; // skip oversized
+      filesToUpload.push({ blob: att, label: 'attachment' });
+    }
   }
 
-  let driveLink = null;
+  const driveLinks = [];
+  const uploadErrors = [];
 
-  // Upload file to Google Drive if present
-  if (file && env.GOOGLE_SERVICE_ACCOUNT_JSON && env.GOOGLE_DRIVE_FOLDER_ID) {
+  // Upload all files to Google Drive
+  if (filesToUpload.length > 0 && env.GOOGLE_SERVICE_ACCOUNT_JSON && env.GOOGLE_DRIVE_FOLDER_ID) {
     try {
       const serviceAccount = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT_JSON);
       const accessToken = await getAccessToken(serviceAccount);
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const fileName = `${type}-${name.replace(/[^a-zA-Z0-9]/g, '_')}-${timestamp}-${file.name || 'recording'}`;
-      const description = `From: ${name} <${email}>\nType: ${type}\nDate: ${new Date().toISOString()}\n${message ? 'Message: ' + message : ''}`;
-      const fileData = await file.arrayBuffer();
-      const result = await uploadToGoogleDrive(
-        accessToken,
-        env.GOOGLE_DRIVE_FOLDER_ID,
-        fileName,
-        fileData,
-        file.type || 'application/octet-stream',
-        description
-      );
-      driveLink = result.link;
+
+      for (const f of filesToUpload) {
+        try {
+          const fileName = `${f.label}-${name.replace(/[^a-zA-Z0-9]/g, '_')}-${timestamp}-${f.blob.name || 'file'}`;
+          const description = `From: ${name} <${email}>\nType: ${type}\nDate: ${new Date().toISOString()}\n${message ? 'Message: ' + message : ''}`;
+          const fileData = await f.blob.arrayBuffer();
+          const result = await uploadToGoogleDrive(
+            accessToken,
+            env.GOOGLE_DRIVE_FOLDER_ID,
+            fileName,
+            fileData,
+            f.blob.type || 'application/octet-stream',
+            description
+          );
+          driveLinks.push(result.link);
+        } catch (err) {
+          console.error('Drive upload error for', f.label, ':', err.message);
+          uploadErrors.push(f.label);
+        }
+      }
     } catch (err) {
-      console.error('Google Drive upload error:', err);
-      // Continue without Drive upload — still send email
+      console.error('Google auth error:', err.message);
+      uploadErrors.push('auth-failed');
     }
+  } else if (filesToUpload.length > 0) {
+    // No Google Drive configured — note this in the email
+    uploadErrors.push('drive-not-configured');
   }
 
   // Send notification via FormSubmit
   try {
-    await sendFormSubmitNotification(name, email, message, type, driveLink);
+    // If uploads failed, note it in the message
+    let finalMessage = message;
+    if (uploadErrors.length > 0 && filesToUpload.length > 0) {
+      finalMessage += `\n\n[Note: ${filesToUpload.length} file(s) could not be uploaded to Google Drive. Error: ${uploadErrors.join(', ')}]`;
+    }
+    if (filesToUpload.length > 0 && driveLinks.length === 0) {
+      finalMessage += `\n\n[${type} recording/files were attached but could not be saved. Please follow up with the sender.]`;
+    }
+
+    await sendFormSubmitNotification(name, email, finalMessage.trim(), type, driveLinks);
   } catch (err) {
     console.error('FormSubmit notification error:', err);
     return jsonResponse({ success: false, error: 'Failed to deliver message. Please email khalil@drissi.org directly.' }, 500);
