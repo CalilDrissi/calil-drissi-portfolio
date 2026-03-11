@@ -45,7 +45,13 @@ async function createJWT(serviceAccount) {
   const claimB64 = base64urlEncode(strToArrayBuffer(JSON.stringify(claim)));
   const unsignedToken = headerB64 + '.' + claimB64;
 
-  const pemContents = serviceAccount.private_key
+  // Handle escaped newlines from env vars (Cloudflare stores literal \n)
+  let privateKey = serviceAccount.private_key;
+  if (privateKey && !privateKey.includes('\n') && privateKey.includes('\\n')) {
+    privateKey = privateKey.replace(/\\n/g, '\n');
+  }
+
+  const pemContents = privateKey
     .replace(/-----BEGIN PRIVATE KEY-----/, '')
     .replace(/-----END PRIVATE KEY-----/, '')
     .replace(/\s/g, '');
@@ -245,7 +251,11 @@ export async function onRequestPost(context) {
   // Upload all files to Google Drive
   if (filesToUpload.length > 0 && env.GOOGLE_SERVICE_ACCOUNT_JSON && env.GOOGLE_DRIVE_FOLDER_ID) {
     try {
-      const serviceAccount = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT_JSON);
+      // Handle potential escaped characters in the secret value
+      let saJson = env.GOOGLE_SERVICE_ACCOUNT_JSON;
+      // If it starts with a single quote or has escaped quotes, clean up
+      saJson = saJson.trim().replace(/^'|'$/g, '');
+      const serviceAccount = JSON.parse(saJson);
       const accessToken = await getAccessToken(serviceAccount);
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
 
@@ -270,7 +280,7 @@ export async function onRequestPost(context) {
       }
     } catch (err) {
       console.error('Google auth error:', err.message);
-      uploadErrors.push('auth-failed');
+      uploadErrors.push('auth: ' + err.message);
     }
   } else if (filesToUpload.length > 0) {
     // No Google Drive configured — note this in the email
@@ -294,5 +304,8 @@ export async function onRequestPost(context) {
     return jsonResponse({ success: false, error: 'Failed to deliver message. Please email khalil@drissi.org directly.' }, 500);
   }
 
-  return jsonResponse({ success: true });
+  const result = { success: true };
+  if (driveLinks.length > 0) result.driveLinks = driveLinks;
+  if (uploadErrors.length > 0) result.uploadErrors = uploadErrors;
+  return jsonResponse(result);
 }
