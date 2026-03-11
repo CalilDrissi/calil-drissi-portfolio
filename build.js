@@ -1391,20 +1391,15 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     }
     .toc-label-inner {
       display: inline-block; white-space: nowrap;
+      transition: transform 0s linear;
+    }
+    .toc-label-inner.scrolling {
+      transition: transform var(--scroll-dur, 4s) linear;
+      transform: translateX(var(--scroll-dist, 0));
     }
     .toc-num:hover ~ .toc-label,
     .toc-item.active .toc-label { max-width: 260px; padding: 0 12px; }
     .toc-item.active .toc-num { background: var(--accent); color: #fff; }
-    .toc-num:hover ~ .toc-label .toc-label-inner.overflows,
-    .toc-item.active .toc-label .toc-label-inner.overflows {
-      animation: tocMarquee 14s linear infinite;
-    }
-    @keyframes tocMarquee {
-      0% { transform: translateX(0); }
-      20% { transform: translateX(0); }
-      80% { transform: translateX(var(--marquee-dist)); }
-      100% { transform: translateX(var(--marquee-dist)); }
-    }
 
     /* ---- Comments ---- */
     .comments-section {
@@ -1656,28 +1651,38 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
         toc.appendChild(a);
       });
 
-      // Detect overflow on labels after a frame so layout is computed
-      setTimeout(function() {
-        var labels = toc.querySelectorAll('.toc-label-inner');
-        labels.forEach(function(inner) {
-          var label = inner.parentElement;
-          // Temporarily expand to measure
-          label.style.maxWidth = '260px';
-          label.style.padding = '0 12px';
-          label.style.position = 'absolute';
-          label.style.visibility = 'hidden';
-          label.offsetWidth; // force reflow
+      // Scroll long labels when expanded
+      function checkAndScroll(inner) {
+        var label = inner.parentElement;
+        // Wait for max-width transition to finish
+        setTimeout(function() {
           var overflow = inner.scrollWidth - label.clientWidth;
-          label.style.maxWidth = '';
-          label.style.padding = '';
-          label.style.position = '';
-          label.style.visibility = '';
           if (overflow > 5) {
-            inner.classList.add('overflows');
-            inner.style.setProperty('--marquee-dist', '-' + (overflow + 20) + 'px');
+            var dur = Math.max(3, overflow / 30); // ~30px per second
+            inner.style.setProperty('--scroll-dist', '-' + (overflow + 10) + 'px');
+            inner.style.setProperty('--scroll-dur', dur + 's');
+            // Small delay so reader sees the start first
+            setTimeout(function() { inner.classList.add('scrolling'); }, 800);
           }
-        });
-      }, 100);
+        }, 550); // after max-width transition (500ms)
+      }
+      function resetScroll(inner) {
+        inner.classList.remove('scrolling');
+        // Reset position instantly
+        inner.style.transition = 'none';
+        inner.offsetHeight;
+        inner.style.transition = '';
+      }
+
+      toc.querySelectorAll('.toc-item').forEach(function(item) {
+        var inner = item.querySelector('.toc-label-inner');
+        var num = item.querySelector('.toc-num');
+        num.addEventListener('mouseenter', function() { checkAndScroll(inner); });
+        num.addEventListener('mouseleave', function() { resetScroll(inner); });
+      });
+
+      // Also handle active state scrolling
+      var lastActiveInner = null;
 
       var items = toc.querySelectorAll('.toc-item');
       var active = -1;
@@ -1699,7 +1704,11 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
         headings.forEach(function(h, i) { if (h.getBoundingClientRect().top < offset) current = i; });
         if (current !== active) {
           active = current;
+          if (lastActiveInner) resetScroll(lastActiveInner);
           items.forEach(function(item, i) { item.classList.toggle('active', i === current); });
+          var newInner = items[current].querySelector('.toc-label-inner');
+          checkAndScroll(newInner);
+          lastActiveInner = newInner;
         }
       }
       window.addEventListener('scroll', updateToc, { passive: true });
