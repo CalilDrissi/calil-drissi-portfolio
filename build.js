@@ -439,9 +439,7 @@ function blogListingHTML(data, posts, lang) {
     .hover-card-title {
       font-family: var(--serif); font-size: 16px; font-style: italic; margin-bottom: 4px;
     }
-    .hover-card-meta-row { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
-    .hover-card-meta-row span { font-size: 10px; color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.04em; }
-    .hover-card-views { opacity: 0.6; }
+    .hover-card-date { font-size: 10px; color: var(--fg-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
     .hover-card-excerpt {
       font-size: 11px; color: var(--fg-dim); line-height: 1.5; margin-bottom: 8px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
@@ -508,9 +506,7 @@ function blogListingHTML(data, posts, lang) {
       font-family: var(--serif); font-size: 14px; font-style: italic; margin-bottom: 2px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .post-item-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
-    .post-item-date { font-size: 10px; color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.04em; }
-    .post-item-views { font-size: 10px; color: var(--fg-faint); }
+    .post-item-date { font-size: 10px; color: var(--fg-dim); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
     .post-item-tags { display: flex; gap: 4px; flex-wrap: wrap; }
     .post-item-tags span {
       font-size: 9px; padding: 1px 6px; border: 1px solid rgba(255,255,255,0.1); border-radius: 3px;
@@ -567,7 +563,7 @@ function blogListingHTML(data, posts, lang) {
   <div class="hover-card" id="hoverCard">
     <img class="hover-card-img" id="hoverImg" src="" alt="" />
     <div class="hover-card-title" id="hoverTitle"></div>
-    <div class="hover-card-meta-row"><span id="hoverDate"></span><span class="hover-card-views" id="hoverViews"></span></div>
+    <div class="hover-card-date" id="hoverDate"></div>
     <div class="hover-card-excerpt" id="hoverExcerpt"></div>
     <div class="hover-card-tags" id="hoverTags"></div>
   </div>
@@ -576,15 +572,6 @@ function blogListingHTML(data, posts, lang) {
   const POSTS = ${postsJSON};
   const PREFIX = '${prefix}';
   const LANG = '${lang}';
-  const VIEW_LABEL = LANG === 'fr' ? 'vues' : 'views';
-
-  // --- Fetch all view counts ---
-  let postViews = {};
-  fetch('/api/views/')
-    .then(r => r.json())
-    .then(v => { postViews = v; renderPostList(); })
-    .catch(() => {});
-
   // --- Build edges from shared tags ---
   const edges = [];
   for (let i = 0; i < POSTS.length; i++) {
@@ -883,7 +870,6 @@ function blogListingHTML(data, posts, lang) {
   const hoverImg = document.getElementById('hoverImg');
   const hoverTitle = document.getElementById('hoverTitle');
   const hoverDate = document.getElementById('hoverDate');
-  const hoverViews = document.getElementById('hoverViews');
   const hoverExcerpt = document.getElementById('hoverExcerpt');
   const hoverTags = document.getElementById('hoverTags');
 
@@ -894,8 +880,6 @@ function blogListingHTML(data, posts, lang) {
     hoverTitle.textContent = p.title;
     const locale = LANG === 'fr' ? 'fr-FR' : 'en-US';
     hoverDate.textContent = new Date(p.date).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
-    const views = postViews[p.slug] || 0;
-    hoverViews.textContent = views ? views + ' ' + VIEW_LABEL : '';
     const exc = p.excerpt.length > 120 ? p.excerpt.slice(0, 117) + '...' : p.excerpt;
     hoverExcerpt.textContent = exc;
     hoverTags.innerHTML = p.tags.map(t => '<span>' + t + '</span>').join('');
@@ -1134,10 +1118,8 @@ function blogListingHTML(data, posts, lang) {
       const p = POSTS[i];
       const item = document.createElement('div');
       item.className = 'post-item';
-      const views = postViews[p.slug] || 0;
-      const viewsHtml = views ? '<span class="post-item-views">' + views + ' ' + VIEW_LABEL + '</span>' : '';
       item.innerHTML = '<div class="post-item-title">' + p.title + '</div>' +
-        '<div class="post-item-meta"><span class="post-item-date">' + new Date(p.date).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) + '</span>' + viewsHtml + '</div>' +
+        '<div class="post-item-date">' + new Date(p.date).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) + '</div>' +
         '<div class="post-item-tags">' + p.tags.map(t => '<span>' + t + '</span>').join('') + '</div>';
       item.addEventListener('click', () => {
         window.location.href = PREFIX + '/blog/' + p.slug + '/';
@@ -1260,8 +1242,6 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     .post-container { max-width: 720px; margin: 0 auto; padding: 40px 20px 80px; }
     .post-meta { display: flex; gap: 16px; align-items: center; margin-bottom: 24px; flex-wrap: wrap; }
     .post-date { font-size: 11px; color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.04em; }
-    .post-views { font-size: 11px; color: var(--fg-dim); letter-spacing: 0.04em; }
-    .post-views::before { content: ''; display: inline-block; width: 1px; height: 10px; background: var(--fg-faint); margin-right: 12px; vertical-align: middle; }
     .post-tags { display: flex; gap: 6px; }
     .post-tags span {
       font-size: 10px; padding: 2px 8px; border: 1px solid var(--fg-faint); border-radius: 3px;
@@ -1457,7 +1437,6 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
   <article class="post-container">
     <div class="post-meta">
       <span class="post-date">${new Date(post.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-      <span class="post-views" id="viewCount"></span>
       <div class="post-tags">${post.tags.map(t => `<span>${t}</span>`).join('')}</div>
     </div>
     <h1 class="post-title">${post.title}</h1>
@@ -1525,13 +1504,6 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     var WP_ID = ${wpId};
     var WP_URL = '${wpUrl}';
     var I18N = ${JSON.stringify(i18n)};
-
-    // ---- View count ----
-    var viewEl = document.getElementById('viewCount');
-    fetch('/api/views/' + SLUG, { method: 'POST' })
-      .then(function(r) { return r.json(); })
-      .then(function(d) { if (d.views) viewEl.textContent = d.views + ' ' + I18N.views; })
-      .catch(function() {});
 
     // ---- TOC ----
     var headings = document.querySelectorAll('.post-body h2');
