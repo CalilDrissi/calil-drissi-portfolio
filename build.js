@@ -196,8 +196,8 @@ function render(template, data, lang) {
 
       <div class="connect-ctas">
         ${data.connect.buttons.map(b => `<a href="${b.url}" class="cta-btn">${b.label}</a>`).join('\n        ')}
-        <button class="cta-btn" id="openMessageBtn">Leave a Message &#8599;</button>
-        <button class="cta-btn cta-btn-flair" id="terminalChallengeBtn">Free Consult &#8599;</button>
+        <button class="cta-btn" id="openMessageBtn">${lang === 'fr' ? 'Laisser un message' : 'Leave a Message'} &#8599;</button>
+        <button class="cta-btn cta-btn-flair" id="terminalChallengeBtn">${lang === 'fr' ? 'Consultation Gratuite' : 'Free Consult'} &#8599;</button>
       </div>
     </div>
 

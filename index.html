@@ -648,10 +648,15 @@
       overflow: hidden;
       vertical-align: bottom;
       height: 1.4em;
+      min-width: 2em;
     }
     .rotate-slot em {
       display: block;
       white-space: nowrap;
+      font-family: var(--sans);
+      font-style: normal;
+      font-weight: 700;
+      color: #fff;
     }
     .rotate-slot em.leaving {
       position: absolute;
@@ -2234,6 +2239,28 @@
 </div>
 
 <script>
+  // ======== PAGE LANGUAGE ========
+  var LANG = document.documentElement.lang || 'en';
+
+  // Micro i18n helper
+  var _t = (function() {
+    var fr = {
+      'Name and email are required': 'Nom et courriel requis',
+      'Please write a message': 'Veuillez écrire un message',
+      'No recording found': 'Aucun enregistrement trouvé',
+      'Sending...': 'Envoi en cours...',
+      'Message sent successfully!': 'Message envoyé avec succès !',
+      'Network error — please try again': 'Erreur réseau — veuillez réessayer',
+      'Permission denied or not supported': 'Permission refusée ou non supportée',
+      'Failed to send': "Échec de l'envoi",
+      'Discard & re-record': 'Supprimer et réenregistrer',
+      'Recording': 'Enregistrement',
+      'recorded': 'enregistré',
+      'Too large (max 25 MB)': 'Trop volumineux (max 25 Mo)',
+    };
+    return function(s) { return LANG === 'fr' && fr[s] ? fr[s] : s; };
+  })();
+
   // ======== HYBRID CUSTOM CURSOR ========
   // Default arrow everywhere. Custom dot+ring only on interactive elements.
   const cursorDot = document.getElementById('cursorDot');
@@ -3164,7 +3191,45 @@
 // ======== LEAVE A MESSAGE ========
 (function() {
   const messagePopup = document.getElementById('messagePopup');
-  const msgWin = WM.register(messagePopup, 'Leave a Message');
+
+  // ---- i18n for Leave a Message ----
+  if (LANG === 'fr') {
+    const t = messagePopup;
+    t.querySelector('.win-titlebar-text').textContent = 'laisser un message';
+    t.querySelectorAll('.msg-tab').forEach(tab => {
+      const k = tab.dataset.msgTab;
+      if (k === 'text') tab.textContent = 'Texte';
+      if (k === 'audio') tab.textContent = 'Audio';
+      if (k === 'video') tab.textContent = 'Vidéo';
+    });
+    t.querySelectorAll('.msg-panel').forEach(panel => {
+      panel.querySelectorAll('label').forEach(l => {
+        const txt = l.textContent.trim();
+        if (txt === 'Name') l.textContent = 'Nom';
+        if (txt === 'Email') l.textContent = 'Courriel';
+        if (txt === 'Message') l.textContent = 'Message';
+        if (txt === 'Leave a note (optional)') l.textContent = 'Laisser une note (optionnel)';
+      });
+      panel.querySelectorAll('input[placeholder]').forEach(i => {
+        if (i.placeholder === 'Your name') i.placeholder = 'Votre nom';
+        if (i.placeholder === 'you@example.com') i.placeholder = 'vous@exemple.com';
+      });
+      panel.querySelectorAll('textarea[placeholder]').forEach(ta => {
+        if (ta.placeholder === 'Write your message...') ta.placeholder = 'Écrivez votre message...';
+        if (ta.placeholder === 'Add context to your recording...') ta.placeholder = 'Ajoutez du contexte à votre enregistrement...';
+      });
+      const dz = panel.querySelector('.msg-dropzone-text');
+      if (dz) dz.innerHTML = 'Déposer des fichiers ici ou <span>parcourir</span>';
+      const sendBtn = panel.querySelector('.msg-send-btn');
+      if (sendBtn) {
+        const type = sendBtn.dataset.type;
+        if (type === 'text') sendBtn.textContent = 'Envoyer le message';
+        else sendBtn.textContent = "Envoyer l'enregistrement";
+      }
+    });
+  }
+
+  const msgWin = WM.register(messagePopup, LANG === 'fr' ? 'Laisser un message' : 'Leave a Message');
   msgWin.persistent = true;
 
   // Open button
@@ -3382,7 +3447,7 @@
           const blob = new Blob(chunks, { type: mimeType });
           sendBtn._blob = blob;
           sendBtn.disabled = false;
-          timerEl.textContent = formatTime(seconds) + ' recorded';
+          timerEl.textContent = formatTime(seconds) + ' ' + _t('recorded');
 
           // Show custom player preview with discard button
           const wrap = document.createElement('div');
@@ -3392,7 +3457,7 @@
           wrap.appendChild(player);
           const discard = document.createElement('button');
           discard.className = 'msg-discard-btn';
-          discard.textContent = 'Discard & re-record';
+          discard.textContent = _t('Discard & re-record');
           discard.addEventListener('click', () => {
             URL.revokeObjectURL(blobUrl);
             previewEl.innerHTML = '';
@@ -3410,10 +3475,10 @@
         recorder.start(200);
         btn.classList.add('recording');
         timerEl.textContent = '00:00';
-        statusEl.innerHTML = '<span class="msg-rec-dot"></span> Recording';
+        statusEl.innerHTML = '<span class="msg-rec-dot"></span> ' + _t('Recording');
 
       } catch (err) {
-        statusEl.textContent = 'Permission denied or not supported';
+        statusEl.textContent = _t('Permission denied or not supported');
         console.error('Recording error:', err);
       }
     });
@@ -3487,7 +3552,7 @@
       const email = emailInput ? emailInput.value.trim() : '';
 
       if (!name || !email) {
-        statusEl.textContent = 'Name and email are required';
+        statusEl.textContent = _t('Name and email are required');
         statusEl.className = 'msg-status error';
         return;
       }
@@ -3502,11 +3567,11 @@
       const msg = msgEl ? msgEl.value.trim() : '';
 
       if (type === 'text') {
-        if (!msg) { statusEl.textContent = 'Please write a message'; statusEl.className = 'msg-status error'; return; }
+        if (!msg) { statusEl.textContent = _t('Please write a message'); statusEl.className = 'msg-status error'; return; }
         fd.append('message', msg);
       } else if (type === 'audio' || type === 'video') {
         const blob = btn._blob;
-        if (!blob) { statusEl.textContent = 'No recording found'; statusEl.className = 'msg-status error'; return; }
+        if (!blob) { statusEl.textContent = _t('No recording found'); statusEl.className = 'msg-status error'; return; }
         fd.append('file', blob, type + '-message.webm');
         if (msg) fd.append('message', msg);
       }
@@ -3517,14 +3582,14 @@
       }
 
       btn.disabled = true;
-      statusEl.textContent = 'Sending...';
+      statusEl.textContent = _t('Sending...');
       statusEl.className = 'msg-status sending';
 
       try {
         const res = await fetch('/api/message', { method: 'POST', body: fd });
         const data = await res.json();
         if (data.success) {
-          statusEl.textContent = 'Message sent successfully!';
+          statusEl.textContent = _t('Message sent successfully!');
           statusEl.className = 'msg-status success';
           // Reset form
           if (nameInput) nameInput.value = '';
@@ -3550,7 +3615,7 @@
           btn.disabled = false;
         }
       } catch (err) {
-        statusEl.textContent = 'Network error — please try again';
+        statusEl.textContent = _t('Network error — please try again');
         statusEl.className = 'msg-status error';
         btn.disabled = false;
         console.error('Send error:', err);
@@ -3744,8 +3809,143 @@
 
   var termMuteBtn = document.getElementById('termMuteBtn');
 
+  // ---- GAME i18n ----
+  var isFR = LANG === 'fr';
+  var T = isFR ? {
+    winTitle: 'Aventure Grotte Colossale',
+    welcome: 'Bienvenue dans AVENTURE GROTTE COLOSSALE',
+    byline: 'Un défi textuel par Khalil Drissi',
+    goal: 'OBJECTIF : Marquer 50+ points pour gagner une consultation GRATUITE.',
+    explore: 'Explorez les salles, collectez des trésors, battez les créatures.',
+    timerHint: 'Le chrono commence — en combien de temps vaincrez-vous la grotte ?',
+    helpHint: 'Tapez "aide" pour le guide complet, ou explorez !',
+    howToPlay: '=== COMMENT JOUER ===',
+    helpDesc1: "Vous êtes un aventurier explorant une grotte mystérieuse.",
+    helpDesc2: 'Votre objectif : collecter des trésors et vaincre les ennemis',
+    helpDesc3: 'pour marquer 50+ points et gagner une consultation GRATUITE.',
+    helpTimer: 'Le chrono en haut à droite mesure votre temps.',
+    cmdTitle: '--- COMMANDES ---',
+    move1: 'DÉPLACER :  n / s / e / o / h / b',
+    move2: '            entrer, sortir, aller [direction]',
+    act1: 'INTERAGIR : prendre [objet] - ramasser',
+    act2: '            poser [objet]    - déposer',
+    act3: '            utiliser [objet] - utiliser',
+    act4: '            ouvrir [objet]   - ouvrir',
+    act5: '            examiner [objet] - inspecter',
+    act6: '            attaquer         - combattre',
+    inf1: 'INFO :      regarder (r)     - observer',
+    inf2: '            inventaire (i)   - vérifier sac',
+    inf3: '            score            - voir score',
+    inf4: '            aide             - ce guide',
+    other: 'AUTRE :     recommencer, quitter, effacer',
+    tipsTitle: '--- CONSEILS ---',
+    tip1: '  * Certaines zones sont sombres. Apportez une lampe !',
+    tip2: '  * Utilisez les clés pour déverrouiller.',
+    tip3: '  * Les trésors brillent en jaune quand vous entrez.',
+    tip4: '  * Des créatures bloquent le chemin — combattez-les.',
+    tip5: '  * Si vous mourez, vous réapparaissez sans vos objets.',
+    cantGo: "Vous ne pouvez pas aller par là.",
+    stumble: "Vous trébuchez dans l'obscurité...",
+    pitDeath: "Vous tombez dans un puit et vous brisez tous les os !",
+    snakeBlock: "L'énorme serpent vert siffle et barre le chemin !",
+    snakeHint: "Il vous faut quelque chose pour combattre.",
+    dragonBlock: "Le dragon rugit et bloque avec un mur de flammes !",
+    dragonHint: "Vous devez d'abord le vaincre.",
+    pitchDark: "Il fait noir ! Vous risquez de tomber dans un puit !",
+    goBack: "Reculez ou trouvez une source de lumière.",
+    takeWhat: "Prendre quoi ?",
+    tooDark: "Trop sombre pour voir !",
+    dontSee: "Vous ne voyez pas ça ici.",
+    chestHeavy: "Le coffre est trop lourd. Essayez de l'ouvrir.",
+    swordBehind: "L'épée est derrière le dragon !",
+    taken: "Pris : ",
+    treasurePts: "** Trésor trouvé : +{pts} points ! **",
+    dropWhat: "Poser quoi ?",
+    notCarrying: "Vous ne portez pas ça.",
+    dropped: "Posé : ",
+    useWhat: "Utiliser quoi ?",
+    noLamp: "Vous n'avez pas de lampe.",
+    lampOn: "La lampe projette une lueur dorée.",
+    lampOff: "Lampe éteinte. L'obscurité vous enveloppe.",
+    noSword: "Vous n'avez pas d'épée.",
+    swingSnake1: "Vous frappez le serpent !",
+    swingSnake2: "Le serpent recule et rampe dans l'ombre.",
+    snakePts: "** Serpent vaincu ! +10 points **",
+    swingDragon1: "Vous chargez le dragon !",
+    swingDragon2: "D'un coup formidable, vous frappez la bête !",
+    swingDragon3: "Le dragon pousse un dernier rugissement et s'effondre.",
+    dragonPts: "** Dragon vaincu ! +10 points **",
+    swingNothing: "Vous brandissez l'épée. Rien ne se passe.",
+    keysHint: 'Essayez "ouvrir coffre".',
+    cantUse: "Pas utilisable ici.",
+    openWhat: "Ouvrir quoi ?",
+    noChest: "Pas de coffre ici.",
+    chestOpen: "Le coffre est déjà ouvert et vide.",
+    chestLocked: "Le coffre est verrouillé. Il faut des clés.",
+    chestUnlock: "Vous déverrouillez le coffre...",
+    chestLoot1: "Un magnifique trésor de pièces anciennes,",
+    chestLoot2: "de bijoux précieux et une couronne dorée !",
+    chestPts: "** Coffre ouvert ! +20 points **",
+    cantOpen: "Impossible d'ouvrir ça.",
+    emptyHands: "Vous n'avez rien.",
+    carrying: "Vous portez :",
+    lampLitNote: "  (lampe allumée)",
+    death: "    *** Vous êtes mort ***",
+    respawn: "Vous vous réveillez, étourdi mais vivant.",
+    scattered: "Vos affaires ont été dispersées...",
+    congrats: "*** FÉLICITATIONS, AVENTURIER ! ***",
+    masterLine1: "Vous avez conquis la Grotte Colossale !",
+    masterLine2: "Titre obtenu : MAÎTRE AVENTURIER !",
+    rewardTitle: "VOTRE CODE RÉCOMPENSE :",
+    rewardClaim: "Présentez ce code pour obtenir votre",
+    rewardFree: "consultation GRATUITE de 30 minutes.",
+    rewardLink: "Planifier votre appel gratuit \u2192",
+    keepPlaying: 'Tapez "aide" pour continuer à explorer.',
+    quit: "Merci d'avoir joué !",
+    restartHint: 'Tapez "recommencer" pour rejouer.',
+    bareHands: "Avec quoi ? Vos mains nues ?",
+    dontUnderstand: 'Commande inconnue. Tapez "aide".',
+    thereIs: "Il y a un(e) {item} ici.",
+    chestEmpty: "Coffre au trésor ouvert (vide).",
+    swordCorner: "Une épée brille dans le coin, derrière le dragon.",
+    exits: "Sorties : ",
+    rooms: {
+      outside: { name: "Entrée de la Grotte", desc: "Vous êtes au bout d'un chemin devant un petit bâtiment.\nUn ruisseau sort du bâtiment et coule dans un ravin." },
+      building: { name: "Intérieur du Bâtiment", desc: "Vous êtes dans un bâtiment, un puits de source.\nLa sortie est à l'ouest." },
+      valley: { name: "Vallée", desc: "Vous êtes dans une vallée forestière près d'un ruisseau\ncascadant sur un lit rocheux. Le chemin va au nord\net au sud à travers la forêt." },
+      forest: { name: "Forêt", desc: "Vous êtes dans une forêt ouverte, avec une vallée\nprofonde d'un côté. Les arbres vous entourent." },
+      slit: { name: "Fente dans la Roche", desc: "L'eau du ruisseau s'engouffre dans une fente\nde 5 cm dans la roche. Un passage étroit\ndescend dans l'obscurité." },
+      dark_passage: { name: "Passage Sombre", desc: "Un passage sombre et humide. Les murs sont glissants.\nVous entendez de l'eau goutter.", darkDesc: "Il fait noir ! Vous risquez de tomber !" },
+      hall_of_mists: { name: "Salle des Brumes", desc: "Une vaste salle s'étendant vers l'ouest à perte de vue.\nDes volutes de brume blanche ondulent comme vivantes.\nUn escalier de pierre monte. Passages au sud et à l'est." },
+      gold_room: { name: "Salle d'Or", desc: "Une salle basse avec une note sur le mur :\n\"Vous ne le monterez pas par les escaliers.\"\nLa pièce brille d'un éclat métallique." },
+      hall_mt_king: { name: "Salle du Roi", desc: "Salle du Roi de la Montagne, avec des passages\ndans plusieurs directions. Des gravures anciennes\ncouvrent chaque mur.", descSnake: "Salle du Roi de la Montagne. Un énorme serpent\nvert féroce barre le passage au sud !\nDes gravures anciennes couvrent les murs." },
+      crystal_palace: { name: "Palais de Cristal", desc: "Une caverne magnifique avec des cristaux scintillant\nsur chaque surface. La lumière arc-en-ciel danse\nsur les murs." },
+      dragon_lair: { name: "Antre du Dragon", desc: "Une caverne calcinée. Des griffures entaillent le sol.\nL'air est chaud et sent le soufre.", descDragon: "Un dragon rouge couché en travers du passage,\nécailles brillant comme des braises. De la fumée\ns'échappe de ses naseaux. Une épée brille\ndans le coin, hors de portée." },
+      treasure_chamber: { name: "Salle du Trésor", desc: "La salle du trésor. Les murs scintillent de gemmes.\nDes richesses anciennes sont empilées dans les coins." }
+    },
+    items: {
+      keys: { name: 'trousseau de clés', desc: 'Des clés en fer rouillé.' },
+      lamp: { name: 'lampe en laiton', desc: 'Une lampe en laiton. Éteinte.' },
+      gold: { name: "pépite d'or", desc: 'Une grosse pépite dorée !' },
+      diamonds: { name: 'poignée de diamants', desc: 'Des diamants taillés brillants.' },
+      crystal_vase: { name: 'vase en cristal', desc: 'Un vase en cristal fin.' },
+      sword: { name: 'puissante épée', desc: 'Une épée brillante ancienne.' },
+      chest: { name: 'coffre au trésor', desc: 'Un grand coffre cerclé de fer. Verrouillé.' }
+    }
+  } : null;
+
+  function gt(key, rep) {
+    if (!T || !T[key]) return null;
+    var s = T[key];
+    if (rep) Object.keys(rep).forEach(function(k) { s = s.replace('{' + k + '}', rep[k]); });
+    return s;
+  }
+  function getItemName(id) { return T && T.items[id] ? T.items[id].name : itemDefs[id].name; }
+  function getItemDesc(id) { return T && T.items[id] ? T.items[id].desc : itemDefs[id].desc; }
+  function getRoomName(id) { return T && T.rooms[id] ? T.rooms[id].name : rooms[id].name; }
+
   // Register with WM
-  var termWinObj = WM.register(termWin, 'Colossal Cave Adventure');
+  var termWinObj = WM.register(termWin, isFR ? 'Aventure Grotte Colossale' : 'Colossal Cave Adventure');
   termWinObj.persistent = true;
 
   // ---- AMBIENT CAVE MUSIC (Web Audio API) ----
@@ -4112,64 +4312,54 @@
 
   // ---- GAME LOGIC ----
   function showScore() {
-    addLine('[Score: ' + G.score + '/50 | Moves: ' + G.moves + ']', 'cyan');
+    addLine(isFR ? '[Score : ' + G.score + '/50 | Coups : ' + G.moves + ']' : '[Score: ' + G.score + '/50 | Moves: ' + G.moves + ']', 'cyan');
   }
 
   function getRoomDesc(roomId) {
     var room = rooms[roomId];
     if (!room) return '';
+    var tr = T && T.rooms[roomId] ? T.rooms[roomId] : null;
 
-    // Dark room check
     if (room.dark && !G.lampLit) {
-      return room.darkDesc || 'It is pitch dark!';
+      return (tr && tr.darkDesc) || room.darkDesc || (isFR ? 'Il fait noir !' : 'It is pitch dark!');
     }
-
-    // Special descriptions
     if (roomId === 'hall_mt_king' && !G.snakeDead) {
-      return room.descSnake || room.desc;
+      return (tr && tr.descSnake) || room.descSnake || (tr ? tr.desc : room.desc);
     }
     if (roomId === 'dragon_lair' && !G.dragonDead) {
-      return room.descDragon || room.desc;
+      return (tr && tr.descDragon) || room.descDragon || (tr ? tr.desc : room.desc);
     }
-    return room.desc;
+    return tr ? tr.desc : room.desc;
   }
 
   function lookRoom() {
     var room = rooms[G.currentRoom];
     addLine('');
-    addLine('--- ' + room.name + ' ---', 'bold');
+    addLine('--- ' + getRoomName(G.currentRoom) + ' ---', 'bold');
     addLine('');
 
     var desc = getRoomDesc(G.currentRoom);
-    desc.split('\n').forEach(function(line) {
-      addLine(line);
-    });
+    desc.split('\n').forEach(function(line) { addLine(line); });
 
-    // Show items on ground (only if room is visible)
     if (!room.dark || G.lampLit) {
-      var groundItems = room.items.filter(function(id) {
-        return G.inventory.indexOf(id) === -1;
-      });
+      var groundItems = room.items.filter(function(id) { return G.inventory.indexOf(id) === -1; });
       if (groundItems.length > 0) {
         addLine('');
         groundItems.forEach(function(id) {
-          var item = itemDefs[id];
           if (id === 'chest' && G.chestOpened) {
-            addLine('There is an open treasure chest here (empty).', 'yellow');
+            addLine(gt('chestEmpty') || 'There is an open treasure chest here (empty).', 'yellow');
           } else if (id === 'sword' && !G.dragonDead && G.currentRoom === 'dragon_lair') {
-            addLine('A mighty sword gleams in the corner, behind the dragon.', 'yellow');
+            addLine(gt('swordCorner') || 'A mighty sword gleams in the corner, behind the dragon.', 'yellow');
           } else {
-            addLine('There is a ' + item.name + ' here.', 'yellow');
+            var name = getItemName(id);
+            addLine(isFR ? ('Il y a un(e) ' + name + ' ici.') : ('There is a ' + name + ' here.'), 'yellow');
           }
         });
       }
-
-      // Show exits
       var exitDirs = Object.keys(room.exits);
       addLine('');
-      addLine('Exits: ' + exitDirs.join(', '), 'dim');
+      addLine((gt('exits') || 'Exits: ') + exitDirs.join(', '), 'dim');
     }
-
     addLine('');
     showScore();
   }
@@ -4177,11 +4367,10 @@
   function doMove(dir) {
     var room = rooms[G.currentRoom];
 
-    // Dark room - moving without lamp is fatal
     if (room.dark && !G.lampLit && dir !== 'up' && dir !== 'north') {
       addLine('');
-      addLine('You stumble in the darkness...', 'red');
-      addLine('You fell into a pit and broke every bone in your body!', 'red');
+      addLine(gt('stumble') || 'You stumble in the darkness...', 'red');
+      addLine(gt('pitDeath') || 'You fell into a pit and broke every bone in your body!', 'red');
       addLine('');
       doDeath();
       return;
@@ -4189,7 +4378,7 @@
 
     var exits = room.exits;
     if (!exits[dir]) {
-      addLine('You can\'t go that way.', 'red');
+      addLine(gt('cantGo') || "You can't go that way.", 'red');
       return;
     }
 
@@ -4197,15 +4386,15 @@
 
     // Snake blocks south passage in Hall of Mountain King
     if (G.currentRoom === 'hall_mt_king' && dir === 'south' && !G.snakeDead) {
-      addLine('The huge green snake hisses and blocks your way!', 'red');
-      addLine('You need something to fight it with.', 'yellow');
+      addLine(gt('snakeBlock') || 'The huge green snake hisses and blocks your way!', 'red');
+      addLine(gt('snakeHint') || 'You need something to fight it with.', 'yellow');
       return;
     }
 
     // Dragon blocks passage in Dragon's Lair to treasure
     if (G.currentRoom === 'dragon_lair' && dir === 'south' && !G.dragonDead) {
-      addLine('The dragon roars and blocks the passage with a wall of flame!', 'red');
-      addLine('You need to defeat it first.', 'yellow');
+      addLine(gt('dragonBlock') || 'The dragon roars and blocks the passage with a wall of flame!', 'red');
+      addLine(gt('dragonHint') || 'You need to defeat it first.', 'yellow');
       return;
     }
 
@@ -4216,10 +4405,10 @@
     var newRoom = rooms[destId];
     if (newRoom.dark && !G.lampLit) {
       addLine('');
-      addLine('--- ' + newRoom.name + ' ---', 'bold');
+      addLine('--- ' + getRoomName(destId) + ' ---', 'bold');
       addLine('');
-      addLine('It is pitch dark. You are likely to fall into a pit!', 'red');
-      addLine('You should go back or find a light source.', 'yellow');
+      addLine(gt('pitchDark') || 'It is pitch dark. You are likely to fall into a pit!', 'red');
+      addLine(gt('goBack') || 'You should go back or find a light source.', 'yellow');
       addLine('');
       showScore();
       return;
@@ -4230,13 +4419,13 @@
 
   function doTake(itemName) {
     if (!itemName) {
-      addLine('Take what?', 'red');
+      addLine(gt('takeWhat') || 'Take what?', 'red');
       return;
     }
 
     var room = rooms[G.currentRoom];
     if (room.dark && !G.lampLit) {
-      addLine('It\'s too dark to see anything!', 'red');
+      addLine(gt('tooDark') || "It's too dark to see anything!", 'red');
       return;
     }
 
@@ -4245,35 +4434,33 @@
     room.items.forEach(function(id) {
       if (G.inventory.indexOf(id) !== -1) return;
       var def = itemDefs[id];
-      if (id === itemName || def.name.toLowerCase().indexOf(itemName) !== -1) {
+      if (id === itemName || def.name.toLowerCase().indexOf(itemName) !== -1 || getItemName(id).toLowerCase().indexOf(itemName) !== -1) {
         matchedId = id;
       }
     });
 
     if (!matchedId) {
-      addLine('You don\'t see that here.', 'red');
+      addLine(gt('dontSee') || "You don't see that here.", 'red');
       return;
     }
 
-    // Can't take the chest
     if (matchedId === 'chest') {
-      addLine('The chest is far too heavy to carry. Try opening it instead.', 'yellow');
+      addLine(gt('chestHeavy') || 'The chest is far too heavy to carry. Try opening it instead.', 'yellow');
       return;
     }
 
-    // Sword behind dragon
     if (matchedId === 'sword' && G.currentRoom === 'dragon_lair' && !G.dragonDead) {
-      addLine('The sword is behind the dragon! You can\'t reach it.', 'red');
+      addLine(gt('swordBehind') || "The sword is behind the dragon! You can't reach it.", 'red');
       return;
     }
 
     G.inventory.push(matchedId);
     var def = itemDefs[matchedId];
-    addLine('Taken: ' + def.name + '.', 'green');
+    addLine((gt('taken') || 'Taken: ') + getItemName(matchedId) + '.', 'green');
 
     if (def.type === 'treasure') {
       G.score += def.pts;
-      addLine('** You found a treasure worth ' + def.pts + ' points! **', 'green');
+      addLine(gt('treasurePts', {pts: def.pts}) || '** You found a treasure worth ' + def.pts + ' points! **', 'green');
       showScore();
       checkWin();
     }
@@ -4281,64 +4468,64 @@
 
   function doDrop(itemName) {
     if (!itemName) {
-      addLine('Drop what?', 'red');
+      addLine(gt('dropWhat') || 'Drop what?', 'red');
       return;
     }
     var matchedIdx = -1;
     G.inventory.forEach(function(id, idx) {
       var def = itemDefs[id];
-      if (id === itemName || def.name.toLowerCase().indexOf(itemName) !== -1) {
+      if (id === itemName || def.name.toLowerCase().indexOf(itemName) !== -1 || getItemName(id).toLowerCase().indexOf(itemName) !== -1) {
         matchedIdx = idx;
       }
     });
     if (matchedIdx === -1) {
-      addLine('You\'re not carrying that.', 'red');
+      addLine(gt('notCarrying') || "You're not carrying that.", 'red');
       return;
     }
     var dropped = G.inventory.splice(matchedIdx, 1)[0];
     rooms[G.currentRoom].items.push(dropped);
-    addLine('Dropped: ' + itemDefs[dropped].name + '.', 'cyan');
+    addLine((gt('dropped') || 'Dropped: ') + getItemName(dropped) + '.', 'cyan');
   }
 
   function doUse(itemName) {
     if (!itemName) {
-      addLine('Use what?', 'red');
+      addLine(gt('useWhat') || 'Use what?', 'red');
       return;
     }
 
     // Lamp
-    if (itemName === 'lamp' || itemName === 'brass lamp') {
+    if (itemName === 'lamp' || itemName === 'brass lamp' || itemName === 'lampe') {
       if (G.inventory.indexOf('lamp') === -1) {
-        addLine('You\'re not carrying a lamp.', 'red');
+        addLine(gt('noLamp') || "You're not carrying a lamp.", 'red');
         return;
       }
       if (!G.lampLit) {
         G.lampLit = true;
-        addLine('The lamp is now lit, casting a warm golden glow.', 'green');
+        addLine(gt('lampOn') || 'The lamp is now lit, casting a warm golden glow.', 'green');
         // If we are in a dark room, show it now
         if (rooms[G.currentRoom].dark) {
           lookRoom();
         }
       } else {
         G.lampLit = false;
-        addLine('You turn off the lamp. Darkness closes in.', 'yellow');
+        addLine(gt('lampOff') || 'You turn off the lamp. Darkness closes in.', 'yellow');
       }
       return;
     }
 
     // Sword
-    if (itemName === 'sword' || itemName === 'mighty sword') {
+    if (itemName === 'sword' || itemName === 'mighty sword' || itemName === 'épée' || itemName === 'epee') {
       if (G.inventory.indexOf('sword') === -1) {
-        addLine('You\'re not carrying a sword.', 'red');
+        addLine(gt('noSword') || "You're not carrying a sword.", 'red');
         return;
       }
 
       if (G.currentRoom === 'hall_mt_king' && !G.snakeDead) {
         G.snakeDead = true;
         G.score += 10;
-        addLine('You swing the mighty sword at the snake!', 'green');
-        addLine('The snake recoils and slithers away into the darkness.', 'green');
-        addLine('** Snake defeated! +10 points **', 'green');
+        addLine(gt('swingSnake1') || 'You swing the mighty sword at the snake!', 'green');
+        addLine(gt('swingSnake2') || 'The snake recoils and slithers away into the darkness.', 'green');
+        addLine(gt('snakePts') || '** Snake defeated! +10 points **', 'green');
         showScore();
         checkWin();
         return;
@@ -4347,120 +4534,119 @@
       if (G.currentRoom === 'dragon_lair' && !G.dragonDead) {
         G.dragonDead = true;
         G.score += 10;
-        addLine('You charge the dragon with the mighty sword!', 'green');
-        addLine('With a tremendous blow, you strike the beast!', 'green');
-        addLine('The dragon lets out a final roar and collapses.', 'green');
-        addLine('** Dragon defeated! +10 points **', 'green');
+        addLine(gt('swingDragon1') || 'You charge the dragon with the mighty sword!', 'green');
+        addLine(gt('swingDragon2') || 'With a tremendous blow, you strike the beast!', 'green');
+        addLine(gt('swingDragon3') || 'The dragon lets out a final roar and collapses.', 'green');
+        addLine(gt('dragonPts') || '** Dragon defeated! +10 points **', 'green');
         showScore();
         checkWin();
         return;
       }
 
-      addLine('You swing the sword dramatically. Nothing happens.', 'dim');
+      addLine(gt('swingNothing') || 'You swing the sword dramatically. Nothing happens.', 'dim');
       return;
     }
 
     // Keys
-    if (itemName === 'keys' || itemName === 'key') {
-      addLine('You can use the keys to open things. Try "open chest".', 'cyan');
+    if (itemName === 'keys' || itemName === 'key' || itemName === 'clés' || itemName === 'cles') {
+      addLine(gt('keysHint') || 'You can use the keys to open things. Try "open chest".', 'cyan');
       return;
     }
 
-    addLine('You can\'t use that here.', 'red');
+    addLine(gt('cantUse') || "You can't use that here.", 'red');
   }
 
   function doOpen(itemName) {
     if (!itemName) {
-      addLine('Open what?', 'red');
+      addLine(gt('openWhat') || 'Open what?', 'red');
       return;
     }
 
-    if (itemName === 'chest' || itemName === 'treasure chest') {
+    if (itemName === 'chest' || itemName === 'treasure chest' || itemName === 'coffre') {
       if (G.currentRoom !== 'treasure_chamber') {
-        addLine('You don\'t see a chest here.', 'red');
+        addLine(gt('noChest') || "You don't see a chest here.", 'red');
         return;
       }
       if (G.chestOpened) {
-        addLine('The chest is already open and empty.', 'dim');
+        addLine(gt('chestOpen') || 'The chest is already open and empty.', 'dim');
         return;
       }
       if (G.inventory.indexOf('keys') === -1) {
-        addLine('The chest is locked. You need keys to open it.', 'yellow');
+        addLine(gt('chestLocked') || 'The chest is locked. You need keys to open it.', 'yellow');
         return;
       }
       G.chestOpened = true;
       G.score += 20;
-      addLine('You unlock the chest with the iron keys...', 'green');
-      addLine('Inside you find a magnificent hoard of ancient coins,', 'green');
-      addLine('precious jewels, and a golden crown!', 'green');
-      addLine('** Treasure chest opened! +20 points **', 'green');
+      addLine(gt('chestUnlock') || 'You unlock the chest with the iron keys...', 'green');
+      addLine(gt('chestLoot1') || 'Inside you find a magnificent hoard of ancient coins,', 'green');
+      addLine(gt('chestLoot2') || 'precious jewels, and a golden crown!', 'green');
+      addLine(gt('chestPts') || '** Treasure chest opened! +20 points **', 'green');
       showScore();
       checkWin();
       return;
     }
 
-    addLine('You can\'t open that.', 'red');
+    addLine(gt('cantOpen') || "You can't open that.", 'red');
   }
 
   function doInventory() {
     if (G.inventory.length === 0) {
-      addLine('You are empty-handed.', 'dim');
+      addLine(gt('emptyHands') || 'You are empty-handed.', 'dim');
       return;
     }
-    addLine('You are carrying:', 'cyan');
+    addLine(gt('carrying') || 'You are carrying:', 'cyan');
     G.inventory.forEach(function(id) {
-      var def = itemDefs[id];
-      addLine('  - ' + def.name, 'yellow');
+      addLine('  - ' + getItemName(id), 'yellow');
     });
     if (G.lampLit) {
-      addLine('  (lamp is lit)', 'dim');
+      addLine(gt('lampLitNote') || '  (lamp is lit)', 'dim');
     }
   }
 
   function doHelp() {
     addLine('');
-    addLine('=== HOW TO PLAY ===', 'cyan');
+    addLine(gt('howToPlay') || '=== HOW TO PLAY ===', 'cyan');
     addLine('');
-    addLine('You are an adventurer exploring a mysterious cave.', '');
-    addLine('Your goal: collect treasures and defeat foes to', '');
-    addLine('score 50+ points and win a FREE consultation.', 'green');
+    addLine(gt('helpDesc1') || 'You are an adventurer exploring a mysterious cave.', '');
+    addLine(gt('helpDesc2') || 'Your goal: collect treasures and defeat foes to', '');
+    addLine(gt('helpDesc3') || 'score 50+ points and win a FREE consultation.', 'green');
     addLine('');
-    addLine('The timer in the top-right tracks your time.', 'dim');
+    addLine(gt('helpTimer') || 'The timer in the top-right tracks your time.', 'dim');
     addLine('');
-    addLine('--- COMMANDS ---', 'cyan');
+    addLine(gt('cmdTitle') || '--- COMMANDS ---', 'cyan');
     addLine('');
-    addLine('MOVE:      n / s / e / w / u / d', 'yellow');
-    addLine('           enter, exit, go [direction]', 'yellow');
+    addLine(gt('move1') || 'MOVE:      n / s / e / w / u / d', 'yellow');
+    addLine(gt('move2') || '           enter, exit, go [direction]', 'yellow');
     addLine('');
-    addLine('INTERACT:  take [item]    - pick up an item', 'yellow');
-    addLine('           drop [item]    - drop an item', 'yellow');
-    addLine('           use [item]     - use an item', 'yellow');
-    addLine('           open [item]    - open something', 'yellow');
-    addLine('           examine [item] - inspect an item', 'yellow');
-    addLine('           attack         - fight with sword', 'yellow');
+    addLine(gt('act1') || 'INTERACT:  take [item]    - pick up an item', 'yellow');
+    addLine(gt('act2') || '           drop [item]    - drop an item', 'yellow');
+    addLine(gt('act3') || '           use [item]     - use an item', 'yellow');
+    addLine(gt('act4') || '           open [item]    - open something', 'yellow');
+    addLine(gt('act5') || '           examine [item] - inspect an item', 'yellow');
+    addLine(gt('act6') || '           attack         - fight with sword', 'yellow');
     addLine('');
-    addLine('INFO:      look (l)       - look around', 'yellow');
-    addLine('           inventory (i)  - check your bag', 'yellow');
-    addLine('           score          - check score/moves', 'yellow');
-    addLine('           help           - show this guide', 'yellow');
+    addLine(gt('inf1') || 'INFO:      look (l)       - look around', 'yellow');
+    addLine(gt('inf2') || '           inventory (i)  - check your bag', 'yellow');
+    addLine(gt('inf3') || '           score          - check score/moves', 'yellow');
+    addLine(gt('inf4') || '           help           - show this guide', 'yellow');
     addLine('');
-    addLine('OTHER:     restart, quit, clear', 'yellow');
+    addLine(gt('other') || 'OTHER:     restart, quit, clear', 'yellow');
     addLine('');
-    addLine('--- TIPS ---', 'cyan');
+    addLine(gt('tipsTitle') || '--- TIPS ---', 'cyan');
     addLine('');
-    addLine('  * Some areas are dark. Bring a lamp!', 'dim');
-    addLine('  * Use keys to unlock things.', 'dim');
-    addLine('  * Treasures glow yellow when you enter a room.', 'dim');
-    addLine('  * Dangerous creatures block your path — fight them.', 'dim');
-    addLine('  * If you die, you respawn but lose your items.', 'dim');
+    addLine(gt('tip1') || '  * Some areas are dark. Bring a lamp!', 'dim');
+    addLine(gt('tip2') || '  * Use keys to unlock things.', 'dim');
+    addLine(gt('tip3') || '  * Treasures glow yellow when you enter a room.', 'dim');
+    addLine(gt('tip4') || '  * Dangerous creatures block your path — fight them.', 'dim');
+    addLine(gt('tip5') || '  * If you die, you respawn but lose your items.', 'dim');
     addLine('');
   }
 
   function doDeath() {
-    addLine('    *** You have died ***', 'red');
+    addLine(gt('death') || '    *** You have died ***', 'red');
     addLine('');
-    addLine('You awaken back in the well house, dazed but alive.', 'cyan');
-    addLine('Your belongings have been scattered...', 'cyan');
+    addLine(gt('respawn') || 'You awaken back in the well house, dazed but alive.', 'cyan');
+    addLine(gt('scattered') || 'Your belongings have been scattered...', 'cyan');
     addLine('');
 
     // Reset position and inventory, keep score from treasures already scored
@@ -4499,25 +4685,25 @@
     addLine('');
     winAscii.forEach(function(l) { addLine(l, 'ascii'); });
     addLine('');
-    addLine('*** CONGRATULATIONS, ADVENTURER! ***', 'green');
+    addLine(gt('congrats') || '*** CONGRATULATIONS, ADVENTURER! ***', 'green');
     addLine('');
-    addLine('You have mastered the Colossal Cave and proven yourself', 'green');
-    addLine('worthy of the title: MASTER ADVENTURER!', 'green');
+    addLine(gt('masterLine1') || 'You have mastered the Colossal Cave and proven yourself', 'green');
+    addLine(gt('masterLine2') || 'worthy of the title: MASTER ADVENTURER!', 'green');
     addLine('');
-    addLine('Final Score: ' + G.score + '/50 | Moves: ' + G.moves + ' | Time: ' + timeStr, 'cyan');
+    addLine(isFR ? 'Score final : ' + G.score + '/50 | Coups : ' + G.moves + ' | Temps : ' + timeStr : 'Final Score: ' + G.score + '/50 | Moves: ' + G.moves + ' | Time: ' + timeStr, 'cyan');
     addLine('');
 
     var code = generateCode();
-    addLine('YOUR REWARD CODE:', 'yellow');
+    addLine(gt('rewardTitle') || 'YOUR REWARD CODE:', 'yellow');
     addLine('');
     addLine('  >> ' + code + ' <<', 'green');
     addLine('');
-    addLine('Show this code when booking to claim your', '');
-    addLine('FREE 30-minute consultation.', 'green');
+    addLine(gt('rewardClaim') || 'Show this code when booking to claim your', '');
+    addLine(gt('rewardFree') || 'FREE 30-minute consultation.', 'green');
     addLine('');
-    addHTML('<a class="term-reward-link cursor-zone" href="#">Schedule Your Free Call &rarr;</a>');
+    addHTML('<a class="term-reward-link cursor-zone" href="#">' + (gt('rewardLink') || 'Schedule Your Free Call &rarr;') + '</a>');
     addLine('');
-    addLine('The cave awaits further exploration. Type "help" for commands.', 'dim');
+    addLine(gt('keepPlaying') || 'The cave awaits further exploration. Type "help" for commands.', 'dim');
     addLine('');
 
     // Restart timer so they can keep exploring
@@ -4530,7 +4716,12 @@
     u: 'up', d: 'down',
     north: 'north', south: 'south', east: 'east', west: 'west',
     up: 'up', down: 'down',
-    enter: 'enter', exit: 'exit'
+    enter: 'enter', exit: 'exit',
+    // French aliases
+    o: 'west', h: 'up', b: 'down',
+    nord: 'north', sud: 'south', est: 'east', ouest: 'west',
+    haut: 'up', bas: 'down',
+    entrer: 'enter', sortir: 'exit'
   };
 
   // ---- COMMAND PARSER ----
@@ -4545,30 +4736,30 @@
     addLine('> ' + raw, 'dim');
 
     // Meta commands
-    if (val === 'restart' || val === 'reset') {
+    if (val === 'restart' || val === 'reset' || val === 'recommencer') {
       resetGame();
       return;
     }
-    if (val === 'quit') {
-      addLine('Thanks for playing Colossal Cave Adventure!', 'cyan');
-      addLine('Type "restart" to play again.', 'dim');
+    if (val === 'quit' || val === 'quitter') {
+      addLine(gt('quit') || 'Thanks for playing Colossal Cave Adventure!', 'cyan');
+      addLine(gt('restartHint') || 'Type "restart" to play again.', 'dim');
       return;
     }
-    if (val === 'clear') {
+    if (val === 'clear' || val === 'effacer') {
       termOutput.innerHTML = '';
       return;
     }
-    if (val === 'help' || val === '?') {
+    if (val === 'help' || val === '?' || val === 'aide') {
       doHelp();
       return;
     }
 
     // Game commands
-    if (val === 'look' || val === 'l') {
+    if (val === 'look' || val === 'l' || val === 'regarder' || val === 'r') {
       lookRoom();
       return;
     }
-    if (val === 'inventory' || val === 'i') {
+    if (val === 'inventory' || val === 'i' || val === 'inventaire') {
       doInventory();
       return;
     }
@@ -4582,9 +4773,9 @@
       doMove(dirMap[val]);
       return;
     }
-    // "go north" style
-    if (val.indexOf('go ') === 0) {
-      var goDir = val.substring(3).trim();
+    // "go north" / "aller nord" style
+    if (val.indexOf('go ') === 0 || val.indexOf('aller ') === 0) {
+      var goDir = val.replace(/^(go |aller )/, '').trim();
       if (dirMap[goDir]) {
         doMove(dirMap[goDir]);
         return;
@@ -4592,52 +4783,52 @@
     }
 
     // Take / get
-    if (val.indexOf('take ') === 0 || val.indexOf('get ') === 0 || val.indexOf('pick up ') === 0) {
-      var takeItem = val.replace(/^(take |get |pick up )/, '').trim();
+    if (val.indexOf('take ') === 0 || val.indexOf('get ') === 0 || val.indexOf('pick up ') === 0 || val.indexOf('prendre ') === 0 || val.indexOf('ramasser ') === 0) {
+      var takeItem = val.replace(/^(take |get |pick up |prendre |ramasser )/, '').trim();
       doTake(takeItem);
       return;
     }
 
     // Drop
-    if (val.indexOf('drop ') === 0) {
-      var dropItem = val.substring(5).trim();
+    if (val.indexOf('drop ') === 0 || val.indexOf('poser ') === 0) {
+      var dropItem = val.replace(/^(drop |poser )/, '').trim();
       doDrop(dropItem);
       return;
     }
 
     // Use
-    if (val.indexOf('use ') === 0 || val.indexOf('light ') === 0) {
-      var useItem = val.replace(/^(use |light )/, '').trim();
+    if (val.indexOf('use ') === 0 || val.indexOf('light ') === 0 || val.indexOf('utiliser ') === 0 || val.indexOf('allumer ') === 0) {
+      var useItem = val.replace(/^(use |light |utiliser |allumer )/, '').trim();
       doUse(useItem);
       return;
     }
 
     // Open
-    if (val.indexOf('open ') === 0 || val.indexOf('unlock ') === 0) {
-      var openItem = val.replace(/^(open |unlock )/, '').trim();
+    if (val.indexOf('open ') === 0 || val.indexOf('unlock ') === 0 || val.indexOf('ouvrir ') === 0) {
+      var openItem = val.replace(/^(open |unlock |ouvrir )/, '').trim();
       doOpen(openItem);
       return;
     }
 
     // Kill / attack / fight
-    if (val.indexOf('kill ') === 0 || val.indexOf('attack ') === 0 || val.indexOf('fight ') === 0) {
+    if (val.indexOf('kill ') === 0 || val.indexOf('attack ') === 0 || val.indexOf('fight ') === 0 || val.indexOf('attaquer') === 0 || val.indexOf('combattre') === 0 || val.indexOf('tuer ') === 0) {
       if (G.inventory.indexOf('sword') !== -1) {
         doUse('sword');
       } else {
-        addLine('With what? Your bare hands?', 'red');
+        addLine(gt('bareHands') || 'With what? Your bare hands?', 'red');
       }
       return;
     }
 
     // Examine
-    if (val.indexOf('examine ') === 0 || val.indexOf('x ') === 0) {
-      var exItem = val.replace(/^(examine |x )/, '').trim();
+    if (val.indexOf('examine ') === 0 || val.indexOf('x ') === 0 || val.indexOf('examiner ') === 0) {
+      var exItem = val.replace(/^(examine |x |examiner )/, '').trim();
       // Check inventory
       var found = false;
       G.inventory.forEach(function(id) {
         var def = itemDefs[id];
         if (id === exItem || def.name.toLowerCase().indexOf(exItem) !== -1) {
-          addLine(def.desc, 'yellow');
+          addLine(getItemDesc(id), 'yellow');
           found = true;
         }
       });
@@ -4648,7 +4839,7 @@
           if (G.inventory.indexOf(id) !== -1) return;
           var def = itemDefs[id];
           if (id === exItem || def.name.toLowerCase().indexOf(exItem) !== -1) {
-            addLine(def.desc, 'yellow');
+            addLine(getItemDesc(id), 'yellow');
             found = true;
           }
         });
@@ -4659,7 +4850,7 @@
       return;
     }
 
-    addLine('I don\'t understand "' + raw + '". Type "help" for commands.', 'red');
+    addLine(gt('dontUnderstand') || 'I don\'t understand "' + raw + '". Type "help" for commands.', 'red');
   }
 
   // ---- GAME INIT ----
@@ -4692,15 +4883,15 @@
     var introLines = [];
     asciiArt.forEach(function(l) { introLines.push({ text: l, cls: 'ascii' }); });
     introLines.push({ text: '', cls: '' });
-    introLines.push({ text: 'Welcome to COLOSSAL CAVE ADVENTURE', cls: 'green' });
-    introLines.push({ text: 'A text adventure challenge by Khalil Drissi', cls: 'green' });
+    introLines.push({ text: gt('welcome') || 'Welcome to COLOSSAL CAVE ADVENTURE', cls: 'green' });
+    introLines.push({ text: gt('byline') || 'A text adventure challenge by Khalil Drissi', cls: 'green' });
     introLines.push({ text: '', cls: '' });
-    introLines.push({ text: 'GOAL: Score 50+ points to win a FREE consultation.', cls: 'yellow' });
+    introLines.push({ text: gt('goal') || 'GOAL: Score 50+ points to win a FREE consultation.', cls: 'yellow' });
     introLines.push({ text: '', cls: '' });
-    introLines.push({ text: 'Explore rooms, collect treasures, defeat creatures.', cls: '' });
-    introLines.push({ text: 'Timer starts now — how fast can you conquer the cave?', cls: 'dim' });
+    introLines.push({ text: gt('explore') || 'Explore rooms, collect treasures, defeat creatures.', cls: '' });
+    introLines.push({ text: gt('timerHint') || 'Timer starts now — how fast can you conquer the cave?', cls: 'dim' });
     introLines.push({ text: '', cls: '' });
-    introLines.push({ text: 'Type "help" for full guide, or just start exploring!', cls: 'cyan' });
+    introLines.push({ text: gt('helpHint') || 'Type "help" for full guide, or just start exploring!', cls: 'cyan' });
 
     typeLines(introLines, 45, function() {
       startTimer();
