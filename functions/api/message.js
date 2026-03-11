@@ -173,13 +173,18 @@ async function sendFormSubmitNotification(senderName, senderEmail, messageText, 
 
   const res = await fetch('https://formsubmit.co/ajax/khalil@drissi.org', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Origin': 'https://khalildrissi.com',
+      'Referer': 'https://khalildrissi.com/',
+    },
     body: JSON.stringify(payload),
   });
 
   const result = await res.json();
-  if (!result.success) {
-    throw new Error('FormSubmit failed: ' + JSON.stringify(result));
+  if (result.success === 'false' || result.success === false) {
+    throw new Error('FormSubmit failed: ' + (result.message || JSON.stringify(result)));
   }
   return result;
 }
@@ -262,7 +267,7 @@ export async function onRequestPost(context) {
     await sendFormSubmitNotification(name, email, message, type, driveLink);
   } catch (err) {
     console.error('FormSubmit notification error:', err);
-    // Don't fail the request — Drive upload may have succeeded
+    return jsonResponse({ success: false, error: 'Failed to deliver message. Please email khalil@drissi.org directly.' }, 500);
   }
 
   return jsonResponse({ success: true });
