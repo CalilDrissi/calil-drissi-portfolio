@@ -1330,6 +1330,16 @@ async function build() {
     console.log('  ✓ /_redirects');
   }
 
+  // Copy static assets (images, favicon)
+  const staticFiles = ['profile.png', 'favicon.png', 'apple-touch-icon.png'];
+  for (const f of staticFiles) {
+    const src = path.join(__dirname, f);
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, path.join(DIST, f));
+      console.log(`  ✓ /${f}`);
+    }
+  }
+
   console.log('Done!');
 }
 
