@@ -1568,13 +1568,11 @@
     }
     .msg-preview-player {
       width: 100%;
-      max-width: 320px;
+      max-width: 340px;
     }
     .msg-preview-player audio,
     .msg-preview-player video {
-      width: 100%;
-      border-radius: 4px;
-      outline: none;
+      display: none;
     }
     .msg-preview-wrap {
       display: flex;
@@ -1582,8 +1580,95 @@
       align-items: center;
       gap: 8px;
       width: 100%;
-      max-width: 320px;
+      max-width: 340px;
     }
+
+    /* Custom audio/video player */
+    .custom-player {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.03);
+      overflow: hidden;
+    }
+    .custom-player-video {
+      width: 100%;
+      max-height: 200px;
+      display: block;
+      background: #000;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .custom-player-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+    }
+    .cp-play {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.15s, background 0.15s;
+      color: rgba(255,255,255,0.7);
+    }
+    .cp-play:hover {
+      border-color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.05);
+    }
+    .cp-play svg { width: 12px; height: 12px; }
+    .cp-time {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: rgba(255,255,255,0.4);
+      flex-shrink: 0;
+      min-width: 70px;
+      letter-spacing: 0.04em;
+    }
+    .cp-bar-wrap {
+      flex: 1;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      position: relative;
+    }
+    .cp-bar {
+      width: 100%;
+      height: 3px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+    .cp-bar-fill {
+      height: 100%;
+      background: var(--accent, #a882ff);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+    .cp-bar-wrap:hover .cp-bar { height: 5px; }
+    .cp-vol {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: rgba(255,255,255,0.35);
+      transition: color 0.15s;
+    }
+    .cp-vol:hover { color: rgba(255,255,255,0.6); }
     .msg-discard-btn {
       font-family: var(--mono);
       font-size: 9px;
@@ -3119,6 +3204,109 @@
     return document.querySelector(`[data-msg-panel="${type}"]`);
   }
 
+  // ---- Custom player builder ----
+  function cpFmtTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+  }
+
+  const playSvg = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+  const pauseSvg = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
+  const volSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>';
+  const muteSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+
+  function buildCustomPlayer(src, type) {
+    const container = document.createElement('div');
+    container.className = 'custom-player';
+
+    const media = document.createElement(type === 'video' ? 'video' : 'audio');
+    media.src = src;
+    media.preload = 'metadata';
+
+    if (type === 'video') {
+      const vid = document.createElement('video');
+      vid.src = src;
+      vid.className = 'custom-player-video';
+      vid.preload = 'metadata';
+      container.appendChild(vid);
+      container._vid = vid;
+    }
+
+    const controls = document.createElement('div');
+    controls.className = 'custom-player-controls';
+
+    const playBtn = document.createElement('button');
+    playBtn.className = 'cp-play';
+    playBtn.innerHTML = playSvg;
+
+    const timeEl = document.createElement('span');
+    timeEl.className = 'cp-time';
+    timeEl.textContent = '00:00 / 00:00';
+
+    const barWrap = document.createElement('div');
+    barWrap.className = 'cp-bar-wrap';
+    const bar = document.createElement('div');
+    bar.className = 'cp-bar';
+    const barFill = document.createElement('div');
+    barFill.className = 'cp-bar-fill';
+    bar.appendChild(barFill);
+    barWrap.appendChild(bar);
+
+    const volBtn = document.createElement('button');
+    volBtn.className = 'cp-vol';
+    volBtn.innerHTML = volSvg;
+
+    controls.appendChild(playBtn);
+    controls.appendChild(timeEl);
+    controls.appendChild(barWrap);
+    controls.appendChild(volBtn);
+    container.appendChild(controls);
+
+    // Use video element for video, audio for audio
+    const el = type === 'video' ? container._vid : media;
+    container._media = el;
+
+    el.addEventListener('loadedmetadata', () => {
+      timeEl.textContent = '00:00 / ' + cpFmtTime(el.duration);
+    });
+
+    el.addEventListener('timeupdate', () => {
+      const pct = el.duration ? (el.currentTime / el.duration) * 100 : 0;
+      barFill.style.width = pct + '%';
+      timeEl.textContent = cpFmtTime(el.currentTime) + ' / ' + cpFmtTime(el.duration || 0);
+    });
+
+    el.addEventListener('ended', () => {
+      playBtn.innerHTML = playSvg;
+    });
+
+    playBtn.addEventListener('click', () => {
+      if (el.paused) {
+        el.play();
+        playBtn.innerHTML = pauseSvg;
+      } else {
+        el.pause();
+        playBtn.innerHTML = playSvg;
+      }
+    });
+
+    barWrap.addEventListener('click', (e) => {
+      const rect = barWrap.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      if (el.duration) el.currentTime = pct * el.duration;
+    });
+
+    let muted = false;
+    volBtn.addEventListener('click', () => {
+      muted = !muted;
+      el.muted = muted;
+      volBtn.innerHTML = muted ? muteSvg : volSvg;
+    });
+
+    return container;
+  }
+
   // ---- Audio / Video record buttons ----
   document.querySelectorAll('.msg-record-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
@@ -3186,19 +3374,17 @@
           sendBtn.disabled = false;
           timerEl.textContent = formatTime(seconds) + ' recorded';
 
-          // Show preview with discard button
+          // Show custom player preview with discard button
           const wrap = document.createElement('div');
           wrap.className = 'msg-preview-wrap';
-          const el = document.createElement(mediaType === 'video' ? 'video' : 'audio');
-          el.src = URL.createObjectURL(blob);
-          el.controls = true;
-          if (mediaType === 'video') el.style.maxHeight = '200px';
-          wrap.appendChild(el);
+          const blobUrl = URL.createObjectURL(blob);
+          const player = buildCustomPlayer(blobUrl, mediaType);
+          wrap.appendChild(player);
           const discard = document.createElement('button');
           discard.className = 'msg-discard-btn';
           discard.textContent = 'Discard & re-record';
           discard.addEventListener('click', () => {
-            URL.revokeObjectURL(el.src);
+            URL.revokeObjectURL(blobUrl);
             previewEl.innerHTML = '';
             sendBtn._blob = null;
             sendBtn.disabled = true;
