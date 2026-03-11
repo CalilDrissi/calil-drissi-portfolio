@@ -1366,21 +1366,22 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     .post-nav-link {
       display: flex; align-items: center; gap: 12px;
       text-decoration: none; color: var(--fg-dim); position: relative;
-      transition: color 0.2s;
+      transition: color 0.2s; flex: 1; min-width: 0;
     }
     .post-nav-link:hover { color: var(--fg); }
     .post-nav-link svg { width: 16px; height: 16px; flex-shrink: 0; }
-    .post-nav-info { display: flex; flex-direction: column; }
+    .post-nav-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
     .post-nav-label {
       font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em;
       color: var(--fg-dim); font-family: var(--mono);
     }
     .post-nav-title {
       font-size: 13px; font-family: var(--mono); color: var(--fg);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;
     }
     .post-nav-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 3px;
-      width: 18px; height: 18px; text-decoration: none;
+      width: 18px; height: 18px; text-decoration: none; flex-shrink: 0;
     }
     .post-nav-grid span {
       background: rgba(255,255,255,0.3); border-radius: 1px;
@@ -1472,7 +1473,7 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
           <div class="post-nav-preview-excerpt">${prevPost.excerpt || ''}</div>
         </div>
       </div>
-    </a>` : '<div></div>'}
+    </a>` : '<div style="flex:1"></div>'}
 
     <a class="post-nav-grid" href="${prefix}/blog/" title="${lang === 'fr' ? 'Tous les articles' : 'All posts'}">
       <span></span><span></span><span></span><span></span>
@@ -1491,7 +1492,7 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
           <div class="post-nav-preview-excerpt">${nextPost.excerpt || ''}</div>
         </div>
       </div>
-    </a>` : '<div></div>'}
+    </a>` : '<div style="flex:1"></div>'}
   </nav>
 
   <nav class="toc" id="toc"></nav>
