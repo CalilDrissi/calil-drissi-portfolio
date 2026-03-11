@@ -1,6 +1,6 @@
 // Cloudflare Pages Function: message
 // Handles "Leave a Message" form submissions
-// ENV vars: GOOGLE_SERVICE_ACCOUNT_JSON, GOOGLE_DRIVE_FOLDER_ID, NOTIFICATION_EMAIL, RESEND_API_KEY
+// ENV vars: GOOGLE_SERVICE_ACCOUNT_JSON, GOOGLE_DRIVE_FOLDER_ID
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -152,77 +152,34 @@ async function uploadToGoogleDrive(accessToken, folderId, fileName, fileData, mi
   };
 }
 
-async function sendEmailNotification(apiKey, toEmail, senderName, senderEmail, messageText, messageType, driveLink) {
+async function sendFormSubmitNotification(senderName, senderEmail, messageText, messageType, driveLink) {
   const typeLabel = messageType.charAt(0).toUpperCase() + messageType.slice(1);
-  const timestamp = new Date().toISOString();
 
-  let mediaSection = '';
+  const payload = {
+    _subject: `New ${typeLabel} Message from ${senderName}`,
+    _replyto: senderEmail,
+    _captcha: 'false',
+    _template: 'table',
+    Name: senderName,
+    Email: senderEmail,
+    Type: typeLabel,
+    Message: messageText || '(no message)',
+  };
+
   if (driveLink) {
-    mediaSection = `
-      <tr>
-        <td style="padding:8px 16px;color:#888;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;">Attachment</td>
-        <td style="padding:8px 16px;"><a href="${driveLink}" style="color:#5e2bff;">${typeLabel} file on Google Drive</a></td>
-      </tr>`;
+    payload.Attachment = driveLink;
+    payload['Note'] = '📎 This submission includes a file. Check your Google Drive to view it.';
   }
 
-  let messageSection = '';
-  if (messageText) {
-    messageSection = `
-      <tr>
-        <td colspan="2" style="padding:16px;border-top:1px solid #222;">
-          <div style="color:#888;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Message</div>
-          <div style="color:#fff;font-size:14px;line-height:1.6;white-space:pre-wrap;">${messageText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
-        </td>
-      </tr>`;
-  }
-
-  const html = `
-    <div style="font-family:'DM Mono',monospace;background:#121212;color:#fff;padding:32px;">
-      <div style="max-width:560px;margin:0 auto;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:8px;overflow:hidden;">
-        <div style="padding:16px;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);">
-          <span style="font-size:12px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.06em;">New ${typeLabel} Message</span>
-        </div>
-        <table style="width:100%;border-collapse:collapse;">
-          <tr>
-            <td style="padding:8px 16px;color:#888;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;width:100px;">From</td>
-            <td style="padding:8px 16px;color:#fff;font-size:14px;">${senderName.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>
-          </tr>
-          <tr>
-            <td style="padding:8px 16px;color:#888;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;">Email</td>
-            <td style="padding:8px 16px;"><a href="mailto:${senderEmail}" style="color:#5e2bff;">${senderEmail}</a></td>
-          </tr>
-          <tr>
-            <td style="padding:8px 16px;color:#888;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;">Type</td>
-            <td style="padding:8px 16px;color:#fff;font-size:14px;">${typeLabel}</td>
-          </tr>
-          <tr>
-            <td style="padding:8px 16px;color:#888;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;">Time</td>
-            <td style="padding:8px 16px;color:rgba(255,255,255,0.6);font-size:12px;">${timestamp}</td>
-          </tr>
-          ${mediaSection}
-          ${messageSection}
-        </table>
-      </div>
-    </div>`;
-
-  const res = await fetch('https://api.resend.com/emails', {
+  const res = await fetch('https://formsubmit.co/ajax/khalil@drissi.org', {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: 'Portfolio <noreply@khalildrissi.com>',
-      to: [toEmail],
-      subject: `New ${typeLabel} Message from ${senderName}`,
-      html: html,
-      reply_to: senderEmail,
-    }),
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(payload),
   });
 
   const result = await res.json();
-  if (!res.ok) {
-    throw new Error('Resend email failed: ' + JSON.stringify(result));
+  if (!result.success) {
+    throw new Error('FormSubmit failed: ' + JSON.stringify(result));
   }
   return result;
 }
@@ -231,11 +188,6 @@ async function sendEmailNotification(apiKey, toEmail, senderName, senderEmail, m
 
 export async function onRequestPost(context) {
   const { env, request } = context;
-
-  // Validate env
-  if (!env.RESEND_API_KEY || !env.NOTIFICATION_EMAIL) {
-    return jsonResponse({ error: 'Server not configured' }, 500);
-  }
 
   let formData;
   try {
@@ -305,20 +257,12 @@ export async function onRequestPost(context) {
     }
   }
 
-  // Send email notification
+  // Send notification via FormSubmit
   try {
-    await sendEmailNotification(
-      env.RESEND_API_KEY,
-      env.NOTIFICATION_EMAIL,
-      name,
-      email,
-      message,
-      type,
-      driveLink
-    );
+    await sendFormSubmitNotification(name, email, message, type, driveLink);
   } catch (err) {
-    console.error('Email notification error:', err);
-    return jsonResponse({ error: 'Failed to send notification' }, 500);
+    console.error('FormSubmit notification error:', err);
+    // Don't fail the request — Drive upload may have succeeded
   }
 
   return jsonResponse({ success: true });

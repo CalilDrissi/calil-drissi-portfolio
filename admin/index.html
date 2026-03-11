@@ -972,9 +972,9 @@
         </div>
 
         <div class="section-block">
-          <h3>Awards Gallery</h3>
-          <div id="rep-awards-gallery"></div>
-          <button class="repeatable-add" onclick="addAwardGalleryItem()">+ Add Award</button>
+          <h3>Open Source Projects</h3>
+          <div id="rep-opensource"></div>
+          <button class="repeatable-add" onclick="addOpenSourceItem()">+ Add Project</button>
         </div>
 
         <div class="section-block">
@@ -991,12 +991,12 @@
           </div>
           <div class="field-row">
             <div class="field">
-              <label>Awards Tab Label</label>
-              <input type="text" data-path="awardsTab.label" />
+              <label>Open Source Tab Label</label>
+              <input type="text" data-path="openSourceTab.label" />
             </div>
             <div class="field">
-              <label>Awards Tab Count</label>
-              <input type="text" data-path="awardsTab.count" />
+              <label>Open Source Tab Count</label>
+              <input type="text" data-path="openSourceTab.count" />
             </div>
           </div>
           <div class="field-row">
@@ -1345,8 +1345,8 @@ function populatePortfolioForm() {
   // Projects
   renderProjects(data.projects || []);
 
-  // Awards gallery
-  renderAwardsGallery(data.awards || []);
+  // Open source projects
+  renderOpenSource(data.openSource || []);
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1643,44 +1643,54 @@ function collectProjects() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   AWARDS GALLERY
+   OPEN SOURCE PROJECTS
    ═══════════════════════════════════════════════════════ */
-function renderAwardsGallery(items) {
-  var container = document.getElementById('rep-awards-gallery');
+function renderOpenSource(items) {
+  var container = document.getElementById('rep-opensource');
   container.innerHTML = '';
   items.forEach(function(item, i) {
     var div = document.createElement('div');
     div.className = 'repeatable-pair';
+    div.style.flexWrap = 'wrap';
     div.innerHTML =
-      '<input type="text" placeholder="label" value="' + escapeAttr(item.label || '') + '" data-award-gal="' + i + '" data-award-key="label" />' +
-      '<input type="text" placeholder="image URL" value="' + escapeAttr(item.img || '') + '" data-award-gal="' + i + '" data-award-key="img" />' +
-      '<button class="btn-icon remove" onclick="removeAwardGalleryItem(' + i + ')" title="Remove">&times;</button>';
+      '<input type="text" placeholder="Label" value="' + escapeAttr(item.label || '') + '" data-os="' + i + '" data-os-key="label" style="flex:1;min-width:120px" />' +
+      '<input type="text" placeholder="Stars (e.g. 1.2k)" value="' + escapeAttr(item.stars || '') + '" data-os="' + i + '" data-os-key="stars" style="width:80px" />' +
+      '<input type="text" placeholder="Repo URL" value="' + escapeAttr(item.url || '') + '" data-os="' + i + '" data-os-key="url" style="flex:2;min-width:200px" />' +
+      '<input type="text" placeholder="Image URL" value="' + escapeAttr(item.img || '') + '" data-os="' + i + '" data-os-key="img" style="flex:2;min-width:200px" />' +
+      '<input type="text" placeholder="Description" value="' + escapeAttr(item.desc || '') + '" data-os="' + i + '" data-os-key="desc" style="flex:3;min-width:250px" />' +
+      '<button class="btn-icon remove" onclick="removeOpenSourceItem(' + i + ')" title="Remove">&times;</button>';
     container.appendChild(div);
   });
 }
 
-function addAwardGalleryItem() {
-  collectAwardsGallery();
-  if (!portfolioData.awards) portfolioData.awards = [];
-  portfolioData.awards.push({ label: '', img: '' });
-  renderAwardsGallery(portfolioData.awards);
+function addOpenSourceItem() {
+  collectOpenSource();
+  if (!portfolioData.openSource) portfolioData.openSource = [];
+  portfolioData.openSource.push({ label: '', desc: '', stars: '', url: '', img: '' });
+  renderOpenSource(portfolioData.openSource);
 }
 
-function removeAwardGalleryItem(index) {
-  collectAwardsGallery();
-  portfolioData.awards.splice(index, 1);
-  renderAwardsGallery(portfolioData.awards);
+function removeOpenSourceItem(index) {
+  collectOpenSource();
+  portfolioData.openSource.splice(index, 1);
+  renderOpenSource(portfolioData.openSource);
 }
 
-function collectAwardsGallery() {
-  var container = document.getElementById('rep-awards-gallery');
+function collectOpenSource() {
+  var container = document.getElementById('rep-opensource');
   var rows = container.querySelectorAll('.repeatable-pair');
   var arr = [];
   rows.forEach(function(row) {
     var inputs = row.querySelectorAll('input');
-    arr.push({ label: inputs[0].value, img: inputs[1].value });
+    arr.push({
+      label: inputs[0].value,
+      stars: inputs[1].value,
+      url: inputs[2].value,
+      img: inputs[3].value,
+      desc: inputs[4].value
+    });
   });
-  portfolioData.awards = arr;
+  portfolioData.openSource = arr;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1716,8 +1726,8 @@ function collectAllPortfolio() {
   // Collect projects
   collectProjects();
 
-  // Collect awards gallery
-  collectAwardsGallery();
+  // Collect open source projects
+  collectOpenSource();
 }
 
 async function savePortfolio() {

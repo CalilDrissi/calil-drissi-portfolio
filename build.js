@@ -253,7 +253,7 @@ function render(template, data, lang) {
     data.about.titlebarText
   );
   html = html.replace(
-    /<a class="win-action-btn" href="mailto:hello@khalildrissi\.com">Email ↗<\/a>/,
+    /<a class="win-action-btn" href="mailto:khalil@drissi\.org">Email ↗<\/a>/,
     `<a class="win-action-btn" href="${data.about.emailBtn.url}">${data.about.emailBtn.label}</a>`
   );
   html = html.replace(
@@ -364,13 +364,13 @@ function blogListingHTML(data, posts, lang) {
   <link rel="canonical" href="https://khalildrissi.com${prefix}/blog/" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
       --bg: #000000; --sidebar-bg: #1a1a1a; --fg: #ffffff; --fg-dim: rgba(255,255,255,0.6);
       --fg-faint: rgba(255,255,255,0.22); --accent: #a882ff;
-      --mono: 'DM Mono', monospace; --serif: 'Instrument Serif', serif;
+      --mono: 'DM Mono', monospace; --sans: 'Inter', sans-serif;
     }
     html { -webkit-font-smoothing: antialiased; }
     body { background: var(--bg); color: var(--fg); font-family: var(--mono); font-size: 13px; line-height: 1.6; overflow: hidden; height: 100vh; }
@@ -434,7 +434,7 @@ function blogListingHTML(data, posts, lang) {
       width: 160px; height: 90px; object-fit: cover; border-radius: 4px; margin-bottom: 10px;
     }
     .hover-card-title {
-      font-family: var(--serif); font-size: 16px; font-style: italic; margin-bottom: 4px;
+      font-family: var(--sans); font-size: 15px; font-weight: 500; margin-bottom: 4px;
     }
     .hover-card-date { font-size: 10px; color: var(--fg-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
     .hover-card-excerpt {
@@ -500,7 +500,7 @@ function blogListingHTML(data, posts, lang) {
     }
     .post-item:hover { background: rgba(255,255,255,0.04); }
     .post-item-title {
-      font-family: var(--serif); font-size: 14px; font-style: italic; margin-bottom: 2px;
+      font-family: var(--sans); font-size: 13px; font-weight: 500; margin-bottom: 2px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .post-item-date { font-size: 10px; color: var(--fg-dim); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
@@ -1216,13 +1216,13 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
   <link rel="canonical" href="https://khalildrissi.com${prefix}/blog/${post.slug}/" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
       --bg: #121212; --fg: #ffffff; --fg-dim: rgba(255,255,255,0.6);
       --fg-faint: rgba(255,255,255,0.22); --accent: #5e2bff;
-      --mono: 'DM Mono', monospace; --serif: 'Instrument Serif', serif;
+      --mono: 'DM Mono', monospace; --sans: 'Inter', sans-serif;
     }
     html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
     body { background: var(--bg); color: var(--fg); font-family: var(--mono); font-size: 13px; line-height: 1.7; }
@@ -1244,8 +1244,8 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
       font-size: 10px; padding: 2px 8px; border: 1px solid var(--fg-faint); border-radius: 3px;
       color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.03em;
     }
-    .post-title { font-family: var(--serif); font-size: clamp(28px, 5vw, 40px); font-weight: 400; font-style: italic; margin-bottom: 32px; line-height: 1.2; }
-    .post-body h2 { font-family: var(--serif); font-size: 22px; font-weight: 400; font-style: italic; margin: 32px 0 12px; }
+    .post-title { font-family: var(--sans); font-size: clamp(28px, 5vw, 40px); font-weight: 700; margin-bottom: 32px; line-height: 1.2; }
+    .post-body h2 { font-family: var(--sans); font-size: 22px; font-weight: 600; margin: 32px 0 12px; }
     .post-body h3 { font-size: 14px; font-weight: 500; margin: 24px 0 8px; text-transform: uppercase; letter-spacing: 0.03em; }
     .post-body p { color: var(--fg-dim); margin-bottom: 16px; }
     .post-body ul, .post-body ol { color: var(--fg-dim); margin: 0 0 16px 20px; }
