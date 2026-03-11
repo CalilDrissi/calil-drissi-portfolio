@@ -917,7 +917,11 @@ function blogListingHTML(data, posts, lang) {
 
     const node = getNodeAt(mx, my);
     if (node !== hoveredNode) {
+      // Unpin previously hovered node (unless it's being dragged)
+      if (hoveredNode && hoveredNode !== dragNode) hoveredNode.pinned = false;
       hoveredNode = node;
+      // Pin hovered node so it stops moving
+      if (node) node.pinned = true;
       canvas.style.cursor = node ? 'pointer' : 'grab';
       if (node) showHoverCard(node, e.clientX, e.clientY);
       else hideHoverCard();
@@ -976,6 +980,7 @@ function blogListingHTML(data, posts, lang) {
   }, { passive: false });
 
   canvas.addEventListener('mouseleave', () => {
+    if (hoveredNode && hoveredNode !== dragNode) hoveredNode.pinned = false;
     hoveredNode = null;
     hideHoverCard();
   });

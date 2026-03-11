@@ -2684,7 +2684,7 @@
 
   // ---- ABOUT ME WINDOW ----
   const aboutPopup = document.getElementById('aboutPopup');
-  const aboutWin = WM.register(aboutPopup, 'About Me');
+  const aboutWin = WM.register(aboutPopup, LANG === 'fr' ? 'À propos' : 'About Me');
   aboutWin.persistent = true;
 
   // Pill follows cursor
@@ -3227,6 +3227,14 @@
         else sendBtn.textContent = "Envoyer l'enregistrement";
       }
     });
+    // Record & mute button titles
+    t.querySelectorAll('.msg-record-btn').forEach(btn => {
+      if (btn.dataset.media === 'audio') btn.title = 'Enregistrer audio';
+      if (btn.dataset.media === 'video') btn.title = 'Enregistrer vidéo';
+    });
+    // Chat input placeholder
+    const chatIn = document.getElementById('chatInput');
+    if (chatIn) chatIn.placeholder = 'Posez une question sur le travail, les compétences, la disponibilité de Calil...';
   }
 
   const msgWin = WM.register(messagePopup, LANG === 'fr' ? 'Laisser un message' : 'Leave a Message');
@@ -3506,7 +3514,7 @@
         item.className = 'msg-file-item';
         item.innerHTML = '<span class="msg-file-item-name">' + file.name + '</span>'
           + '<span class="msg-file-item-size">' + formatSize(file.size) + '</span>'
-          + '<button class="msg-file-item-remove" title="Remove">&times;</button>';
+          + '<button class="msg-file-item-remove" title="' + (LANG === 'fr' ? 'Supprimer' : 'Remove') + '">&times;</button>';
         item.querySelector('.msg-file-item-remove').addEventListener('click', () => {
           panel._attachedFiles.splice(idx, 1);
           renderFileList();
@@ -3610,7 +3618,7 @@
           panel._attachedFiles = [];
           btn.disabled = (type === 'audio' || type === 'video');
         } else {
-          statusEl.textContent = data.error || 'Failed to send';
+          statusEl.textContent = data.error || _t('Failed to send');
           statusEl.className = 'msg-status error';
           btn.disabled = false;
         }
@@ -3808,6 +3816,7 @@
   var termBtn = document.getElementById('terminalChallengeBtn');
 
   var termMuteBtn = document.getElementById('termMuteBtn');
+  if (LANG === 'fr' && termMuteBtn) termMuteBtn.title = 'Activer/Désactiver la musique';
 
   // ---- GAME i18n ----
   var isFR = LANG === 'fr';
@@ -4357,6 +4366,10 @@
         });
       }
       var exitDirs = Object.keys(room.exits);
+      if (isFR) {
+        var dirFR = {north:'nord',south:'sud',east:'est',west:'ouest',up:'haut',down:'bas',enter:'entrer',exit:'sortir'};
+        exitDirs = exitDirs.map(function(d) { return dirFR[d] || d; });
+      }
       addLine('');
       addLine((gt('exits') || 'Exits: ') + exitDirs.join(', '), 'dim');
     }
@@ -4845,7 +4858,7 @@
         });
       }
       if (!found) {
-        addLine('You don\'t see that here.', 'red');
+        addLine(gt('dontSee') || "You don't see that here.", 'red');
       }
       return;
     }
