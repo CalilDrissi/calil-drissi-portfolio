@@ -1286,6 +1286,7 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
       height: 32px; display: flex; align-items: center;
     }
     .toc-item:hover .toc-label { max-width: 200px; padding: 0 10px; }
+    .toc-item.active { gap: 6px; }
     .toc-item.active .toc-num { background: var(--accent); color: #fff; }
     .toc-item.active .toc-label { max-width: 200px; padding: 0 10px; }
 
