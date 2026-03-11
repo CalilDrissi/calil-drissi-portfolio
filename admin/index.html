@@ -1637,7 +1637,7 @@ function collectProjects() {
         proj[key] = el.value;
       }
     });
-    arr.push(proj);
+    if (proj.title && proj.title.trim()) arr.push(proj);
   });
   portfolioData.projects = arr;
 }
@@ -1744,7 +1744,7 @@ function collectOpenSource() {
         item[key] = el.value;
       }
     });
-    arr.push(item);
+    if (item.title && item.title.trim()) arr.push(item);
   });
   portfolioData.openSource = arr;
 }
