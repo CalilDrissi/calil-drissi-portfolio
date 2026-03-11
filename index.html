@@ -3665,9 +3665,9 @@
       <div class="msg-field"><label>Email</label><input type="email" id="schedEmail" placeholder="you@example.com" /></div>
     </div>
     <div class="msg-field"><label>Company / Project</label><input type="text" id="schedCompany" placeholder="Company or project name" /></div>
-    <div class="msg-field">
-      <label>Preferred date &amp; time</label>
-      <input type="text" id="schedDate" placeholder="e.g. March 15, 2pm GMT+1" />
+    <div class="msg-row">
+      <div class="msg-field"><label>Preferred date</label><input type="date" id="schedDate" style="color-scheme:dark;" /></div>
+      <div class="msg-field"><label>Preferred time</label><input type="time" id="schedTime" style="color-scheme:dark;" /></div>
     </div>
     <div class="msg-field"><label>What would you like to discuss?</label><textarea id="schedTopic" placeholder="Brief description of your project or topic..." rows="3"></textarea></div>
     <button class="msg-send-btn" id="schedSubmit">Send Request</button>
@@ -3734,12 +3734,12 @@
     labels[0].textContent = 'Nom';
     labels[1].textContent = 'Courriel';
     labels[2].textContent = 'Entreprise / Projet';
-    labels[3].textContent = 'Date et heure souhaitées';
-    labels[4].textContent = 'De quoi souhaitez-vous discuter ?';
+    labels[3].textContent = 'Date souhaitée';
+    labels[4].textContent = 'Heure souhaitée';
+    labels[5].textContent = 'De quoi souhaitez-vous discuter ?';
     popup.querySelector('#schedName').placeholder = 'Votre nom';
     popup.querySelector('#schedEmail').placeholder = 'vous@exemple.com';
     popup.querySelector('#schedCompany').placeholder = 'Nom de l\'entreprise ou du projet';
-    popup.querySelector('#schedDate').placeholder = 'ex. 15 mars, 14h GMT+1';
     popup.querySelector('#schedTopic').placeholder = 'Brève description de votre projet ou sujet...';
     popup.querySelector('#schedSubmit').textContent = 'Envoyer la demande';
   }
@@ -3755,7 +3755,8 @@
     var name = document.getElementById('schedName').value.trim();
     var email = document.getElementById('schedEmail').value.trim();
     var company = document.getElementById('schedCompany').value.trim();
-    var date = document.getElementById('schedDate').value.trim();
+    var date = document.getElementById('schedDate').value + ' ' + (document.getElementById('schedTime').value || '');
+    date = date.trim();
     var topic = document.getElementById('schedTopic').value.trim();
     var status = document.getElementById('schedStatus');
     var btn = this;
@@ -3786,6 +3787,7 @@
           status.className = 'msg-status success';
           document.getElementById('schedTopic').value = '';
           document.getElementById('schedDate').value = '';
+          document.getElementById('schedTime').value = '';
         } else {
           status.textContent = d.error || _t('Failed to send');
           status.className = 'msg-status error';
