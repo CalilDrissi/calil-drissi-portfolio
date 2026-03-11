@@ -2080,7 +2080,7 @@
       <div class="chat-messages" id="chatMessages">
         <div class="chat-msg bot">
           <div class="msg-sender">Alfred</div>
-          Good day! 👋 Master Khalil is not available right now, but you can ask me anything you need to know and I will answer you about Master Khalil. I will let him know about our conversation so he can get back to you.
+          Good day. Master Khalil is away at the moment. Feel free to ask me anything, I'm well briefed on his work and availability.
           <div class="msg-time">Just now</div>
         </div>
       </div>
@@ -3241,7 +3241,7 @@
       chatIntro.querySelector('.msg-sender').textContent = 'Alfred';
       chatIntro.childNodes.forEach(n => {
         if (n.nodeType === 3 && n.textContent.trim().length > 10) {
-          n.textContent = "\n          Bonjour ! 👋 Maître Khalil n'est pas disponible en ce moment, mais vous pouvez me poser toutes vos questions et je vous répondrai à propos de Maître Khalil. Je lui transmettrai notre conversation pour qu'il puisse revenir vers vous.\n          ";
+          n.textContent = "\n          Bonjour. Maître Khalil est absent pour le moment. N'hésitez pas à me poser vos questions, je suis bien informé sur son travail et sa disponibilité.\n          ";
         }
       });
     }
