@@ -500,10 +500,21 @@ function blogListingHTML(data, posts, lang) {
       color: rgba(255,255,255,0.25); font-family: var(--mono); flex-shrink: 0;
     }
 
-    .sidebar-tags {
-      padding: 6px 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.08);
-      display: flex; flex-wrap: wrap; gap: 5px; flex-shrink: 0;
+    .sidebar-tags-header {
+      padding: 6px 16px 0; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
     }
+    .sidebar-tags-header span { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.3); font-family: var(--mono); }
+    .sidebar-tags-toggle {
+      font-size: 9px; color: var(--accent); cursor: pointer; background: none; border: none;
+      font-family: var(--mono); padding: 2px 4px; letter-spacing: 0.02em;
+    }
+    .sidebar-tags-toggle:hover { text-decoration: underline; }
+    .sidebar-tags {
+      padding: 4px 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; flex-wrap: wrap; gap: 5px; flex-shrink: 0;
+      max-height: 56px; overflow: hidden; transition: max-height 0.3s ease;
+    }
+    .sidebar-tags.expanded { max-height: 400px; }
     .tag-pill {
       font-size: 10px; padding: 2px 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
       color: rgba(255,255,255,0.4); cursor: pointer; transition: all 0.2s;
@@ -587,6 +598,10 @@ function blogListingHTML(data, posts, lang) {
       </div>
       <div class="sidebar-categories" id="categoryFilters"></div>
       <div class="sidebar-filter-label">${lang === 'fr' ? 'Tags' : 'Tags'}</div>
+      <div class="sidebar-tags-header">
+        <span>${lang === 'fr' ? 'Tags' : 'Tags'}</span>
+        <button class="sidebar-tags-toggle" id="tagToggle">${lang === 'fr' ? 'Voir plus' : 'Show more'}</button>
+      </div>
       <div class="sidebar-tags" id="tagFilters"></div>
       <div class="active-filters" id="activeFilters">
         <span id="filterLabel"></span>
@@ -684,15 +699,19 @@ function blogListingHTML(data, posts, lang) {
   const DAMPING = 0.85;
   const MIN_DIST = 30;
   const BREATHING_STRENGTH = 0.008; // very subtle drift like Obsidian
-  let simAlpha = 1;
+  let simAlpha = 0.15; // start gentle, ramp up smoothly
   let simTime = 0;
+  let entranceFade = 0; // visual fade-in 0→1
 
   function simulate() {
     simTime++;
 
+    // Smooth entrance: ramp up visual opacity
+    if (entranceFade < 1) entranceFade = Math.min(1, entranceFade + 0.012);
+
     // Keep a minimum alpha for breathing — never fully stop
     const effectiveAlpha = Math.max(simAlpha, 0.002);
-    if (simAlpha > 0.001) simAlpha *= 0.985;
+    if (simAlpha > 0.001) simAlpha *= 0.992;
 
     for (let i = 0; i < nodes.length; i++) {
       if (nodes[i].pinned) continue;
@@ -734,10 +753,11 @@ function blogListingHTML(data, posts, lang) {
       if (!b.pinned) { b.vx -= fx; b.vy -= fy; }
     }
 
-    // Apply velocity with damping
+    // Apply velocity with damping (extra damping during entrance for smoothness)
+    const effectiveDamping = simTime < 120 ? DAMPING * 0.92 : DAMPING;
     for (const n of nodes) {
       if (n.pinned) continue;
-      n.vx *= DAMPING; n.vy *= DAMPING;
+      n.vx *= effectiveDamping; n.vy *= effectiveDamping;
       n.x += n.vx; n.y += n.vy;
     }
   }
@@ -748,6 +768,9 @@ function blogListingHTML(data, posts, lang) {
     // Pure black background
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, W, H);
+
+    // Smooth entrance fade
+    const eFade = entranceFade;
 
     const isFiltered = activeCategoryFilter || activeTagFilters.size > 0 || searchQuery.length > 0;
     const hIdx = hoveredNode !== null ? hoveredNode.postIndex : sidebarHoverIndex;
@@ -771,11 +794,11 @@ function blogListingHTML(data, posts, lang) {
         if ((e.source === hIdx || e.target === hIdx)) {
           alpha = 0.8;
           width = 1.5;
-          ctx.strokeStyle = 'rgba(' + NODE_COLOR_R + ',' + NODE_COLOR_G + ',' + NODE_COLOR_B + ',' + alpha + ')';
+          ctx.strokeStyle = 'rgba(' + NODE_COLOR_R + ',' + NODE_COLOR_G + ',' + NODE_COLOR_B + ',' + (alpha * eFade) + ')';
         } else {
           alpha = 0.06;
           width = 0.5;
-          ctx.strokeStyle = 'rgba(255,255,255,' + alpha + ')';
+          ctx.strokeStyle = 'rgba(255,255,255,' + (alpha * eFade) + ')';
         }
       } else if (isFiltered) {
         if (!visibleIndices.has(e.source) || !visibleIndices.has(e.target)) {
@@ -784,11 +807,11 @@ function blogListingHTML(data, posts, lang) {
           alpha = 0.25;
         }
         width = 0.8;
-        ctx.strokeStyle = 'rgba(255,255,255,' + alpha + ')';
+        ctx.strokeStyle = 'rgba(255,255,255,' + (alpha * eFade) + ')';
       } else {
         alpha = 0.18;
         width = 0.8;
-        ctx.strokeStyle = 'rgba(255,255,255,' + alpha + ')';
+        ctx.strokeStyle = 'rgba(255,255,255,' + (alpha * eFade) + ')';
       }
 
       ctx.beginPath();
@@ -824,7 +847,7 @@ function blogListingHTML(data, posts, lang) {
         const glowR = r * 3.5;
         const screenGlowR = glowR * camZoom;
         const grad = ctx.createRadialGradient(s.x, s.y, screenR * 0.3, s.x, s.y, screenGlowR);
-        grad.addColorStop(0, 'rgba(' + NODE_COLOR_R + ',' + NODE_COLOR_G + ',' + NODE_COLOR_B + ',0.35)');
+        grad.addColorStop(0, 'rgba(' + NODE_COLOR_R + ',' + NODE_COLOR_G + ',' + NODE_COLOR_B + ',' + (0.35 * eFade) + ')');
         grad.addColorStop(1, 'rgba(' + NODE_COLOR_R + ',' + NODE_COLOR_G + ',' + NODE_COLOR_B + ',0)');
         ctx.fillStyle = grad;
         ctx.beginPath();
@@ -835,7 +858,7 @@ function blogListingHTML(data, posts, lang) {
       // Node circle — filled dot
       ctx.beginPath();
       ctx.arc(s.x, s.y, screenR, 0, Math.PI * 2);
-      ctx.globalAlpha = nodeAlpha;
+      ctx.globalAlpha = nodeAlpha * eFade;
       ctx.fillStyle = (isHovered || isFocused) ? '#ffffff' : NODE_COLOR;
       ctx.fill();
       ctx.globalAlpha = 1;
@@ -855,7 +878,7 @@ function blogListingHTML(data, posts, lang) {
         labelAlpha = 0.55;
       }
 
-      ctx.globalAlpha = labelAlpha;
+      ctx.globalAlpha = labelAlpha * eFade;
       ctx.fillStyle = '#ffffff';
       ctx.font = (isHovered ? '500 ' : '400 ') + Math.max(10, 11 / Math.max(camZoom * 0.6, 0.5)) + 'px "Space Grotesk", sans-serif';
       ctx.textAlign = 'left';
@@ -1130,9 +1153,13 @@ function blogListingHTML(data, posts, lang) {
     categoryFilters.appendChild(pill);
   });
 
-  // --- Sidebar: Tags ---
+  // --- Sidebar: Tags (top 20 by frequency) ---
   const tagFilters = document.getElementById('tagFilters');
-  allTags.forEach(tag => {
+  const tagToggle = document.getElementById('tagToggle');
+  const tagCounts = {};
+  POSTS.forEach(p => p.tags.forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; }));
+  const topTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 20).map(e => e[0]).sort();
+  topTags.forEach(tag => {
     const pill = document.createElement('button');
     pill.className = 'tag-pill';
     pill.textContent = tag;
@@ -1143,6 +1170,10 @@ function blogListingHTML(data, posts, lang) {
       applyFilters();
     });
     tagFilters.appendChild(pill);
+  });
+  tagToggle.addEventListener('click', () => {
+    const expanded = tagFilters.classList.toggle('expanded');
+    tagToggle.textContent = expanded ? '${lang === 'fr' ? 'Voir moins' : 'Show less'}' : '${lang === 'fr' ? 'Voir plus' : 'Show more'}';
   });
 
   // --- Sidebar: Search ---

@@ -23,6 +23,39 @@ async function wpAPI(method, endpoint, body) {
   return data;
 }
 
+// Upload a featured image from Picsum (free, no API key needed)
+async function uploadFeaturedImage(postTitle, index) {
+  try {
+    // Use a deterministic seed from post index for consistent images
+    const width = 1200, height = 630;
+    const imageUrl = `https://picsum.photos/seed/blog${index}/${width}/${height}`;
+    const imgRes = await fetch(imageUrl, { redirect: 'follow' });
+    if (!imgRes.ok) throw new Error(`Image fetch failed: ${imgRes.status}`);
+    const buffer = Buffer.from(await imgRes.arrayBuffer());
+    const filename = `blog-cover-${index}.jpg`;
+
+    const uploadRes = await fetch(`${WP_URL}/wp-json/wp/v2/media`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${AUTH}`,
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Type': 'image/jpeg',
+      },
+      body: buffer,
+    });
+    const media = await uploadRes.json();
+    if (!uploadRes.ok) throw new Error(`Upload failed: ${JSON.stringify(media)}`);
+
+    // Set alt text
+    await wpAPI('POST', `media/${media.id}`, { alt_text: postTitle });
+
+    return media.id;
+  } catch (e) {
+    console.log(`    ⚠ Image upload failed: ${e.message.substring(0, 80)}`);
+    return null;
+  }
+}
+
 async function getOrCreateTerm(taxonomy, name) {
   const search = await wpAPI('GET', `${taxonomy}?search=${encodeURIComponent(name)}&per_page=5`);
   const found = search.find(t => t.name.toLowerCase() === name.toLowerCase());
@@ -996,12 +1029,17 @@ const frPosts = [
 
   console.log('\n--- Creating English Posts ---\n');
   const enCreated = [];
-  for (const post of enPosts) {
+  for (let idx = 0; idx < enPosts.length; idx++) {
+    const post = enPosts[idx];
     try {
       const catId = catIds[post.category] ? [catIds[post.category]] : [];
       const tagIdList = post.tags.map(t => tagIds[t]).filter(Boolean);
 
-      const created = await wpAPI('POST', 'posts', {
+      // Upload featured image
+      console.log(`  📷 Uploading cover image for [EN] ${post.title}...`);
+      const featuredMediaId = await uploadFeaturedImage(post.title, idx);
+
+      const postData = {
         title: post.title,
         slug: post.slug,
         content: post.content,
@@ -1010,7 +1048,10 @@ const frPosts = [
         categories: catId,
         tags: tagIdList,
         lang: 'en',
-      });
+      };
+      if (featuredMediaId) postData.featured_media = featuredMediaId;
+
+      const created = await wpAPI('POST', 'posts', postData);
       enCreated.push({ id: created.id, slug: post.slug });
       console.log(`  ✓ [EN] ${post.title} (ID: ${created.id})`);
     } catch (e) {
@@ -1020,12 +1061,17 @@ const frPosts = [
 
   console.log('\n--- Creating French Posts ---\n');
   const frCreated = [];
-  for (const post of frPosts) {
+  for (let idx = 0; idx < frPosts.length; idx++) {
+    const post = frPosts[idx];
     try {
       const catId = catIds[post.category] ? [catIds[post.category]] : [];
       const tagIdList = post.tags.map(t => tagIds[t]).filter(Boolean);
 
-      const created = await wpAPI('POST', 'posts', {
+      // Upload featured image (offset by 20 to get different images)
+      console.log(`  📷 Uploading cover image for [FR] ${post.title}...`);
+      const featuredMediaId = await uploadFeaturedImage(post.title, idx + 20);
+
+      const postData = {
         title: post.title,
         slug: post.slug,
         content: post.content,
@@ -1034,7 +1080,10 @@ const frPosts = [
         categories: catId,
         tags: tagIdList,
         lang: 'fr',
-      });
+      };
+      if (featuredMediaId) postData.featured_media = featuredMediaId;
+
+      const created = await wpAPI('POST', 'posts', postData);
       frCreated.push({ id: created.id, slug: post.slug });
       console.log(`  ✓ [FR] ${post.title} (ID: ${created.id})`);
     } catch (e) {
