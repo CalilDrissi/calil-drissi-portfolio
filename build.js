@@ -1762,12 +1762,14 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
       }
       if (chunk) chunks.push(chunk);
       var currentChunk = 0;
-      var changingSpeed = false;
+      var speakGeneration = 0;
 
       function speakFrom(idx) {
         synth.cancel();
         currentChunk = idx;
+        var gen = ++speakGeneration;
         function speakNext() {
+          if (gen !== speakGeneration) return;
           if (currentChunk >= chunks.length) {
             stopSpeech();
             return;
@@ -1776,11 +1778,13 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
           utterance.lang = '${lang === 'fr' ? 'fr-FR' : 'en-US'}';
           utterance.rate = speeds[speedIdx];
           utterance.onend = function() {
+            if (gen !== speakGeneration) return;
             currentChunk++;
             speakNext();
           };
           utterance.onerror = function(e) {
-            if (e.error !== 'canceled' && !changingSpeed) stopSpeech();
+            if (gen !== speakGeneration) return;
+            if (e.error !== 'canceled') stopSpeech();
           };
           synth.speak(utterance);
         }
@@ -1832,11 +1836,7 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
         speedIdx = (speedIdx + 1) % speeds.length;
         speedBtn.textContent = speeds[speedIdx] + '\\u00d7';
         if (playing && !paused) {
-          // Resume from current chunk at new speed, keep progress
-          changingSpeed = true;
           speakFrom(currentChunk);
-          changingSpeed = false;
-          // Adjust timer to account for speed change
           startTime = Date.now() - (elapsed * 1000 * (oldSpeed / speeds[speedIdx]));
         }
       });
