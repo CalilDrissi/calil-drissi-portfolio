@@ -364,13 +364,13 @@ function blogListingHTML(data, posts, lang) {
   <link rel="canonical" href="https://khalildrissi.com${prefix}/blog/" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
       --bg: #000000; --sidebar-bg: #1a1a1a; --fg: #ffffff; --fg-dim: rgba(255,255,255,0.6);
       --fg-faint: rgba(255,255,255,0.22); --accent: #a882ff;
-      --mono: 'DM Mono', monospace; --sans: 'Inter', sans-serif;
+      --mono: 'DM Mono', monospace; --sans: 'Inter', sans-serif; --display: 'Space Grotesk', sans-serif;
     }
     html { -webkit-font-smoothing: antialiased; }
     body { background: var(--bg); color: var(--fg); font-family: var(--mono); font-size: 13px; line-height: 1.6; overflow: hidden; height: 100vh; }
@@ -434,7 +434,7 @@ function blogListingHTML(data, posts, lang) {
       width: 160px; height: 90px; object-fit: cover; border-radius: 4px; margin-bottom: 10px;
     }
     .hover-card-title {
-      font-family: var(--sans); font-size: 15px; font-weight: 500; margin-bottom: 4px;
+      font-family: var(--display); font-size: 15px; font-weight: 300; margin-bottom: 4px; letter-spacing: -0.01em;
     }
     .hover-card-date { font-size: 10px; color: var(--fg-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
     .hover-card-excerpt {
@@ -500,7 +500,7 @@ function blogListingHTML(data, posts, lang) {
     }
     .post-item:hover { background: rgba(255,255,255,0.04); }
     .post-item-title {
-      font-family: var(--sans); font-size: 13px; font-weight: 500; margin-bottom: 2px;
+      font-family: var(--display); font-size: 13px; font-weight: 300; margin-bottom: 2px; letter-spacing: -0.01em;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .post-item-date { font-size: 10px; color: var(--fg-dim); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
