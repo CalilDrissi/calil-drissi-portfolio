@@ -16,9 +16,18 @@
     "whatIDo": "Ce que je fais",
     "whatIDoDesc": "Je conçois et construis des logiciels.",
     "stats": [
-      { "value": "Senior", "label": "Développeur." },
-      { "value": "Toute", "label": "Plateforme, Toute Échelle." },
-      { "value": "Ouvert", "label": "À la Collaboration." }
+      {
+        "value": "Senior",
+        "label": "Développeur."
+      },
+      {
+        "value": "Toute",
+        "label": "Plateforme, Toute Échelle."
+      },
+      {
+        "value": "Ouvert",
+        "label": "À la Collaboration."
+      }
     ]
   },
   "position": {
@@ -26,80 +35,505 @@
     "studio": "Directeur Général — Virtus Operandi",
     "focus": "Full-Stack · Toutes Plateformes",
     "stackLabel": "Focus",
-    "stack": ["Conception de Systèmes", "Développement de Systèmes", "Calcul Distribué", "IA/ML & Blockchain"],
+    "stack": [
+      "Conception de Systèmes",
+      "Développement de Systèmes",
+      "Calcul Distribué",
+      "IA/ML & Blockchain"
+    ],
     "previousLabel": "Précédent",
-    "previous": ["Co-Fondateur & CTO — Circuit Dynamic SARL", "Projets en agence", "Contrats startup", "Open Source"]
+    "previous": [
+      "Co-Fondateur & CTO — Circuit Dynamic SARL",
+      "Projets en agence",
+      "Contrats startup",
+      "Open Source"
+    ]
   },
   "ventures": {
     "header": "Ventures",
     "list": [
-      { "name": "DevKit CLI", "desc": "Toolkit CLI open-source pour scaffolding et automatisation de workflows", "status": "Actif" },
-      { "name": "MotionLib", "desc": "Bibliothèque d'animation React légère basée sur GSAP", "status": "Actif" },
-      { "name": "Pagerank", "desc": "Outil d'audit SEO pour développeurs — Lighthouse + Core Web Vitals en un dashboard", "status": "Bêta" },
-      { "name": "Dotfiles", "desc": "Config d'environnement dev personnel — Neovim, tmux, Warp, et plus", "status": "En cours" }
+      {
+        "name": "DevKit CLI",
+        "desc": "Toolkit CLI open-source pour scaffolding et automatisation de workflows",
+        "status": "Actif"
+      },
+      {
+        "name": "MotionLib",
+        "desc": "Bibliothèque d'animation React légère basée sur GSAP",
+        "status": "Actif"
+      },
+      {
+        "name": "Pagerank",
+        "desc": "Outil d'audit SEO pour développeurs — Lighthouse + Core Web Vitals en un dashboard",
+        "status": "Bêta"
+      },
+      {
+        "name": "Dotfiles",
+        "desc": "Config d'environnement dev personnel — Neovim, tmux, Warp, et plus",
+        "status": "En cours"
+      }
     ],
     "changelogLabel": "Changelog",
-    "changelog": ["DevKit CLI v2.3 — Mars 2026", "MotionLib v1.1 — Fév 2026", "Pagerank Bêta — Jan 2026"]
+    "changelog": [
+      "DevKit CLI v2.3 — Mars 2026",
+      "MotionLib v1.1 — Fév 2026",
+      "Pagerank Bêta — Jan 2026"
+    ]
   },
   "articles": {
     "header": "Articles",
     "list": [
-      { "label": "Animations GSAP au Scroll", "href": "/fr/blog/maitriser-les-animations-gsap/", "img": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=560&h=280&fit=crop", "title": "Maîtriser les Animations au Scroll avec GSAP ScrollTrigger", "excerpt": "Une plongée approfondie dans la création d'animations au scroll fluides avec le plugin ScrollTrigger de GSAP.", "tags": "GSAP, Animation", "date": "2026-01" },
-      { "label": "Dashboards Performants", "href": "/fr/blog/construire-des-dashboards-performants/", "img": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=560&h=280&fit=crop", "title": "Construire des Dashboards Temps Réel Performants", "excerpt": "Stratégies pour des dashboards gérant des milliers de points de données sans perte de frames.", "tags": "React, Performance", "date": "2026-01" },
-      { "label": "C++ pour le Web", "href": "#", "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=560&h=280&fit=crop", "title": "Patterns C++ Modernes pour Développeurs Web", "excerpt": "Comment les concepts du C++ moderne comme RAII et la sémantique de déplacement améliorent votre JavaScript.", "tags": "C++, Architecture", "date": "2025-11" },
-      { "label": "Design Systems Évolutifs", "href": "#", "img": "https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=560&h=280&fit=crop", "title": "Des Design Systems qui Passent à l'Échelle", "excerpt": "Construire un design system de zéro — tokens, APIs de composants, documentation et outillage.", "tags": "Design Systems, CSS", "date": "2025-09" },
-      { "label": "Edge Computing", "href": "#", "img": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=560&h=280&fit=crop", "title": "Edge Computing avec Cloudflare Workers et Durable Objects", "excerpt": "Déployer des applications stateful à la périphérie — collaboration temps réel et gestion de sessions.", "tags": "Edge, Cloudflare", "date": "2025-07" },
-      { "label": "Wasm en Production", "href": "#", "img": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=560&h=280&fit=crop", "title": "WebAssembly en Production : Retours d'Expérience", "excerpt": "Intégrer des modules Wasm en production — traitement d'images, crypto et géométrie computationnelle.", "tags": "WebAssembly, Rust", "date": "2025-05" },
-      { "label": "L'Art de la Code Review", "href": "#", "img": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=560&h=280&fit=crop", "title": "L'Art de la Code Review : Au-delà de la Syntaxe", "excerpt": "Comment donner des reviews qui améliorent l'architecture et la vélocité de l'équipe.", "tags": "Engineering, Équipes", "date": "2025-03" }
+      {
+        "label": "Animations GSAP au Scroll",
+        "href": "/fr/blog/maitriser-les-animations-gsap/",
+        "img": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=560&h=280&fit=crop",
+        "title": "Maîtriser les Animations au Scroll avec GSAP ScrollTrigger",
+        "excerpt": "Une plongée approfondie dans la création d'animations au scroll fluides avec le plugin ScrollTrigger de GSAP.",
+        "tags": "GSAP, Animation",
+        "date": "2026-01"
+      },
+      {
+        "label": "Dashboards Performants",
+        "href": "/fr/blog/construire-des-dashboards-performants/",
+        "img": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=560&h=280&fit=crop",
+        "title": "Construire des Dashboards Temps Réel Performants",
+        "excerpt": "Stratégies pour des dashboards gérant des milliers de points de données sans perte de frames.",
+        "tags": "React, Performance",
+        "date": "2026-01"
+      },
+      {
+        "label": "C++ pour le Web",
+        "href": "#",
+        "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=560&h=280&fit=crop",
+        "title": "Patterns C++ Modernes pour Développeurs Web",
+        "excerpt": "Comment les concepts du C++ moderne comme RAII et la sémantique de déplacement améliorent votre JavaScript.",
+        "tags": "C++, Architecture",
+        "date": "2025-11"
+      },
+      {
+        "label": "Design Systems Évolutifs",
+        "href": "#",
+        "img": "https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=560&h=280&fit=crop",
+        "title": "Des Design Systems qui Passent à l'Échelle",
+        "excerpt": "Construire un design system de zéro — tokens, APIs de composants, documentation et outillage.",
+        "tags": "Design Systems, CSS",
+        "date": "2025-09"
+      },
+      {
+        "label": "Edge Computing",
+        "href": "#",
+        "img": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=560&h=280&fit=crop",
+        "title": "Edge Computing avec Cloudflare Workers et Durable Objects",
+        "excerpt": "Déployer des applications stateful à la périphérie — collaboration temps réel et gestion de sessions.",
+        "tags": "Edge, Cloudflare",
+        "date": "2025-07"
+      },
+      {
+        "label": "Wasm en Production",
+        "href": "#",
+        "img": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=560&h=280&fit=crop",
+        "title": "WebAssembly en Production : Retours d'Expérience",
+        "excerpt": "Intégrer des modules Wasm en production — traitement d'images, crypto et géométrie computationnelle.",
+        "tags": "WebAssembly, Rust",
+        "date": "2025-05"
+      },
+      {
+        "label": "L'Art de la Code Review",
+        "href": "#",
+        "img": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=560&h=280&fit=crop",
+        "title": "L'Art de la Code Review : Au-delà de la Syntaxe",
+        "excerpt": "Comment donner des reviews qui améliorent l'architecture et la vélocité de l'équipe.",
+        "tags": "Engineering, Équipes",
+        "date": "2025-03"
+      }
     ]
   },
   "connect": {
     "header": "Contact",
     "links": [
-      { "label": "LinkedIn", "url": "#" },
-      { "label": "Email", "url": "mailto:khalil@drissi.org" },
-      { "label": "GitHub", "url": "#" },
-      { "label": "Twitter / X", "url": "#" }
+      {
+        "label": "LinkedIn",
+        "url": "#"
+      },
+      {
+        "label": "Email",
+        "url": "mailto:khalil@drissi.org"
+      },
+      {
+        "label": "GitHub",
+        "url": "#"
+      },
+      {
+        "label": "Twitter / X",
+        "url": "#"
+      }
     ],
     "availStatus": "Disponible maintenant",
     "availCta": "Réserver un appel découverte de 30 min",
     "buttons": [
-      { "label": "Planifier un appel ↗", "url": "#" },
-      { "label": "Estimation de coût ↗", "url": "#" }
+      {
+        "label": "Planifier un appel ↗",
+        "url": "#"
+      },
+      {
+        "label": "Estimation de coût ↗",
+        "url": "#"
+      }
     ]
   },
   "statement": {
     "text": "Un développeur logiciel expérimenté axé sur {rotate} et le <em>savoir-faire</em>. Un partenaire fiable pour les startups, agences et marques qui construisent <em>sur&nbsp;toutes&nbsp;plateformes</em><span class=\"superscript\">15</span>.",
-    "rotateWords": ["la performance", "la scalabilité", "la précision", "l'élégance", "l'innovation", "la qualité"]
+    "rotateWords": [
+      "la performance",
+      "la scalabilité",
+      "la précision",
+      "l'élégance",
+      "l'innovation",
+      "la qualité"
+    ]
   },
-  "ribbon": ["Khalil Drissi", "Disponible pour Collaboration", "khalil@drissi.org", "khalildrissi.com"],
+  "ribbon": [
+    "Khalil Drissi",
+    "Disponible pour Collaboration",
+    "khalil@drissi.org",
+    "khalildrissi.com"
+  ],
   "projects": [
-    { "title": "Application Dashboard", "subtitle": "Startup Fintech — Application Web", "desc": "Un tableau de bord financier en temps réel avec des graphiques interactifs, suivi de portefeuille et reporting automatisé. Construit avec Next.js et D3.js pour une visualisation haute performance.", "tags": ["Next.js", "TypeScript", "D3.js", "PostgreSQL", "WebSocket"], "year": "2025", "role": "Développeur Principal", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=360&h=240&fit=crop" },
-    { "title": "Plateforme Analytics", "subtitle": "Entreprise SaaS — Produit Complet", "desc": "Plateforme d'analyse traitant des millions d'événements quotidiens. Constructeur de requêtes, tableaux de bord en temps réel et génération automatique d'insights.", "tags": ["React", "Python", "FastAPI", "ClickHouse", "Redis"], "year": "2024", "role": "Développeur Full-Stack", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=360&h=240&fit=crop" },
-    { "title": "E-Commerce", "subtitle": "Marque Retail — Boutique & CMS", "desc": "Plateforme e-commerce haute conversion avec CMS headless, filtrage dynamique de produits et tunnel de paiement personnalisé. Optimisé pour les Core Web Vitals avec un score Lighthouse de 98+.", "tags": ["Next.js", "Shopify API", "Tailwind", "Sanity", "Stripe"], "year": "2024", "role": "Lead Frontend", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=360&h=240&fit=crop" },
-    { "title": "Plateforme Sociale", "subtitle": "Startup — MVP au Lancement", "desc": "Plateforme sociale communautaire avec messagerie temps réel, flux de contenu et modération. Passage de MVP à 10K utilisateurs actifs en 3 mois.", "tags": ["React", "Node.js", "Socket.io", "MongoDB", "AWS"], "year": "2024", "role": "Co-fondateur Technique", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=360&h=240&fit=crop" },
-    { "title": "Produit IA", "subtitle": "Startup IA/ML — Design & Développement", "desc": "Interface IA conversationnelle avec réponses en streaming, gestion du contexte et entrées multimodales pour les workflows d'entreprise.", "tags": ["Next.js", "Python", "LangChain", "OpenAI", "Vercel AI SDK"], "year": "2025", "role": "Développeur Full-Stack", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=360&h=240&fit=crop" },
-    { "title": "Plateforme Cloud", "subtitle": "Outil DevOps — Infrastructure", "desc": "Tableau de bord de gestion d'infrastructure cloud avec déploiements automatisés, monitoring et optimisation des coûts.", "tags": ["React", "Go", "Terraform", "Docker", "Kubernetes"], "year": "2023", "role": "Développeur Backend", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=360&h=240&fit=crop" },
-    { "title": "Outils Dev", "subtitle": "Open Source — Expérience Développeur", "desc": "Suite d'outils CLI et extensions VS Code pour accélérer les workflows de développement.", "tags": ["TypeScript", "Node.js", "VS Code API", "CLI", "NPM"], "year": "2023", "role": "Créateur & Mainteneur", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=360&h=240&fit=crop" },
-    { "title": "Application Mobile", "subtitle": "Santé Tech — Multi-plateforme", "desc": "Application mobile de suivi santé avec synchronisation biométrique temps réel, insights personnalisés et intégration télémédecine.", "tags": ["React Native", "TypeScript", "Firebase", "HealthKit", "GraphQL"], "year": "2023", "role": "Développeur Mobile", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=360&h=240&fit=crop" },
-    { "title": "Plateforme Équipe", "subtitle": "Entreprise — Suite Collaboration", "desc": "Outil de collaboration interne avec gestion de projets, partage de documents et tableau blanc temps réel.", "tags": ["Next.js", "Prisma", "PostgreSQL", "tRPC", "Auth0"], "year": "2022", "role": "Développeur Principal", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=360&h=240&fit=crop" },
-    { "title": "Data Viz", "subtitle": "Société Média — Histoires Interactives", "desc": "Plateforme de visualisation de données interactive pour le storytelling éditorial avec graphiques animés, cartes et effets WebGL.", "tags": ["D3.js", "Three.js", "GSAP", "Mapbox", "Canvas API"], "year": "2022", "role": "Développeur Créatif", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=360&h=240&fit=crop" },
-    { "title": "Landing Pages", "subtitle": "Agence — Axé Conversion", "desc": "Landing pages haute performance avec animations GSAP au scroll, atteignant +40% de taux de conversion.", "tags": ["HTML", "CSS", "GSAP", "JavaScript", "Figma"], "year": "2022", "role": "Développeur Frontend", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1536104968055-4d61aa56f46a?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1536104968055-4d61aa56f46a?w=360&h=240&fit=crop" },
-    { "title": "Open Source", "subtitle": "Communauté — Bibliothèques & Outils", "desc": "Bibliothèques open-source maintenues dont un toolkit d'animation React et un boilerplate API Node.js. 2K+ étoiles GitHub.", "tags": ["TypeScript", "React", "Node.js", "GitHub Actions", "NPM"], "year": "2021–Présent", "role": "Créateur & Mainteneur", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop" }
+    {
+      "title": "Application Dashboard",
+      "subtitle": "Startup Fintech — Application Web",
+      "desc": "Un tableau de bord financier en temps réel avec des graphiques interactifs, suivi de portefeuille et reporting automatisé. Construit avec Next.js et D3.js pour une visualisation haute performance.",
+      "tags": [
+        "Next.js",
+        "TypeScript",
+        "D3.js",
+        "PostgreSQL",
+        "WebSocket"
+      ],
+      "year": "2025",
+      "role": "Développeur Principal",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "Plateforme Analytics",
+      "subtitle": "Entreprise SaaS — Produit Complet",
+      "desc": "Plateforme d'analyse traitant des millions d'événements quotidiens. Constructeur de requêtes, tableaux de bord en temps réel et génération automatique d'insights.",
+      "tags": [
+        "React",
+        "Python",
+        "FastAPI",
+        "ClickHouse",
+        "Redis"
+      ],
+      "year": "2024",
+      "role": "Développeur Full-Stack",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "E-Commerce",
+      "subtitle": "Marque Retail — Boutique & CMS",
+      "desc": "Plateforme e-commerce haute conversion avec CMS headless, filtrage dynamique de produits et tunnel de paiement personnalisé. Optimisé pour les Core Web Vitals avec un score Lighthouse de 98+.",
+      "tags": [
+        "Next.js",
+        "Shopify API",
+        "Tailwind",
+        "Sanity",
+        "Stripe"
+      ],
+      "year": "2024",
+      "role": "Lead Frontend",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "Plateforme Sociale",
+      "subtitle": "Startup — MVP au Lancement",
+      "desc": "Plateforme sociale communautaire avec messagerie temps réel, flux de contenu et modération. Passage de MVP à 10K utilisateurs actifs en 3 mois.",
+      "tags": [
+        "React",
+        "Node.js",
+        "Socket.io",
+        "MongoDB",
+        "AWS"
+      ],
+      "year": "2024",
+      "role": "Co-fondateur Technique",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "Produit IA",
+      "subtitle": "Startup IA/ML — Design & Développement",
+      "desc": "Interface IA conversationnelle avec réponses en streaming, gestion du contexte et entrées multimodales pour les workflows d'entreprise.",
+      "tags": [
+        "Next.js",
+        "Python",
+        "LangChain",
+        "OpenAI",
+        "Vercel AI SDK"
+      ],
+      "year": "2025",
+      "role": "Développeur Full-Stack",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "Plateforme Cloud",
+      "subtitle": "Outil DevOps — Infrastructure",
+      "desc": "Tableau de bord de gestion d'infrastructure cloud avec déploiements automatisés, monitoring et optimisation des coûts.",
+      "tags": [
+        "React",
+        "Go",
+        "Terraform",
+        "Docker",
+        "Kubernetes"
+      ],
+      "year": "2023",
+      "role": "Développeur Backend",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "Outils Dev",
+      "subtitle": "Open Source — Expérience Développeur",
+      "desc": "Suite d'outils CLI et extensions VS Code pour accélérer les workflows de développement.",
+      "tags": [
+        "TypeScript",
+        "Node.js",
+        "VS Code API",
+        "CLI",
+        "NPM"
+      ],
+      "year": "2023",
+      "role": "Créateur & Mainteneur",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "Application Mobile",
+      "subtitle": "Santé Tech — Multi-plateforme",
+      "desc": "Application mobile de suivi santé avec synchronisation biométrique temps réel, insights personnalisés et intégration télémédecine.",
+      "tags": [
+        "React Native",
+        "TypeScript",
+        "Firebase",
+        "HealthKit",
+        "GraphQL"
+      ],
+      "year": "2023",
+      "role": "Développeur Mobile",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "Plateforme Équipe",
+      "subtitle": "Entreprise — Suite Collaboration",
+      "desc": "Outil de collaboration interne avec gestion de projets, partage de documents et tableau blanc temps réel.",
+      "tags": [
+        "Next.js",
+        "Prisma",
+        "PostgreSQL",
+        "tRPC",
+        "Auth0"
+      ],
+      "year": "2022",
+      "role": "Développeur Principal",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "Data Viz",
+      "subtitle": "Société Média — Histoires Interactives",
+      "desc": "Plateforme de visualisation de données interactive pour le storytelling éditorial avec graphiques animés, cartes et effets WebGL.",
+      "tags": [
+        "D3.js",
+        "Three.js",
+        "GSAP",
+        "Mapbox",
+        "Canvas API"
+      ],
+      "year": "2022",
+      "role": "Développeur Créatif",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "Landing Pages",
+      "subtitle": "Agence — Axé Conversion",
+      "desc": "Landing pages haute performance avec animations GSAP au scroll, atteignant +40% de taux de conversion.",
+      "tags": [
+        "HTML",
+        "CSS",
+        "GSAP",
+        "JavaScript",
+        "Figma"
+      ],
+      "year": "2022",
+      "role": "Développeur Frontend",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1536104968055-4d61aa56f46a?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1536104968055-4d61aa56f46a?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "Open Source",
+      "subtitle": "Communauté — Bibliothèques & Outils",
+      "desc": "Bibliothèques open-source maintenues dont un toolkit d'animation React et un boilerplate API Node.js. 2K+ étoiles GitHub.",
+      "tags": [
+        "TypeScript",
+        "React",
+        "Node.js",
+        "GitHub Actions",
+        "NPM"
+      ],
+      "year": "2021–Présent",
+      "role": "Créateur & Mainteneur",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop"
+    }
   ],
   "openSource": [
-    { "title": "React Animation Kit", "subtitle": "Open Source — Bibliothèque React", "desc": "Primitives d'animation composables pour React avec API déclarative, physique de ressorts et support des gestes. Utilisé dans 500+ projets.", "tags": ["React", "TypeScript", "Animation", "NPM"], "year": "2024", "role": "Créateur & Mainteneur", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop" },
-    { "title": "Node API Boilerplate", "subtitle": "Open Source — Starter Backend", "desc": "Starter Express + TypeScript prêt pour la production avec auth, validation, tests, Docker et CI/CD pré-configurés.", "tags": ["Node.js", "TypeScript", "Express", "Docker"], "year": "2023", "role": "Créateur & Mainteneur", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=360&h=240&fit=crop" },
-    { "title": "DevKit CLI", "subtitle": "Open Source — Outil Développeur", "desc": "Toolkit de scaffolding et d'automatisation. Générateurs de projets, formateurs de code et scripts de déploiement en un seul CLI.", "tags": ["Node.js", "CLI", "Automation", "NPM"], "year": "2023", "role": "Créateur & Mainteneur", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=360&h=240&fit=crop" },
-    { "title": "MotionLib", "subtitle": "Open Source — Bibliothèque Animation", "desc": "Bibliothèque légère d'animations au scroll sans dépendances. Déclencheurs basés sur Intersection Observer avec easing personnalisable.", "tags": ["JavaScript", "Animation", "Scroll", "Lightweight"], "year": "2024", "role": "Créateur & Mainteneur", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=360&h=240&fit=crop" },
-    { "title": "PageRank", "subtitle": "Open Source — Bibliothèque Rust", "desc": "Implémentation rapide de PageRank en Rust avec support du calcul parallèle. Gère efficacement des graphes de millions de nœuds.", "tags": ["Rust", "Algorithms", "Graph", "Performance"], "year": "2023", "role": "Créateur", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=360&h=240&fit=crop" },
-    { "title": "Dotfiles", "subtitle": "Open Source — Environnement Dev", "desc": "Configurations personnelles d'environnement de développement. Zsh, Neovim, tmux et défauts macOS — installation en une commande.", "tags": ["Shell", "Neovim", "Zsh", "macOS"], "year": "2022", "role": "Mainteneur", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=360&h=240&fit=crop" }
+    {
+      "title": "React Animation Kit",
+      "subtitle": "Open Source — Bibliothèque React",
+      "desc": "Primitives d'animation composables pour React avec API déclarative, physique de ressorts et support des gestes. Utilisé dans 500+ projets.",
+      "tags": [
+        "React",
+        "TypeScript",
+        "Animation",
+        "NPM"
+      ],
+      "year": "2024",
+      "role": "Créateur & Mainteneur",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "Node API Boilerplate",
+      "subtitle": "Open Source — Starter Backend",
+      "desc": "Starter Express + TypeScript prêt pour la production avec auth, validation, tests, Docker et CI/CD pré-configurés.",
+      "tags": [
+        "Node.js",
+        "TypeScript",
+        "Express",
+        "Docker"
+      ],
+      "year": "2023",
+      "role": "Créateur & Mainteneur",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "DevKit CLI",
+      "subtitle": "Open Source — Outil Développeur",
+      "desc": "Toolkit de scaffolding et d'automatisation. Générateurs de projets, formateurs de code et scripts de déploiement en un seul CLI.",
+      "tags": [
+        "Node.js",
+        "CLI",
+        "Automation",
+        "NPM"
+      ],
+      "year": "2023",
+      "role": "Créateur & Mainteneur",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "MotionLib",
+      "subtitle": "Open Source — Bibliothèque Animation",
+      "desc": "Bibliothèque légère d'animations au scroll sans dépendances. Déclencheurs basés sur Intersection Observer avec easing personnalisable.",
+      "tags": [
+        "JavaScript",
+        "Animation",
+        "Scroll",
+        "Lightweight"
+      ],
+      "year": "2024",
+      "role": "Créateur & Mainteneur",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "PageRank",
+      "subtitle": "Open Source — Bibliothèque Rust",
+      "desc": "Implémentation rapide de PageRank en Rust avec support du calcul parallèle. Gère efficacement des graphes de millions de nœuds.",
+      "tags": [
+        "Rust",
+        "Algorithms",
+        "Graph",
+        "Performance"
+      ],
+      "year": "2023",
+      "role": "Créateur",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=360&h=240&fit=crop"
+    },
+    {
+      "title": "Dotfiles",
+      "subtitle": "Open Source — Environnement Dev",
+      "desc": "Configurations personnelles d'environnement de développement. Zsh, Neovim, tmux et défauts macOS — installation en une commande.",
+      "tags": [
+        "Shell",
+        "Neovim",
+        "Zsh",
+        "macOS"
+      ],
+      "year": "2022",
+      "role": "Mainteneur",
+      "visit": "#",
+      "code": "#",
+      "img": "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=820&h=400&fit=crop",
+      "thumb": "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=360&h=240&fit=crop"
+    }
   ],
   "about": {
     "titlebarText": "khalil drissi — à propos",
-    "emailBtn": { "label": "Email ↗", "url": "mailto:khalil@drissi.org" },
-    "resumeBtn": { "label": "CV ↗", "url": "#" },
-    "tabs": { "bio": "À propos", "chat": "Discuter avec Alfred" },
+    "emailBtn": {
+      "label": "Email ↗",
+      "url": "mailto:khalil@drissi.org"
+    },
+    "resumeBtn": {
+      "label": "CV ↗",
+      "url": "#"
+    },
+    "tabs": {
+      "bio": "À propos",
+      "chat": "Discuter avec Alfred"
+    },
     "name": "Khalil Drissi",
     "role": "Développeur Logiciel",
     "bio": [
@@ -108,10 +542,22 @@
       "Quand je ne code pas, vous me trouverez en train d'explorer de nouveaux outils, de contribuer à l'open source ou de mentorer des développeurs en herbe."
     ],
     "details": [
-      { "label": "Localisation", "value": "Actuellement au Maroc<br>Ouvert à la collaboration" },
-      { "label": "Langues", "value": "Arabe · Français · Anglais<br>Parlé et écrit couramment" },
-      { "label": "Formation", "value": "Informatique<br>Autodidacte + Formation continue" },
-      { "label": "Intérêts", "value": "Creative Coding · IA/ML<br>Open Source · Design Systems" }
+      {
+        "label": "Localisation",
+        "value": "Actuellement au Maroc<br>Ouvert à la collaboration"
+      },
+      {
+        "label": "Langues",
+        "value": "Arabe · Français · Anglais<br>Parlé et écrit couramment"
+      },
+      {
+        "label": "Formation",
+        "value": "Informatique<br>Autodidacte + Formation continue"
+      },
+      {
+        "label": "Intérêts",
+        "value": "Creative Coding · IA/ML<br>Open Source · Design Systems"
+      }
     ]
   },
   "chat": {
@@ -126,11 +572,20 @@
       "default": "Bonne question ! Pour des demandes détaillées, le meilleur moyen d'obtenir une réponse complète est de contacter directement khalil@drissi.org ou de planifier un appel. Khalil est toujours heureux de discuter de projets potentiels."
     }
   },
-  "projectsTab": { "label": "Commercial", "count": "15" },
-  "openSourceTab": { "label": "Open Source", "count": "6" },
+  "projectsTab": {
+    "label": "Commercial",
+    "count": "15"
+  },
+  "openSourceTab": {
+    "label": "Open Source",
+    "count": "6"
+  },
   "scrollIndicator": "Défiler",
   "nav": {
     "blog": "Blog",
-    "langToggle": { "label": "EN", "url": "/" }
+    "langToggle": {
+      "label": "EN",
+      "url": "/"
+    }
   }
 }

@@ -77,7 +77,10 @@ export async function onRequestGet(context) {
 
   try {
     const data = await githubRequest('GET', `/repos/${repo}/contents/${filePath}`, null, env);
-    const content = JSON.parse(atob(data.content.replace(/\s/g, '')));
+    const raw = atob(data.content.replace(/\s/g, ''));
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    const content = JSON.parse(new TextDecoder('utf-8').decode(bytes));
     return jsonResponse({ content, sha: data.sha });
   } catch (e) {
     if (e.message.includes('Not Found')) return jsonResponse({ error: 'File not found' }, 404);
