@@ -1325,30 +1325,44 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     .toc {
       position: fixed; left: 24px; top: 50%; transform: translateY(-50%);
       display: flex; flex-direction: column; gap: 6px; z-index: 100;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.5s ease;
     }
+    .toc.visible { opacity: 1; pointer-events: auto; }
     .toc-item {
       display: flex; align-items: center; gap: 0; cursor: pointer;
-      text-decoration: none; height: 32px; overflow: hidden;
-      transition: gap 0.2s ease;
+      text-decoration: none; height: 32px; overflow: visible;
+      transition: gap 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
     }
-    .toc-item:hover { gap: 8px; }
     .toc-num {
       width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
       background: rgba(255,255,255,0.08); color: var(--fg-dim); font-size: 11px;
       font-family: var(--mono); border-radius: 4px; flex-shrink: 0;
-      transition: background 0.2s, color 0.2s;
+      transition: background 0.4s ease, color 0.4s ease;
     }
     .toc-label {
       font-size: 11px; font-family: var(--mono); color: var(--fg);
       white-space: nowrap; max-width: 0; overflow: hidden;
-      transition: max-width 0.3s ease, padding 0.3s ease;
+      transition: max-width 0.5s cubic-bezier(0.25, 0.1, 0.25, 1), padding 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
       padding: 0; background: var(--accent); border-radius: 4px;
       height: 32px; display: flex; align-items: center;
     }
-    .toc-item:hover .toc-label { max-width: 200px; padding: 0 10px; }
-    .toc-item.active { gap: 6px; }
+    .toc-label-inner {
+      display: inline-block; white-space: nowrap;
+    }
+    .toc-num:hover ~ .toc-label,
+    .toc-item.active .toc-label { max-width: 260px; padding: 0 12px; }
     .toc-item.active .toc-num { background: var(--accent); color: #fff; }
-    .toc-item.active .toc-label { max-width: 200px; padding: 0 10px; }
+    .toc-num:hover ~ .toc-label .toc-label-inner.overflows,
+    .toc-item.active .toc-label .toc-label-inner.overflows {
+      animation: tocMarquee 6s linear infinite;
+    }
+    @keyframes tocMarquee {
+      0% { transform: translateX(0); }
+      10% { transform: translateX(0); }
+      90% { transform: translateX(var(--marquee-dist)); }
+      100% { transform: translateX(var(--marquee-dist)); }
+    }
 
     /* ---- Comments ---- */
     .comments-section {
@@ -1578,12 +1592,43 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
         a.className = 'toc-item';
         a.href = '#' + id;
         a.innerHTML = '<span class="toc-num">' + (i + 1) + '</span>'
-          + '<span class="toc-label">' + h.textContent + '</span>';
+          + '<span class="toc-label"><span class="toc-label-inner">' + h.textContent + '</span></span>';
         toc.appendChild(a);
       });
+
+      // Detect overflow on labels and set marquee distance
+      var labels = toc.querySelectorAll('.toc-label-inner');
+      labels.forEach(function(inner) {
+        // Measure when expanded: temporarily force parent open
+        var label = inner.parentElement;
+        var origMax = label.style.maxWidth;
+        var origPad = label.style.padding;
+        label.style.maxWidth = '260px';
+        label.style.padding = '0 12px';
+        var overflow = inner.scrollWidth - label.clientWidth;
+        label.style.maxWidth = origMax;
+        label.style.padding = origPad;
+        if (overflow > 0) {
+          inner.classList.add('overflows');
+          inner.style.setProperty('--marquee-dist', '-' + (overflow + 20) + 'px');
+        }
+      });
+
       var items = toc.querySelectorAll('.toc-item');
       var active = -1;
+      var tocVisible = false;
+
       function updateToc() {
+        // Show TOC only after scrolling past the first heading
+        var firstH2Top = headings[0].getBoundingClientRect().top;
+        var shouldShow = firstH2Top < window.innerHeight * 0.5;
+        if (shouldShow !== tocVisible) {
+          tocVisible = shouldShow;
+          toc.classList.toggle('visible', shouldShow);
+        }
+
+        if (!shouldShow) return;
+
         var current = 0;
         var offset = window.innerHeight * 0.35;
         headings.forEach(function(h, i) { if (h.getBoundingClientRect().top < offset) current = i; });
