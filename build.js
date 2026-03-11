@@ -1368,6 +1368,47 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     .post-body code { font-family: var(--mono); font-size: 12px; }
     .post-body img { border-radius: 8px; margin: 20px 0; }
 
+    /* ---- Listen (TTS) ---- */
+    .listen-bar {
+      max-width: 720px; margin: 0 auto; padding: 0 20px;
+    }
+    .listen-player {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; padding: 10px 16px; margin-bottom: 4px;
+    }
+    .listen-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--accent); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: opacity 0.2s;
+    }
+    .listen-btn:hover { opacity: 0.85; }
+    .listen-btn svg { width: 14px; height: 14px; fill: #fff; }
+    .listen-info { flex: 1; min-width: 0; }
+    .listen-title {
+      font-size: 11px; font-family: var(--mono); color: var(--fg-dim);
+      letter-spacing: 0.03em; text-transform: uppercase; margin-bottom: 3px;
+    }
+    .listen-progress-wrap {
+      width: 100%; height: 3px; background: rgba(255,255,255,0.1);
+      border-radius: 2px; overflow: hidden; cursor: pointer;
+    }
+    .listen-progress {
+      height: 100%; width: 0%; background: var(--accent);
+      border-radius: 2px; transition: width 0.3s linear;
+    }
+    .listen-time {
+      font-size: 11px; font-family: var(--mono); color: var(--fg-faint);
+      flex-shrink: 0; font-variant-numeric: tabular-nums;
+    }
+    .listen-speed {
+      font-size: 10px; font-family: var(--mono); color: var(--fg-dim);
+      background: rgba(255,255,255,0.08); border: none; cursor: pointer;
+      padding: 3px 8px; border-radius: 4px; transition: background 0.2s;
+    }
+    .listen-speed:hover { background: rgba(255,255,255,0.14); }
+
     /* ---- TOC ---- */
     .toc {
       position: fixed; left: 24px; top: 50%; transform: translateY(-50%);
@@ -1574,6 +1615,21 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
       <div class="post-tags">${post.tags.filter(t => t.toLowerCase() !== 'featured').map(t => `<span>${t}</span>`).join('')}</div>
     </div>
   </div>`}
+  <div class="listen-bar">
+    <div class="listen-player" id="listenPlayer">
+      <button class="listen-btn" id="listenBtn" aria-label="${lang === 'fr' ? 'Écouter l\'article' : 'Listen to article'}">
+        <svg viewBox="0 0 24 24" id="listenIcon"><polygon points="6,4 20,12 6,20" /></svg>
+      </button>
+      <div class="listen-info">
+        <div class="listen-title">${lang === 'fr' ? 'Écouter l\'article' : 'Listen to article'}</div>
+        <div class="listen-progress-wrap" id="listenProgressWrap">
+          <div class="listen-progress" id="listenProgress"></div>
+        </div>
+      </div>
+      <span class="listen-time" id="listenTime">0:00</span>
+      <button class="listen-speed" id="listenSpeed">1×</button>
+    </div>
+  </div>
   <article class="post-container">
     <div class="post-body">${post.body}</div>
   </article>
@@ -1639,6 +1695,148 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     var WP_ID = ${wpId};
     var WP_URL = '${wpUrl}';
     var I18N = ${JSON.stringify(i18n)};
+
+    // ---- Listen (TTS) ----
+    (function() {
+      var synth = window.speechSynthesis;
+      if (!synth) { document.getElementById('listenPlayer').style.display = 'none'; return; }
+
+      var btn = document.getElementById('listenBtn');
+      var icon = document.getElementById('listenIcon');
+      var progress = document.getElementById('listenProgress');
+      var progressWrap = document.getElementById('listenProgressWrap');
+      var timeEl = document.getElementById('listenTime');
+      var speedBtn = document.getElementById('listenSpeed');
+      var titleEl = document.querySelector('.listen-title');
+
+      var playing = false, paused = false, utterance = null;
+      var speeds = [1, 1.25, 1.5, 1.75, 2];
+      var speedIdx = 0;
+      var startTime = 0, elapsed = 0, totalEstimate = 0;
+      var tickInterval = null;
+      var textContent = '';
+
+      // Extract plain text from article
+      var body = document.querySelector('.post-body');
+      if (body) {
+        textContent = body.innerText || body.textContent || '';
+        textContent = textContent.replace(/\\s+/g, ' ').trim();
+      }
+
+      // Estimate reading time in seconds (150 words per min at 1x)
+      var wordCount = textContent.split(/\\s+/).length;
+      totalEstimate = Math.round((wordCount / 150) * 60);
+
+      function fmt(secs) {
+        var m = Math.floor(secs / 60);
+        var s = Math.floor(secs % 60);
+        return m + ':' + (s < 10 ? '0' : '') + s;
+      }
+
+      timeEl.textContent = fmt(totalEstimate);
+
+      var playPath = '<polygon points="6,4 20,12 6,20" />';
+      var pausePath = '<rect x="5" y="4" width="4" height="16" /><rect x="13" y="4" width="4" height="16" />';
+
+      function tick() {
+        if (!playing || paused) return;
+        elapsed = (Date.now() - startTime) / 1000;
+        var pct = Math.min(100, (elapsed / (totalEstimate / speeds[speedIdx])) * 100);
+        progress.style.width = pct + '%';
+        var remaining = Math.max(0, (totalEstimate / speeds[speedIdx]) - elapsed);
+        timeEl.textContent = fmt(remaining);
+      }
+
+      function startSpeech() {
+        synth.cancel();
+        // Chrome has a limit on utterance length, split into chunks
+        var chunks = [];
+        var maxLen = 200; // characters per chunk for reliability
+        var words = textContent.split(' ');
+        var chunk = '';
+        for (var i = 0; i < words.length; i++) {
+          if ((chunk + ' ' + words[i]).length > maxLen && chunk) {
+            chunks.push(chunk);
+            chunk = words[i];
+          } else {
+            chunk = chunk ? chunk + ' ' + words[i] : words[i];
+          }
+        }
+        if (chunk) chunks.push(chunk);
+
+        var currentChunk = 0;
+        totalEstimate = Math.round((wordCount / 150) * 60);
+
+        function speakNext() {
+          if (currentChunk >= chunks.length) {
+            stopSpeech();
+            return;
+          }
+          utterance = new SpeechSynthesisUtterance(chunks[currentChunk]);
+          utterance.lang = '${lang === 'fr' ? 'fr-FR' : 'en-US'}';
+          utterance.rate = speeds[speedIdx];
+          utterance.onend = function() {
+            currentChunk++;
+            speakNext();
+          };
+          utterance.onerror = function(e) {
+            if (e.error !== 'canceled') stopSpeech();
+          };
+          synth.speak(utterance);
+        }
+
+        playing = true; paused = false;
+        startTime = Date.now();
+        elapsed = 0;
+        icon.innerHTML = pausePath;
+        titleEl.textContent = '${lang === 'fr' ? 'Lecture en cours...' : 'Playing...'}';
+        tickInterval = setInterval(tick, 250);
+        speakNext();
+      }
+
+      function stopSpeech() {
+        synth.cancel();
+        playing = false; paused = false;
+        icon.innerHTML = playPath;
+        progress.style.width = '0%';
+        timeEl.textContent = fmt(totalEstimate);
+        titleEl.textContent = '${lang === 'fr' ? "Écouter l\\'article" : 'Listen to article'}';
+        if (tickInterval) clearInterval(tickInterval);
+      }
+
+      btn.addEventListener('click', function() {
+        if (!playing) {
+          startSpeech();
+        } else if (!paused) {
+          synth.pause();
+          paused = true;
+          icon.innerHTML = playPath;
+          titleEl.textContent = '${lang === 'fr' ? 'En pause' : 'Paused'}';
+          if (tickInterval) clearInterval(tickInterval);
+        } else {
+          synth.resume();
+          paused = false;
+          icon.innerHTML = pausePath;
+          titleEl.textContent = '${lang === 'fr' ? 'Lecture en cours...' : 'Playing...'}';
+          startTime = Date.now() - (elapsed * 1000);
+          tickInterval = setInterval(tick, 250);
+        }
+      });
+
+      speedBtn.addEventListener('click', function() {
+        speedIdx = (speedIdx + 1) % speeds.length;
+        speedBtn.textContent = speeds[speedIdx] + '\\u00d7';
+        if (playing) {
+          // Restart at new speed
+          var wasElapsed = elapsed;
+          startSpeech();
+          startTime = Date.now() - (wasElapsed * 1000 * (speeds[(speedIdx - 1 + speeds.length) % speeds.length] / speeds[speedIdx]));
+        }
+      });
+
+      // Cleanup on navigate away
+      window.addEventListener('beforeunload', function() { synth.cancel(); });
+    })();
 
     // ---- TOC ----
     var headings = document.querySelectorAll('.post-body h2');
