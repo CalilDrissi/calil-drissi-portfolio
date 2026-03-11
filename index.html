@@ -1576,6 +1576,31 @@
       border-radius: 4px;
       outline: none;
     }
+    .msg-preview-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      max-width: 320px;
+    }
+    .msg-discard-btn {
+      font-family: var(--mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--fg-dim);
+      background: none;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 3px;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .msg-discard-btn:hover {
+      color: #ff5f57;
+      border-color: #ff5f57;
+    }
     .msg-video-live {
       width: 100%;
       max-width: 320px;
@@ -3161,13 +3186,29 @@
           sendBtn.disabled = false;
           timerEl.textContent = formatTime(seconds) + ' recorded';
 
-          // Show preview
+          // Show preview with discard button
+          const wrap = document.createElement('div');
+          wrap.className = 'msg-preview-wrap';
           const el = document.createElement(mediaType === 'video' ? 'video' : 'audio');
           el.src = URL.createObjectURL(blob);
           el.controls = true;
           if (mediaType === 'video') el.style.maxHeight = '200px';
+          wrap.appendChild(el);
+          const discard = document.createElement('button');
+          discard.className = 'msg-discard-btn';
+          discard.textContent = 'Discard & re-record';
+          discard.addEventListener('click', () => {
+            URL.revokeObjectURL(el.src);
+            previewEl.innerHTML = '';
+            sendBtn._blob = null;
+            sendBtn.disabled = true;
+            timerEl.textContent = '';
+            statusEl.innerHTML = '';
+            btn.classList.remove('recording');
+          });
+          wrap.appendChild(discard);
           previewEl.innerHTML = '';
-          previewEl.appendChild(el);
+          previewEl.appendChild(wrap);
         };
 
         recorder.start(200);
