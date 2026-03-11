@@ -1216,13 +1216,13 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
   <link rel="canonical" href="https://khalildrissi.com${prefix}/blog/${post.slug}/" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
       --bg: #121212; --fg: #ffffff; --fg-dim: rgba(255,255,255,0.6);
       --fg-faint: rgba(255,255,255,0.22); --accent: #5e2bff;
-      --mono: 'DM Mono', monospace; --sans: 'Inter', sans-serif;
+      --mono: 'DM Mono', monospace; --sans: 'Inter', sans-serif; --display: 'Space Grotesk', sans-serif;
     }
     html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
     body { background: var(--bg); color: var(--fg); font-family: var(--mono); font-size: 13px; line-height: 1.7; }
@@ -1244,8 +1244,8 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
       font-size: 10px; padding: 2px 8px; border: 1px solid var(--fg-faint); border-radius: 3px;
       color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.03em;
     }
-    .post-title { font-family: var(--sans); font-size: clamp(28px, 5vw, 40px); font-weight: 700; margin-bottom: 32px; line-height: 1.2; }
-    .post-body h2 { font-family: var(--sans); font-size: 22px; font-weight: 600; margin: 32px 0 12px; }
+    .post-title { font-family: var(--display); font-size: clamp(28px, 5vw, 44px); font-weight: 300; margin-bottom: 32px; line-height: 1.15; letter-spacing: -0.02em; }
+    .post-body h2 { font-family: var(--display); font-size: 24px; font-weight: 300; margin: 32px 0 12px; letter-spacing: -0.01em; }
     .post-body h3 { font-size: 14px; font-weight: 500; margin: 24px 0 8px; text-transform: uppercase; letter-spacing: 0.03em; }
     .post-body p { color: var(--fg-dim); margin-bottom: 16px; }
     .post-body ul, .post-body ol { color: var(--fg-dim); margin: 0 0 16px 20px; }
