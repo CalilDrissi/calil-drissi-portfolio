@@ -640,9 +640,9 @@ function blogListingHTML(data, posts, lang) {
   const REPULSION = 4000;
   const ATTRACTION = 0.004;
   const CENTER_GRAVITY = 0.008;
-  const DAMPING = 0.92;
+  const DAMPING = 0.85;
   const MIN_DIST = 30;
-  const BREATHING_STRENGTH = 0.03; // tiny random drift force
+  const BREATHING_STRENGTH = 0.008; // very subtle drift like Obsidian
   let simAlpha = 1;
   let simTime = 0;
 
@@ -650,8 +650,8 @@ function blogListingHTML(data, posts, lang) {
     simTime++;
 
     // Keep a minimum alpha for breathing — never fully stop
-    const effectiveAlpha = Math.max(simAlpha, 0.005);
-    if (simAlpha > 0.001) simAlpha *= 0.995;
+    const effectiveAlpha = Math.max(simAlpha, 0.002);
+    if (simAlpha > 0.001) simAlpha *= 0.985;
 
     for (let i = 0; i < nodes.length; i++) {
       if (nodes[i].pinned) continue;
@@ -662,8 +662,8 @@ function blogListingHTML(data, posts, lang) {
 
       // Subtle breathing / drift force (always active)
       const bp = nodes[i].breathPhase;
-      const bx = Math.sin(simTime * 0.008 + bp) * BREATHING_STRENGTH;
-      const by = Math.cos(simTime * 0.006 + bp * 1.3) * BREATHING_STRENGTH;
+      const bx = Math.sin(simTime * 0.003 + bp) * BREATHING_STRENGTH;
+      const by = Math.cos(simTime * 0.002 + bp * 1.3) * BREATHING_STRENGTH;
       nodes[i].vx += bx;
       nodes[i].vy += by;
 
