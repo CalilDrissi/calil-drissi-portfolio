@@ -1180,9 +1180,13 @@ function blogListingHTML(data, posts, lang) {
 </html>`;
 }
 
-function blogPostHTML(data, post, lang) {
+function blogPostHTML(data, post, lang, allPosts, postIndex) {
   const prefix = lang === 'fr' ? '/fr' : '';
   const seo = post.seo || {};
+  const prevPost = postIndex > 0 ? allPosts[postIndex - 1] : null;
+  const nextPost = postIndex < allPosts.length - 1 ? allPosts[postIndex + 1] : null;
+  const prevLabel = lang === 'fr' ? 'PRÉCÉDENT' : 'PREVIOUS';
+  const nextLabel = lang === 'fr' ? 'SUIVANT' : 'NEXT';
   return `<!DOCTYPE html>
 <html lang="${lang}">
 <head>
@@ -1205,7 +1209,7 @@ function blogPostHTML(data, post, lang) {
       --fg-faint: rgba(255,255,255,0.22); --accent: #5e2bff;
       --mono: 'DM Mono', monospace; --serif: 'Instrument Serif', serif;
     }
-    html { -webkit-font-smoothing: antialiased; }
+    html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
     body { background: var(--bg); color: var(--fg); font-family: var(--mono); font-size: 13px; line-height: 1.7; }
     a { color: var(--accent); }
     img { display: block; max-width: 100%; }
@@ -1238,9 +1242,100 @@ function blogPostHTML(data, post, lang) {
     }
     .post-body code { font-family: var(--mono); font-size: 12px; }
     .post-body img { border-radius: 8px; margin: 20px 0; }
+
+    /* ---- TOC ---- */
+    .toc {
+      position: fixed; left: 24px; top: 50%; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 6px; z-index: 100;
+    }
+    .toc-item {
+      display: flex; align-items: center; gap: 0; cursor: pointer;
+      text-decoration: none; height: 32px; overflow: hidden;
+      transition: gap 0.2s ease;
+    }
+    .toc-item:hover { gap: 8px; }
+    .toc-num {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.08); color: var(--fg-dim); font-size: 11px;
+      font-family: var(--mono); border-radius: 4px; flex-shrink: 0;
+      transition: background 0.2s, color 0.2s;
+    }
+    .toc-label {
+      font-size: 11px; font-family: var(--mono); color: var(--fg);
+      white-space: nowrap; max-width: 0; overflow: hidden;
+      transition: max-width 0.3s ease, padding 0.3s ease;
+      padding: 0; background: var(--accent); border-radius: 4px;
+      height: 32px; display: flex; align-items: center;
+    }
+    .toc-item:hover .toc-label { max-width: 200px; padding: 0 10px; }
+    .toc-item.active .toc-num { background: var(--accent); color: #fff; }
+    .toc-item.active .toc-label { max-width: 200px; padding: 0 10px; }
+
+    /* ---- Post Nav ---- */
+    .post-nav {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 40px; position: relative;
+    }
+    .post-nav-link {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; color: var(--fg-dim); position: relative;
+      transition: color 0.2s;
+    }
+    .post-nav-link:hover { color: var(--fg); }
+    .post-nav-link svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .post-nav-info { display: flex; flex-direction: column; }
+    .post-nav-label {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--fg-dim); font-family: var(--mono);
+    }
+    .post-nav-title {
+      font-size: 13px; font-family: var(--mono); color: var(--fg);
+    }
+    .post-nav-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3px;
+      width: 18px; height: 18px; text-decoration: none;
+    }
+    .post-nav-grid span {
+      background: rgba(255,255,255,0.3); border-radius: 1px;
+      transition: background 0.2s;
+    }
+    .post-nav-grid:hover span { background: var(--accent); }
+    .post-nav-prev { text-align: left; }
+    .post-nav-next { text-align: right; flex-direction: row-reverse; }
+
+    /* Preview card on hover */
+    .post-nav-preview {
+      position: absolute; bottom: 100%; margin-bottom: 12px;
+      width: 280px; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; overflow: hidden; opacity: 0; pointer-events: none;
+      transform: translateY(8px); transition: opacity 0.25s, transform 0.25s;
+      z-index: 10;
+    }
+    .post-nav-prev .post-nav-preview { left: 0; }
+    .post-nav-next .post-nav-preview { right: 0; }
+    .post-nav-link:hover .post-nav-preview { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .post-nav-preview img {
+      width: 100%; height: 140px; object-fit: cover;
+    }
+    .post-nav-preview-body { padding: 12px; }
+    .post-nav-preview-title {
+      font-size: 12px; font-family: var(--mono); color: var(--fg);
+      margin-bottom: 4px; line-height: 1.4;
+    }
+    .post-nav-preview-excerpt {
+      font-size: 11px; color: var(--fg-dim); line-height: 1.5;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+
+    @media (max-width: 900px) {
+      .toc { display: none; }
+    }
     @media (max-width: 640px) {
       .post-header { padding: 16px 20px; }
       .post-container { padding: 24px 16px 60px; }
+      .post-nav { padding: 20px 16px; flex-wrap: wrap; gap: 16px; }
+      .post-nav-preview { display: none; }
     }
   </style>
 </head>
@@ -1258,6 +1353,83 @@ function blogPostHTML(data, post, lang) {
     <h1 class="post-title">${post.title}</h1>
     <div class="post-body">${post.body}</div>
   </article>
+
+  <nav class="post-nav">
+    ${prevPost ? `<a class="post-nav-link post-nav-prev" href="${prefix}/blog/${prevPost.slug}/">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <div class="post-nav-info">
+        <span class="post-nav-label">${prevLabel}</span>
+        <span class="post-nav-title">${prevPost.title}</span>
+      </div>
+      <div class="post-nav-preview">
+        ${prevPost.coverImage ? `<img src="${prevPost.coverImage}" alt="" />` : ''}
+        <div class="post-nav-preview-body">
+          <div class="post-nav-preview-title">${prevPost.title}</div>
+          <div class="post-nav-preview-excerpt">${prevPost.excerpt || ''}</div>
+        </div>
+      </div>
+    </a>` : '<div></div>'}
+
+    <a class="post-nav-grid" href="${prefix}/blog/" title="${lang === 'fr' ? 'Tous les articles' : 'All posts'}">
+      <span></span><span></span><span></span><span></span>
+    </a>
+
+    ${nextPost ? `<a class="post-nav-link post-nav-next" href="${prefix}/blog/${nextPost.slug}/">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      <div class="post-nav-info">
+        <span class="post-nav-label">${nextLabel}</span>
+        <span class="post-nav-title">${nextPost.title}</span>
+      </div>
+      <div class="post-nav-preview">
+        ${nextPost.coverImage ? `<img src="${nextPost.coverImage}" alt="" />` : ''}
+        <div class="post-nav-preview-body">
+          <div class="post-nav-preview-title">${nextPost.title}</div>
+          <div class="post-nav-preview-excerpt">${nextPost.excerpt || ''}</div>
+        </div>
+      </div>
+    </a>` : '<div></div>'}
+  </nav>
+
+  <nav class="toc" id="toc"></nav>
+
+  <script>
+  (function() {
+    // Build TOC from h2 headings
+    const headings = document.querySelectorAll('.post-body h2');
+    const toc = document.getElementById('toc');
+    if (headings.length < 2) { toc.style.display = 'none'; return; }
+
+    headings.forEach((h, i) => {
+      const id = 'section-' + i;
+      h.id = id;
+      const a = document.createElement('a');
+      a.className = 'toc-item';
+      a.href = '#' + id;
+      a.innerHTML = '<span class="toc-num">' + (i + 1) + '</span>'
+        + '<span class="toc-label">' + h.textContent + '</span>';
+      toc.appendChild(a);
+    });
+
+    // Highlight active section on scroll
+    const items = toc.querySelectorAll('.toc-item');
+    let active = -1;
+
+    function update() {
+      let current = 0;
+      const offset = window.innerHeight * 0.35;
+      headings.forEach((h, i) => {
+        if (h.getBoundingClientRect().top < offset) current = i;
+      });
+      if (current !== active) {
+        active = current;
+        items.forEach((item, i) => item.classList.toggle('active', i === current));
+      }
+    }
+
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  })();
+  </script>
 </body>
 </html>`;
 }
@@ -1321,10 +1493,11 @@ async function build() {
     console.log(`  ✓ ${lang.code === 'en' ? '' : '/fr'}/blog/index.html (${posts.length} posts from ${source})`);
 
     // Blog posts
-    for (const post of posts) {
+    for (let i = 0; i < posts.length; i++) {
+      const post = posts[i];
       const postDir = path.join(blogDir, post.slug);
       mkdirp(postDir);
-      fs.writeFileSync(path.join(postDir, 'index.html'), blogPostHTML(data, post, lang.code));
+      fs.writeFileSync(path.join(postDir, 'index.html'), blogPostHTML(data, post, lang.code, posts, i));
       console.log(`  ✓ ${lang.code === 'en' ? '' : '/fr'}/blog/${post.slug}/`);
     }
   }
