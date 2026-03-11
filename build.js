@@ -1302,18 +1302,53 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     }
     .post-header a { color: var(--fg-dim); text-decoration: none; }
     .post-header a:hover { color: #fff; }
-    .post-hero { width: 100%; max-height: 400px; object-fit: cover; }
+    .post-hero-wrap {
+      position: relative; width: 100%; min-height: 340px; max-height: 520px;
+      display: flex; align-items: flex-end; overflow: hidden;
+    }
+    .post-hero-wrap img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; z-index: 0;
+    }
+    .post-hero-wrap::after {
+      content: ''; position: absolute; inset: 0; z-index: 1;
+      background: linear-gradient(0deg, var(--bg) 0%, rgba(10,10,10,0.85) 35%, rgba(10,10,10,0.3) 70%, rgba(10,10,10,0.15) 100%);
+    }
+    .post-hero-content {
+      position: relative; z-index: 2; max-width: 720px;
+      padding: 0 40px 40px; width: 100%;
+      margin: 0 auto;
+    }
+    .post-hero-wrap .post-date {
+      font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase;
+      letter-spacing: 0.06em; font-family: var(--mono); margin-bottom: 12px; display: block;
+    }
+    .post-hero-wrap .post-title {
+      font-family: var(--display); font-size: clamp(28px, 5vw, 44px); font-weight: 300;
+      margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.02em; color: #fff;
+    }
+    .post-hero-wrap .post-meta-bottom {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0;
+    }
+    .post-no-hero { padding-top: 40px; }
+    .post-no-hero .post-date {
+      font-size: 11px; color: var(--fg-dim); text-transform: uppercase;
+      letter-spacing: 0.06em; font-family: var(--mono); margin-bottom: 12px; display: block;
+    }
+    .post-no-hero .post-title {
+      font-family: var(--display); font-size: clamp(28px, 5vw, 44px); font-weight: 300;
+      margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.02em;
+    }
+    .post-no-hero .post-meta-bottom {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 36px;
+    }
     .post-container { max-width: 720px; margin: 0 auto; padding: 40px 20px 80px; }
-    .post-meta { margin-bottom: 12px; }
-    .post-date { font-size: 11px; color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--mono); }
-    .post-title { font-family: var(--display); font-size: clamp(28px, 5vw, 44px); font-weight: 300; margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.02em; }
-    .post-meta-bottom { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 36px; }
     .post-category { font-size: 11px; color: var(--accent); font-family: var(--mono); letter-spacing: 0.02em; }
-    .post-meta-sep { font-size: 10px; color: rgba(255,255,255,0.15); }
+    .post-meta-sep { font-size: 10px; color: rgba(255,255,255,0.25); }
     .post-tags { display: flex; gap: 5px; flex-wrap: wrap; }
     .post-tags span {
       font-size: 10px; padding: 2px 8px; border-radius: 20px;
-      color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.08);
       letter-spacing: 0.01em; font-family: var(--mono);
     }
     .post-body h2 { font-family: var(--display); font-size: 24px; font-weight: 300; margin: 32px 0 12px; letter-spacing: -0.01em; }
@@ -1504,6 +1539,8 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     }
     @media (max-width: 640px) {
       .post-header { padding: 16px 20px; }
+      .post-hero-wrap { min-height: 280px; }
+      .post-hero-content { padding: 0 20px 28px; }
       .post-container { padding: 24px 16px 60px; }
       .post-nav { padding: 20px 16px; flex-wrap: wrap; gap: 16px; }
       .post-nav-preview { display: none; }
@@ -1516,17 +1553,29 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     <a href="${prefix}/blog/">&larr; ${lang === 'fr' ? 'Retour au blog' : 'Back to blog'}</a>
     <a href="${prefix}/">${data.intro.name}</a>
   </header>
-  ${post.coverImage ? `<img class="post-hero" src="${post.coverImage}" alt="" />` : ''}
-  <article class="post-container">
-    <div class="post-meta">
+  ${post.coverImage ? `
+  <div class="post-hero-wrap">
+    <img src="${post.coverImage}" alt="" />
+    <div class="post-hero-content">
       <span class="post-date">${new Date(post.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+      <h1 class="post-title">${post.title}</h1>
+      <div class="post-meta-bottom">
+        <span class="post-category">${post.category || ''}</span>
+        <span class="post-meta-sep">·</span>
+        <div class="post-tags">${post.tags.filter(t => t.toLowerCase() !== 'featured').map(t => `<span>${t}</span>`).join('')}</div>
+      </div>
     </div>
+  </div>` : `
+  <div class="post-no-hero" style="max-width:720px;margin:0 auto;padding-left:20px;padding-right:20px;">
+    <span class="post-date">${new Date(post.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
     <h1 class="post-title">${post.title}</h1>
     <div class="post-meta-bottom">
       <span class="post-category">${post.category || ''}</span>
       <span class="post-meta-sep">·</span>
       <div class="post-tags">${post.tags.filter(t => t.toLowerCase() !== 'featured').map(t => `<span>${t}</span>`).join('')}</div>
     </div>
+  </div>`}
+  <article class="post-container">
     <div class="post-body">${post.body}</div>
   </article>
 
