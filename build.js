@@ -1338,9 +1338,8 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     }
     .toc.visible { opacity: 1; pointer-events: auto; }
     .toc-item {
-      display: flex; align-items: center; gap: 0; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; cursor: pointer;
       text-decoration: none; height: 32px; overflow: visible;
-      transition: gap 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
     }
     .toc-num {
       width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
@@ -1363,12 +1362,12 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     .toc-item.active .toc-num { background: var(--accent); color: #fff; }
     .toc-num:hover ~ .toc-label .toc-label-inner.overflows,
     .toc-item.active .toc-label .toc-label-inner.overflows {
-      animation: tocMarquee 10s linear infinite;
+      animation: tocMarquee 14s linear infinite;
     }
     @keyframes tocMarquee {
       0% { transform: translateX(0); }
-      15% { transform: translateX(0); }
-      85% { transform: translateX(var(--marquee-dist)); }
+      20% { transform: translateX(0); }
+      80% { transform: translateX(var(--marquee-dist)); }
       100% { transform: translateX(var(--marquee-dist)); }
     }
 
@@ -1608,23 +1607,28 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
         toc.appendChild(a);
       });
 
-      // Detect overflow on labels and set marquee distance
-      var labels = toc.querySelectorAll('.toc-label-inner');
-      labels.forEach(function(inner) {
-        // Measure when expanded: temporarily force parent open
-        var label = inner.parentElement;
-        var origMax = label.style.maxWidth;
-        var origPad = label.style.padding;
-        label.style.maxWidth = '260px';
-        label.style.padding = '0 12px';
-        var overflow = inner.scrollWidth - label.clientWidth;
-        label.style.maxWidth = origMax;
-        label.style.padding = origPad;
-        if (overflow > 0) {
-          inner.classList.add('overflows');
-          inner.style.setProperty('--marquee-dist', '-' + (overflow + 20) + 'px');
-        }
-      });
+      // Detect overflow on labels after a frame so layout is computed
+      setTimeout(function() {
+        var labels = toc.querySelectorAll('.toc-label-inner');
+        labels.forEach(function(inner) {
+          var label = inner.parentElement;
+          // Temporarily expand to measure
+          label.style.maxWidth = '260px';
+          label.style.padding = '0 12px';
+          label.style.position = 'absolute';
+          label.style.visibility = 'hidden';
+          label.offsetWidth; // force reflow
+          var overflow = inner.scrollWidth - label.clientWidth;
+          label.style.maxWidth = '';
+          label.style.padding = '';
+          label.style.position = '';
+          label.style.visibility = '';
+          if (overflow > 5) {
+            inner.classList.add('overflows');
+            inner.style.setProperty('--marquee-dist', '-' + (overflow + 20) + 'px');
+          }
+        });
+      }, 100);
 
       var items = toc.querySelectorAll('.toc-item');
       var active = -1;
