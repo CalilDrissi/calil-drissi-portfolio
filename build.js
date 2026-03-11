@@ -47,7 +47,14 @@ function stripHTML(html) {
   return html.replace(/<[^>]*>/g, '').replace(/\n/g, ' ').trim();
 }
 function decodeEntities(str) {
-  return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#039;/g, "'").replace(/&quot;/g, '"');
+  return str.replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n)))
+            .replace(/&#x([0-9a-fA-F]+);/g, (_, n) => String.fromCharCode(parseInt(n, 16)))
+            .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&nbsp;/g, ' ')
+            .replace(/&rsquo;/g, '\u2019').replace(/&lsquo;/g, '\u2018')
+            .replace(/&rdquo;/g, '\u201D').replace(/&ldquo;/g, '\u201C')
+            .replace(/&mdash;/g, '\u2014').replace(/&ndash;/g, '\u2013')
+            .replace(/&hellip;/g, '\u2026');
 }
 
 async function fetchWPPosts(lang) {
@@ -82,7 +89,7 @@ async function fetchWPPosts(lang) {
       return {
         wpId: post.id,
         slug: post.slug,
-        title: post.title.rendered,
+        title: decodeEntities(post.title.rendered),
         date: post.date.split('T')[0],
         excerpt: yoast.description || stripHTML(post.excerpt.rendered),
         category: categories[0] || 'General',
