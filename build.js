@@ -4,6 +4,19 @@ const path = require('path');
 const DIST = path.join(__dirname, 'dist');
 const CONTENT = path.join(__dirname, 'content');
 
+// Load .env if present
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
+    const [key, ...val] = line.split('=');
+    if (key && val.length) process.env[key.trim()] = val.join('=').trim();
+  });
+}
+
+const WP_URL = process.env.WP_URL; // e.g. https://cms.drissi.xyz
+const WP_USER = process.env.WP_USER;
+const WP_APP_PASSWORD = process.env.WP_APP_PASSWORD;
+
 // ---- Helpers ----
 function readJSON(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -18,13 +31,73 @@ function readDir(dir) {
   return fs.readdirSync(dir).filter(f => f.endsWith('.json')).map(f => readJSON(path.join(dir, f)));
 }
 
+// ---- WordPress API ----
+async function wpFetch(endpoint) {
+  const url = `${WP_URL}/wp-json/wp/v2/${endpoint}`;
+  const headers = {};
+  if (WP_USER && WP_APP_PASSWORD) {
+    headers['Authorization'] = 'Basic ' + Buffer.from(`${WP_USER}:${WP_APP_PASSWORD}`).toString('base64');
+  }
+  const res = await fetch(url, { headers });
+  if (!res.ok) throw new Error(`WP API error: ${res.status} ${res.statusText} — ${url}`);
+  return res.json();
+}
+
+function stripHTML(html) {
+  return html.replace(/<[^>]*>/g, '').replace(/\n/g, ' ').trim();
+}
+
+async function fetchWPPosts(lang) {
+  try {
+    // Try with Polylang lang param first, fallback to all posts
+    let endpoint = `posts?per_page=100&_embed`;
+    if (lang) endpoint += `&lang=${lang}`;
+
+    const posts = await wpFetch(endpoint);
+    return posts.map(post => {
+      // Extract featured image from _embedded
+      let coverImage = '';
+      if (post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]) {
+        coverImage = post._embedded['wp:featuredmedia'][0].source_url || '';
+      }
+
+      // Extract tags from _embedded
+      let tags = [];
+      if (post._embedded && post._embedded['wp:term']) {
+        post._embedded['wp:term'].forEach(termGroup => {
+          termGroup.forEach(term => {
+            if (term.taxonomy === 'post_tag') tags.push(term.name);
+          });
+        });
+      }
+
+      // Extract Yoast SEO meta if available
+      const yoast = post.yoast_head_json || {};
+
+      return {
+        slug: post.slug,
+        title: post.title.rendered,
+        date: post.date.split('T')[0],
+        excerpt: yoast.description || stripHTML(post.excerpt.rendered),
+        tags: tags.length ? tags : ['General'],
+        coverImage: yoast.og_image?.[0]?.url || coverImage,
+        body: post.content.rendered,
+        seo: {
+          title: yoast.title || post.title.rendered,
+          description: yoast.description || stripHTML(post.excerpt.rendered),
+          ogImage: yoast.og_image?.[0]?.url || coverImage,
+        }
+      };
+    });
+  } catch (e) {
+    console.warn(`  ⚠ WordPress fetch failed for lang=${lang}: ${e.message}`);
+    return null; // null = fallback to local
+  }
+}
+
 // ---- Template engine (simple token replacement) ----
 function render(template, data, lang) {
   let html = template;
-
-  // Replace content blocks using marker comments
-  // <!-- BEGIN:section --> ... <!-- END:section -->
-  // These get replaced with generated HTML
 
   // INTRO section
   html = html.replace(
@@ -172,11 +245,11 @@ function render(template, data, lang) {
 
   // About popup
   html = html.replace(
-    /calil drissi — about/,
+    /khalil drissi — about/,
     data.about.titlebarText
   );
   html = html.replace(
-    /<a class="win-action-btn" href="mailto:hello@calildrissi\.dev">Email ↗<\/a>/,
+    /<a class="win-action-btn" href="mailto:hello@khalildrissi\.com">Email ↗<\/a>/,
     `<a class="win-action-btn" href="${data.about.emailBtn.url}">${data.about.emailBtn.label}</a>`
   );
   html = html.replace(
@@ -192,7 +265,7 @@ function render(template, data, lang) {
     `>${data.about.tabs.chat}</button>`
   );
   html = html.replace(
-    'class="about-bio-name">Calil Drissi</div>',
+    'class="about-bio-name">Khalil Drissi</div>',
     `class="about-bio-name">${data.about.name}</div>`
   );
   html = html.replace(
@@ -218,7 +291,7 @@ function render(template, data, lang) {
 
   // Chat greeting
   html = html.replace(
-    /<div class="msg-sender">Calil's AI Assistant<\/div>\s*Hey![\s\S]*?<div class="msg-time">/,
+    /<div class="msg-sender">Khalil's AI Assistant<\/div>\s*Hey![\s\S]*?<div class="msg-time">/,
     `<div class="msg-sender">${data.chat.senderName}</div>\n          ${data.chat.greeting}\n          <div class="msg-time">`
   );
 
@@ -276,7 +349,7 @@ function blogListingHTML(data, posts, lang) {
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .map(p => `
       <a href="${prefix}/blog/${p.slug}/" class="blog-card">
-        <img src="${p.coverImage}" alt="" loading="lazy" />
+        ${p.coverImage ? `<img src="${p.coverImage}" alt="" loading="lazy" />` : ''}
         <div class="blog-card-body">
           <div class="blog-card-date">${new Date(p.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
           <h2>${p.title}</h2>
@@ -361,13 +434,18 @@ function blogListingHTML(data, posts, lang) {
 
 function blogPostHTML(data, post, lang) {
   const prefix = lang === 'fr' ? '/fr' : '';
+  const seo = post.seo || {};
   return `<!DOCTYPE html>
 <html lang="${lang}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${post.title} — ${data.intro.name}</title>
-  <meta name="description" content="${post.excerpt}" />
+  <title>${seo.title || post.title} — ${data.intro.name}</title>
+  <meta name="description" content="${seo.description || post.excerpt}" />
+  ${seo.ogImage ? `<meta property="og:image" content="${seo.ogImage}" />` : ''}
+  <meta property="og:title" content="${seo.title || post.title}" />
+  <meta property="og:description" content="${seo.description || post.excerpt}" />
+  <meta property="og:type" content="article" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
@@ -410,6 +488,7 @@ function blogPostHTML(data, post, lang) {
       border-radius: 6px; padding: 16px; overflow-x: auto; margin: 16px 0; font-size: 12px;
     }
     .post-body code { font-family: var(--mono); font-size: 12px; }
+    .post-body img { border-radius: 8px; margin: 20px 0; }
     @media (max-width: 640px) {
       .post-header { padding: 16px 20px; }
       .post-container { padding: 24px 16px 60px; }
@@ -435,7 +514,7 @@ function blogPostHTML(data, post, lang) {
 }
 
 // ---- Main build ----
-function build() {
+async function build() {
   console.log('Building site...');
 
   // Clean dist
@@ -445,15 +524,40 @@ function build() {
   // Read template (current index.html)
   const template = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 
+  // Fetch WordPress posts (try WP first, fallback to local JSON)
+  let wpPostsEN = null;
+  let wpPostsFR = null;
+
+  if (WP_URL) {
+    console.log(`  Fetching posts from ${WP_URL}...`);
+    [wpPostsEN, wpPostsFR] = await Promise.all([
+      fetchWPPosts('en'),
+      fetchWPPosts('fr'),
+    ]);
+
+    // If Polylang isn't active, lang param may be ignored — posts return for both
+    // In that case, use same posts for EN (FR will fallback to local)
+    if (wpPostsEN && wpPostsFR && JSON.stringify(wpPostsEN) === JSON.stringify(wpPostsFR)) {
+      console.log('  ℹ Polylang not detected — using WP posts for EN only, local for FR');
+      wpPostsFR = null;
+    }
+
+    if (wpPostsEN) console.log(`  ✓ Fetched ${wpPostsEN.length} EN posts from WordPress`);
+    if (wpPostsFR) console.log(`  ✓ Fetched ${wpPostsFR.length} FR posts from WordPress`);
+  }
+
   // Build for each language
   const languages = [
-    { code: 'en', file: 'en.json', outDir: DIST },
-    { code: 'fr', file: 'fr.json', outDir: path.join(DIST, 'fr') },
+    { code: 'en', file: 'en.json', outDir: DIST, wpPosts: wpPostsEN },
+    { code: 'fr', file: 'fr.json', outDir: path.join(DIST, 'fr'), wpPosts: wpPostsFR },
   ];
 
   for (const lang of languages) {
     const data = readJSON(path.join(CONTENT, lang.file));
-    const posts = readDir(path.join(CONTENT, 'blog', lang.code));
+
+    // Use WP posts if available, otherwise fall back to local JSON
+    const posts = lang.wpPosts || readDir(path.join(CONTENT, 'blog', lang.code));
+    const source = lang.wpPosts ? 'WordPress' : 'local JSON';
 
     // Portfolio page
     mkdirp(lang.outDir);
@@ -465,7 +569,7 @@ function build() {
     const blogDir = path.join(lang.outDir, 'blog');
     mkdirp(blogDir);
     fs.writeFileSync(path.join(blogDir, 'index.html'), blogListingHTML(data, posts, lang.code));
-    console.log(`  ✓ ${lang.code === 'en' ? '' : '/fr'}/blog/index.html`);
+    console.log(`  ✓ ${lang.code === 'en' ? '' : '/fr'}/blog/index.html (${posts.length} posts from ${source})`);
 
     // Blog posts
     for (const post of posts) {

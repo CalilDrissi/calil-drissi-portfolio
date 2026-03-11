@@ -38,7 +38,7 @@ exports.handler = async (event) => {
     return cors({});
   }
 
-  const repo = process.env.GITHUB_REPO; // e.g. "CalilDrissi/calil-drissi-portfolio"
+  const repo = process.env.GITHUB_REPO; // e.g. "KhalilDrissi/khalil-drissi-portfolio"
   if (!repo || !process.env.GITHUB_TOKEN || !process.env.ADMIN_PASSWORD) {
     return cors({ error: 'Server not configured' }, 500);
   }

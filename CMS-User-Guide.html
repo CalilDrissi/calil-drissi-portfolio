@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CMS User Guide — calildrissi.dev</title>
+<title>CMS User Guide — khalildrissi.com</title>
 <style>
   @page { margin: 1in; size: A4; }
   body {
@@ -36,14 +36,14 @@
 <body>
 
 <h1>CMS User Guide</h1>
-<p>calildrissi.dev — Content Management System</p>
+<p>khalildrissi.com — Content Management System</p>
 
 <h2>1. Set Up Environment Variables</h2>
 <p>Go to <strong>Netlify Dashboard</strong> → <strong>Site settings</strong> → <strong>Environment variables</strong> and add:</p>
 
 <table>
   <tr><th>Variable</th><th>Value</th></tr>
-  <tr><td><code>GITHUB_REPO</code></td><td><code>CalilDrissi/calil-drissi-portfolio</code></td></tr>
+  <tr><td><code>GITHUB_REPO</code></td><td><code>KhalilDrissi/khalil-drissi-portfolio</code></td></tr>
   <tr><td><code>GITHUB_TOKEN</code></td><td>A GitHub Personal Access Token with <code>repo</code> scope<br><small>Generate at github.com/settings/tokens</small></td></tr>
   <tr><td><code>ADMIN_PASSWORD</code></td><td>Any password you choose for admin login</td></tr>
 </table>
@@ -51,7 +51,7 @@
 <div class="note">After adding variables, trigger a redeploy: <strong>Deploys</strong> → <strong>Trigger deploy</strong> → <strong>Deploy site</strong>.</div>
 
 <h2>2. Access the Admin Panel</h2>
-<p>Navigate to <code>https://calil-drissi.netlify.app/admin/</code> and log in with your <code>ADMIN_PASSWORD</code>.</p>
+<p>Navigate to <code>https://khalildrissi.com/admin/</code> and log in with your <code>ADMIN_PASSWORD</code>.</p>
 
 <h2>3. Edit Portfolio Content</h2>
 <ol>
@@ -118,11 +118,11 @@ git add . && git commit -m "Update content" && git push</code></pre>
 <h2>7. Site URLs</h2>
 <table>
   <tr><th>Page</th><th>URL</th></tr>
-  <tr><td>Portfolio (EN)</td><td><code>https://calil-drissi.netlify.app</code></td></tr>
-  <tr><td>Portfolio (FR)</td><td><code>https://calil-drissi.netlify.app/fr/</code></td></tr>
-  <tr><td>Blog (EN)</td><td><code>https://calil-drissi.netlify.app/blog/</code></td></tr>
-  <tr><td>Blog (FR)</td><td><code>https://calil-drissi.netlify.app/fr/blog/</code></td></tr>
-  <tr><td>Admin Panel</td><td><code>https://calil-drissi.netlify.app/admin/</code></td></tr>
+  <tr><td>Portfolio (EN)</td><td><code>https://khalildrissi.com</code></td></tr>
+  <tr><td>Portfolio (FR)</td><td><code>https://khalildrissi.com/fr/</code></td></tr>
+  <tr><td>Blog (EN)</td><td><code>https://khalildrissi.com/blog/</code></td></tr>
+  <tr><td>Blog (FR)</td><td><code>https://khalildrissi.com/fr/blog/</code></td></tr>
+  <tr><td>Admin Panel</td><td><code>https://khalildrissi.com/admin/</code></td></tr>
 </table>
 
 <h2>8. Blog Post JSON Format</h2>
@@ -259,7 +259,7 @@ docker compose down -v</code></pre>
 <div class="note"><strong>Netlify builds:</strong> WordPress does not need to be running for Netlify deploys. The build reads from the committed JSON files in <code>content/blog/</code>. Only run WordPress locally when writing new posts.</div>
 
 <hr>
-<p style="color:#999; font-size:11px; text-align:center;">Generated March 2026 — calildrissi.dev CMS</p>
+<p style="color:#999; font-size:11px; text-align:center;">Generated March 2026 — khalildrissi.com CMS</p>
 
 </body>
 </html>

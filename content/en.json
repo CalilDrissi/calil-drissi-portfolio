@@ -1,12 +1,12 @@
 {
   "meta": {
-    "title": "Calil Drissi — Software Developer",
+    "title": "Khalil Drissi — Software Developer",
     "description": "Software developer crafting performant digital experiences. Based in Morocco, built for global collaboration.",
     "lang": "en"
   },
   "intro": {
     "header": "Intro",
-    "name": "Calil Drissi",
+    "name": "Khalil Drissi",
     "title": "Software Developer",
     "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
     "avatarLargeUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&crop=face",
@@ -57,7 +57,7 @@
     "header": "Connect",
     "links": [
       { "label": "LinkedIn", "url": "#" },
-      { "label": "Email", "url": "mailto:hello@calildrissi.dev" },
+      { "label": "Email", "url": "mailto:hello@khalildrissi.com" },
       { "label": "GitHub", "url": "#" },
       { "label": "Twitter / X", "url": "#" }
     ],
@@ -72,7 +72,7 @@
     "text": "An experienced software developer with a focus on {rotate} and <em>craft</em>. A reliable partner for startups, agencies, and brands building for the <em>modern&nbsp;web</em><span class=\"superscript\">15</span>.",
     "rotateWords": ["performance", "scalability", "precision", "elegance", "innovation", "quality"]
   },
-  "ribbon": ["Available for Work", "React", "Next.js", "TypeScript", "Node.js", "Python", "GSAP", "Morocco GMT+1", "hello@calildrissi.dev"],
+  "ribbon": ["Available for Work", "React", "Next.js", "TypeScript", "Node.js", "Python", "GSAP", "Morocco GMT+1", "hello@khalildrissi.com"],
   "projects": [
     { "title": "Dashboard App", "subtitle": "Fintech Startup — Web Application", "desc": "A real-time financial dashboard with interactive charts, portfolio tracking, and automated reporting. Built with Next.js and D3.js for high-performance data visualization across multiple asset classes.", "tags": ["Next.js", "TypeScript", "D3.js", "PostgreSQL", "WebSocket"], "year": "2025", "role": "Lead Developer", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=360&h=240&fit=crop" },
     { "title": "Analytics Platform", "subtitle": "SaaS Company — Full Product", "desc": "End-to-end analytics platform processing millions of events daily. Custom query builder, real-time dashboards, and automated insight generation.", "tags": ["React", "Python", "FastAPI", "ClickHouse", "Redis"], "year": "2024", "role": "Full-Stack Developer", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=360&h=240&fit=crop" },
@@ -100,11 +100,11 @@
     { "label": "CodePen Featured", "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop" }
   ],
   "about": {
-    "titlebarText": "calil drissi — about",
-    "emailBtn": { "label": "Email ↗", "url": "mailto:hello@calildrissi.dev" },
+    "titlebarText": "khalil drissi — about",
+    "emailBtn": { "label": "Email ↗", "url": "mailto:hello@khalildrissi.com" },
     "resumeBtn": { "label": "Resume ↗", "url": "#" },
     "tabs": { "bio": "About Me", "chat": "Chat with AI Assistant" },
-    "name": "Calil Drissi",
+    "name": "Khalil Drissi",
     "role": "Software Developer · Morocco",
     "bio": [
       "I'm a software developer based in Morocco with 4+ years of experience building web products for startups, agencies, and brands worldwide. I specialize in crafting performant, visually refined digital experiences.",
@@ -119,15 +119,15 @@
     ]
   },
   "chat": {
-    "greeting": "Hey! 👋 I'm Calil's AI assistant. Ask me anything about his work, experience, tech stack, or availability. I'm here to help!",
-    "senderName": "Calil's AI Assistant",
+    "greeting": "Hey! 👋 I'm Khalil's AI assistant. Ask me anything about his work, experience, tech stack, or availability. I'm here to help!",
+    "senderName": "Khalil's AI Assistant",
     "responses": {
-      "stack": "Calil works primarily with React, Next.js, and TypeScript on the frontend, paired with Node.js, Python, and PostgreSQL on the backend. He's also experienced with Tailwind CSS, GSAP, Three.js, and various cloud platforms.",
-      "experience": "Calil has 4+ years of professional experience, delivering 15+ projects for startups, agencies, and brands. He's worked across fintech, e-commerce, health tech, and SaaS industries.",
-      "available": "Yes! Calil is currently available for new projects. He works remotely from Morocco (GMT+1) and collaborates with clients globally. You can schedule a discovery call or request a cost estimate.",
-      "pricing": "Calil's rates depend on the project scope and complexity. For an accurate estimate, it's best to schedule a discovery call or send a project brief to hello@calildrissi.dev.",
-      "contact": "You can reach Calil via email at hello@calildrissi.dev, or connect on LinkedIn, GitHub, or Twitter. He typically responds within 24 hours.",
-      "default": "Great question! For detailed inquiries, the best way to get a thorough answer is to reach out directly at hello@calildrissi.dev or schedule a call. Calil is always happy to chat about potential projects."
+      "stack": "Khalil works primarily with React, Next.js, and TypeScript on the frontend, paired with Node.js, Python, and PostgreSQL on the backend. He's also experienced with Tailwind CSS, GSAP, Three.js, and various cloud platforms.",
+      "experience": "Khalil has 4+ years of professional experience, delivering 15+ projects for startups, agencies, and brands. He's worked across fintech, e-commerce, health tech, and SaaS industries.",
+      "available": "Yes! Khalil is currently available for new projects. He works remotely from Morocco (GMT+1) and collaborates with clients globally. You can schedule a discovery call or request a cost estimate.",
+      "pricing": "Khalil's rates depend on the project scope and complexity. For an accurate estimate, it's best to schedule a discovery call or send a project brief to hello@khalildrissi.com.",
+      "contact": "You can reach Khalil via email at hello@khalildrissi.com, or connect on LinkedIn, GitHub, or Twitter. He typically responds within 24 hours.",
+      "default": "Great question! For detailed inquiries, the best way to get a thorough answer is to reach out directly at hello@khalildrissi.com or schedule a call. Khalil is always happy to chat about potential projects."
     }
   },
   "projectsTab": { "label": "Projects", "count": "15" },
