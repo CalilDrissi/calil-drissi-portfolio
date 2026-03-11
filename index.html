@@ -812,6 +812,39 @@
       letter-spacing: 0.06em;
       color: rgba(255,255,255,0.7);
     }
+    .os-stars {
+      position: absolute;
+      top: 8px; right: 8px;
+      background: rgba(0,0,0,0.7);
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-family: var(--mono);
+      color: #fbbf24;
+      letter-spacing: 0.02em;
+      z-index: 2;
+    }
+    .os-desc {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 20px 8px 6px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.8));
+      font-size: 9px;
+      font-family: var(--mono);
+      color: rgba(255,255,255,0.5);
+      line-height: 1.4;
+      z-index: 1;
+    }
+    .os-thumb .project-label {
+      bottom: auto; top: 8px; left: 8px; right: auto;
+      background: rgba(0,0,0,0.7);
+      padding: 2px 8px;
+      border-radius: 3px;
+      z-index: 2;
+    }
+    .os-thumb::after {
+      content: 'View Repo ↗';
+    }
 
     /* ---- TABLET ---- */
     @media (max-width: 1024px) {
@@ -1926,8 +1959,8 @@
         <div class="scroll-line"></div>
       </div>
       <div class="filter-tabs">
-        <button class="filter-tab active">Projects <span class="filter-count">15</span></button>
-        <button class="filter-tab">Awards <span class="filter-count">23</span></button>
+        <button class="filter-tab active">Commercial <span class="filter-count">15</span></button>
+        <button class="filter-tab">Open Source <span class="filter-count">6</span></button>
       </div>
     </div>
     <div class="projects-strip" id="projectsStrip">
@@ -2380,18 +2413,14 @@
   strip.addEventListener('pointerenter', () => { mouseOverStrip = true; });
   strip.addEventListener('pointerleave', () => { mouseOverStrip = false; isDown = false; strip.style.cursor = 'grab'; });
 
-  // Filter tabs — Awards data
-  const awards = [
-    { label: 'SOTD — Awwwards', img: 'https://images.unsplash.com/photo-1559028012-481c04fa702d?w=360&h=240&fit=crop' },
-    { label: 'SOTD — CSSDA', img: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=360&h=240&fit=crop' },
-    { label: 'Developer Award', img: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=360&h=240&fit=crop' },
-    { label: 'Mobile Excellence', img: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=360&h=240&fit=crop' },
-    { label: 'Innovation Award', img: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=360&h=240&fit=crop' },
-    { label: 'Special Kudos', img: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=360&h=240&fit=crop' },
-    { label: 'GSAP Showcase', img: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=360&h=240&fit=crop' },
-    { label: 'Honors — Awwwards', img: 'https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=360&h=240&fit=crop' },
-    { label: 'ProductHunt #3', img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=360&h=240&fit=crop' },
-    { label: 'CodePen Featured', img: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop' },
+  // Filter tabs — Open Source data
+  const openSourceProjects = [
+    { label: 'React Animation Kit', desc: 'Composable animation primitives for React', stars: '1.2k', url: '#', img: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop' },
+    { label: 'Node API Boilerplate', desc: 'Production-ready Express + TypeScript starter', stars: '850', url: '#', img: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=360&h=240&fit=crop' },
+    { label: 'DevKit CLI', desc: 'Scaffolding & automation toolkit for devs', stars: '640', url: '#', img: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=360&h=240&fit=crop' },
+    { label: 'MotionLib', desc: 'Lightweight scroll animation library', stars: '420', url: '#', img: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=360&h=240&fit=crop' },
+    { label: 'Pagerank', desc: 'Fast PageRank implementation in Rust', stars: '310', url: '#', img: 'https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=360&h=240&fit=crop' },
+    { label: 'Dotfiles', desc: 'Personal dev environment configs', stars: '180', url: '#', img: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=360&h=240&fit=crop' },
   ];
 
   // Store original project thumbs HTML
@@ -2402,12 +2431,14 @@
       document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
 
-      const isAwards = tab.textContent.toLowerCase().includes('award');
-      if (isAwards) {
-        strip.innerHTML = awards.map(a =>
-          `<div class="project-thumb award-thumb">
+      const isOS = tab.textContent.toLowerCase().includes('open source');
+      if (isOS) {
+        strip.innerHTML = openSourceProjects.map(a =>
+          `<div class="project-thumb os-thumb" onclick="if(this.dataset.url!=='#')window.open(this.dataset.url,'_blank')" data-url="${a.url}">
             <img src="${a.img}" alt="" loading="lazy" />
             <div class="project-label">${a.label}</div>
+            <div class="os-stars">★ ${a.stars}</div>
+            <div class="os-desc">${a.desc}</div>
           </div>`
         ).join('');
       } else {
@@ -2671,7 +2702,7 @@
 
   // Attach project thumb clicks
   function attachThumbClicks() {
-    document.querySelectorAll('.project-thumb:not(.award-thumb)').forEach((thumb, i) => {
+    document.querySelectorAll('.project-thumb:not(.os-thumb)').forEach((thumb, i) => {
       thumb.addEventListener('click', () => {
         if (dragDist > 5) return;
         WM.createProjectWindow(projects[i], i);

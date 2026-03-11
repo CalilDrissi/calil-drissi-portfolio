@@ -87,17 +87,13 @@
     { "title": "Landing Pages", "subtitle": "Agency — Conversion-Focused", "desc": "High-performance landing pages with GSAP scroll animations, achieving 40% uplift in conversion rates.", "tags": ["HTML", "CSS", "GSAP", "JavaScript", "Figma"], "year": "2022", "role": "Frontend Developer", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1536104968055-4d61aa56f46a?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1536104968055-4d61aa56f46a?w=360&h=240&fit=crop" },
     { "title": "Open Source", "subtitle": "Community — Libraries & Tools", "desc": "Maintained open-source libraries including a React animation toolkit and Node.js API boilerplate. 2K+ GitHub stars.", "tags": ["TypeScript", "React", "Node.js", "GitHub Actions", "NPM"], "year": "2021–Present", "role": "Creator & Maintainer", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop" }
   ],
-  "awards": [
-    { "label": "SOTD — Awwwards", "img": "https://images.unsplash.com/photo-1559028012-481c04fa702d?w=360&h=240&fit=crop" },
-    { "label": "SOTD — CSSDA", "img": "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=360&h=240&fit=crop" },
-    { "label": "Developer Award", "img": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=360&h=240&fit=crop" },
-    { "label": "Mobile Excellence", "img": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=360&h=240&fit=crop" },
-    { "label": "Innovation Award", "img": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=360&h=240&fit=crop" },
-    { "label": "Special Kudos", "img": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=360&h=240&fit=crop" },
-    { "label": "GSAP Showcase", "img": "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=360&h=240&fit=crop" },
-    { "label": "Honors — Awwwards", "img": "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=360&h=240&fit=crop" },
-    { "label": "ProductHunt #3", "img": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=360&h=240&fit=crop" },
-    { "label": "CodePen Featured", "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop" }
+  "openSource": [
+    { "label": "React Animation Kit", "desc": "Composable animation primitives for React", "stars": "1.2k", "url": "#", "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop" },
+    { "label": "Node API Boilerplate", "desc": "Production-ready Express + TypeScript starter", "stars": "850", "url": "#", "img": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=360&h=240&fit=crop" },
+    { "label": "DevKit CLI", "desc": "Scaffolding & automation toolkit for devs", "stars": "640", "url": "#", "img": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=360&h=240&fit=crop" },
+    { "label": "MotionLib", "desc": "Lightweight scroll animation library", "stars": "420", "url": "#", "img": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=360&h=240&fit=crop" },
+    { "label": "Pagerank", "desc": "Fast PageRank implementation in Rust", "stars": "310", "url": "#", "img": "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=360&h=240&fit=crop" },
+    { "label": "Dotfiles", "desc": "Personal dev environment configs", "stars": "180", "url": "#", "img": "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=360&h=240&fit=crop" }
   ],
   "about": {
     "titlebarText": "khalil drissi — about",
@@ -130,8 +126,8 @@
       "default": "Great question! For detailed inquiries, the best way to get a thorough answer is to reach out directly at hello@khalildrissi.com or schedule a call. Khalil is always happy to chat about potential projects."
     }
   },
-  "projectsTab": { "label": "Projects", "count": "15" },
-  "awardsTab": { "label": "Awards", "count": "23" },
+  "projectsTab": { "label": "Commercial", "count": "15" },
+  "openSourceTab": { "label": "Open Source", "count": "6" },
   "scrollIndicator": "Scroll",
   "nav": {
     "blog": "Blog",

@@ -87,17 +87,13 @@
     { "title": "Landing Pages", "subtitle": "Agence — Axé Conversion", "desc": "Landing pages haute performance avec animations GSAP au scroll, atteignant +40% de taux de conversion.", "tags": ["HTML", "CSS", "GSAP", "JavaScript", "Figma"], "year": "2022", "role": "Développeur Frontend", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1536104968055-4d61aa56f46a?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1536104968055-4d61aa56f46a?w=360&h=240&fit=crop" },
     { "title": "Open Source", "subtitle": "Communauté — Bibliothèques & Outils", "desc": "Bibliothèques open-source maintenues dont un toolkit d'animation React et un boilerplate API Node.js. 2K+ étoiles GitHub.", "tags": ["TypeScript", "React", "Node.js", "GitHub Actions", "NPM"], "year": "2021–Présent", "role": "Créateur & Mainteneur", "visit": "#", "code": "#", "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=820&h=400&fit=crop", "thumb": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop" }
   ],
-  "awards": [
-    { "label": "SOTD — Awwwards", "img": "https://images.unsplash.com/photo-1559028012-481c04fa702d?w=360&h=240&fit=crop" },
-    { "label": "SOTD — CSSDA", "img": "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=360&h=240&fit=crop" },
-    { "label": "Prix Développeur", "img": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=360&h=240&fit=crop" },
-    { "label": "Excellence Mobile", "img": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=360&h=240&fit=crop" },
-    { "label": "Prix Innovation", "img": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=360&h=240&fit=crop" },
-    { "label": "Mentions Spéciales", "img": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=360&h=240&fit=crop" },
-    { "label": "GSAP Showcase", "img": "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=360&h=240&fit=crop" },
-    { "label": "Honors — Awwwards", "img": "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=360&h=240&fit=crop" },
-    { "label": "ProductHunt #3", "img": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=360&h=240&fit=crop" },
-    { "label": "CodePen Featured", "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop" }
+  "openSource": [
+    { "label": "React Animation Kit", "desc": "Primitives d'animation composables pour React", "stars": "1.2k", "url": "#", "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop" },
+    { "label": "Node API Boilerplate", "desc": "Starter Express + TypeScript prêt pour la production", "stars": "850", "url": "#", "img": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=360&h=240&fit=crop" },
+    { "label": "DevKit CLI", "desc": "Toolkit de scaffolding et d'automatisation", "stars": "640", "url": "#", "img": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=360&h=240&fit=crop" },
+    { "label": "MotionLib", "desc": "Bibliothèque légère d'animations au scroll", "stars": "420", "url": "#", "img": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=360&h=240&fit=crop" },
+    { "label": "Pagerank", "desc": "Implémentation rapide de PageRank en Rust", "stars": "310", "url": "#", "img": "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=360&h=240&fit=crop" },
+    { "label": "Dotfiles", "desc": "Configurations personnelles d'environnement dev", "stars": "180", "url": "#", "img": "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=360&h=240&fit=crop" }
   ],
   "about": {
     "titlebarText": "khalil drissi — à propos",
@@ -130,8 +126,8 @@
       "default": "Bonne question ! Pour des demandes détaillées, le meilleur moyen d'obtenir une réponse complète est de contacter directement hello@khalildrissi.com ou de planifier un appel. Khalil est toujours heureux de discuter de projets potentiels."
     }
   },
-  "projectsTab": { "label": "Projets", "count": "15" },
-  "awardsTab": { "label": "Prix", "count": "23" },
+  "projectsTab": { "label": "Commercial", "count": "15" },
+  "openSourceTab": { "label": "Open Source", "count": "6" },
   "scrollIndicator": "Défiler",
   "nav": {
     "blog": "Blog",

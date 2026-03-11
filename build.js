@@ -231,7 +231,7 @@ function render(template, data, lang) {
   html = html.replace(
     /<button class="filter-tab active">[\s\S]*?<\/button>\s*<button class="filter-tab">[\s\S]*?<\/button>/,
     `<button class="filter-tab active">${data.projectsTab.label} <span class="filter-count">${data.projectsTab.count}</span></button>
-        <button class="filter-tab">${data.awardsTab.label} <span class="filter-count">${data.awardsTab.count}</span></button>`
+        <button class="filter-tab">${data.openSourceTab.label} <span class="filter-count">${data.openSourceTab.count}</span></button>`
   );
 
   // Scroll indicator
@@ -315,8 +315,8 @@ function render(template, data, lang) {
     `const projects = ${JSON.stringify(data.projects)};$1`
   );
   html = html.replace(
-    /const awards = \[[\s\S]*?\];(\s*\n\s*\/\/ Store original)/,
-    `const awards = ${JSON.stringify(data.awards)};$1`
+    /const openSourceProjects = \[[\s\S]*?\];(\s*\n\s*\/\/ Store original)/,
+    `const openSourceProjects = ${JSON.stringify(data.openSource)};$1`
   );
   html = html.replace(
     /const chatResponses = \{[\s\S]*?\};(\s*\n\s*function getResponse)/,
