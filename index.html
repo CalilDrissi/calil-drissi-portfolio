@@ -3340,6 +3340,7 @@
     <div class="win-titlebar-text">Colossal Cave Adventure</div>
     <div class="win-titlebar-actions">
       <span class="term-timer" id="termTimer">00:00</span>
+      <button class="term-mute-btn" id="termMuteBtn" title="Toggle music">&#9834;</button>
     </div>
   </div>
   <div class="term-body" id="termBody">
@@ -3369,6 +3370,25 @@
   }
   .term-timer.running {
     color: rgba(255,255,255,0.45);
+  }
+  .term-mute-btn {
+    font-size: 12px;
+    background: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 3px;
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
+    padding: 2px 6px;
+    margin-left: 6px;
+    transition: color 0.2s, border-color 0.2s, opacity 0.2s;
+    line-height: 1;
+  }
+  .term-mute-btn:hover {
+    color: rgba(255,255,255,0.7);
+    border-color: rgba(255,255,255,0.2);
+  }
+  .term-mute-btn.muted {
+    opacity: 0.3;
   }
   .term-body {
     flex: 1;
@@ -3483,9 +3503,169 @@
   var termTimerEl = document.getElementById('termTimer');
   var termBtn = document.getElementById('terminalChallengeBtn');
 
+  var termMuteBtn = document.getElementById('termMuteBtn');
+
   // Register with WM
   var termWinObj = WM.register(termWin, 'Colossal Cave Adventure');
   termWinObj.persistent = true;
+
+  // ---- AMBIENT CAVE MUSIC (Web Audio API) ----
+  var audioCtx = null;
+  var musicNodes = null;
+  var musicMuted = false;
+  var musicGain = null;
+
+  function initAudio() {
+    if (audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    musicGain = audioCtx.createGain();
+    musicGain.gain.value = 0;
+    musicGain.connect(audioCtx.destination);
+  }
+
+  function startMusic() {
+    initAudio();
+    if (musicNodes) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    var nodes = [];
+
+    // Deep drone — low rumbling bass
+    var drone = audioCtx.createOscillator();
+    drone.type = 'sine';
+    drone.frequency.value = 55;
+    var droneGain = audioCtx.createGain();
+    droneGain.gain.value = 0.12;
+    var droneFilter = audioCtx.createBiquadFilter();
+    droneFilter.type = 'lowpass';
+    droneFilter.frequency.value = 120;
+    drone.connect(droneFilter);
+    droneFilter.connect(droneGain);
+    droneGain.connect(musicGain);
+    drone.start();
+    nodes.push(drone);
+
+    // Slow LFO modulating drone pitch
+    var lfo = audioCtx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 0.08;
+    var lfoGain = audioCtx.createGain();
+    lfoGain.gain.value = 3;
+    lfo.connect(lfoGain);
+    lfoGain.connect(drone.frequency);
+    lfo.start();
+    nodes.push(lfo);
+
+    // Second drone — fifth above, very quiet
+    var drone2 = audioCtx.createOscillator();
+    drone2.type = 'sine';
+    drone2.frequency.value = 82;
+    var drone2Gain = audioCtx.createGain();
+    drone2Gain.gain.value = 0.06;
+    var drone2Filter = audioCtx.createBiquadFilter();
+    drone2Filter.type = 'lowpass';
+    drone2Filter.frequency.value = 200;
+    drone2.connect(drone2Filter);
+    drone2Filter.connect(drone2Gain);
+    drone2Gain.connect(musicGain);
+    drone2.start();
+    nodes.push(drone2);
+
+    // Wind/breath noise
+    var noiseLen = audioCtx.sampleRate * 2;
+    var noiseBuf = audioCtx.createBuffer(1, noiseLen, audioCtx.sampleRate);
+    var noiseData = noiseBuf.getChannelData(0);
+    for (var i = 0; i < noiseLen; i++) noiseData[i] = Math.random() * 2 - 1;
+    var noise = audioCtx.createBufferSource();
+    noise.buffer = noiseBuf;
+    noise.loop = true;
+    var noiseFilt = audioCtx.createBiquadFilter();
+    noiseFilt.type = 'bandpass';
+    noiseFilt.frequency.value = 300;
+    noiseFilt.Q.value = 0.5;
+    var noiseGain = audioCtx.createGain();
+    noiseGain.gain.value = 0.025;
+    // Modulate noise volume for breathing effect
+    var noiseLfo = audioCtx.createOscillator();
+    noiseLfo.type = 'sine';
+    noiseLfo.frequency.value = 0.15;
+    var noiseLfoGain = audioCtx.createGain();
+    noiseLfoGain.gain.value = 0.015;
+    noiseLfo.connect(noiseLfoGain);
+    noiseLfoGain.connect(noiseGain.gain);
+    noiseLfo.start();
+    noise.connect(noiseFilt);
+    noiseFilt.connect(noiseGain);
+    noiseGain.connect(musicGain);
+    noise.start();
+    nodes.push(noise, noiseLfo);
+
+    // Water drip — random plinks
+    function scheduleDrip() {
+      if (!musicNodes) return;
+      var osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      var freq = 1800 + Math.random() * 1200;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.4, audioCtx.currentTime + 0.15);
+      var dripGain = audioCtx.createGain();
+      dripGain.gain.setValueAtTime(0.03 + Math.random() * 0.02, audioCtx.currentTime);
+      dripGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+      osc.connect(dripGain);
+      dripGain.connect(musicGain);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.15);
+      var next = 2000 + Math.random() * 5000;
+      setTimeout(scheduleDrip, next);
+    }
+    setTimeout(scheduleDrip, 1000 + Math.random() * 2000);
+
+    musicNodes = nodes;
+
+    // Fade in
+    musicGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    musicGain.gain.setValueAtTime(musicGain.gain.value, audioCtx.currentTime);
+    musicGain.gain.linearRampToValueAtTime(musicMuted ? 0 : 1, audioCtx.currentTime + 1.5);
+  }
+
+  function stopMusic() {
+    if (!musicNodes || !audioCtx) return;
+    // Fade out
+    musicGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    musicGain.gain.setValueAtTime(musicGain.gain.value, audioCtx.currentTime);
+    musicGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.8);
+    var nodesToStop = musicNodes;
+    musicNodes = null;
+    setTimeout(function() {
+      nodesToStop.forEach(function(n) { try { n.stop(); } catch(e) {} });
+    }, 1000);
+  }
+
+  function toggleMute() {
+    musicMuted = !musicMuted;
+    termMuteBtn.classList.toggle('muted', musicMuted);
+    if (musicGain && audioCtx) {
+      musicGain.gain.cancelScheduledValues(audioCtx.currentTime);
+      musicGain.gain.setValueAtTime(musicGain.gain.value, audioCtx.currentTime);
+      musicGain.gain.linearRampToValueAtTime(musicMuted ? 0 : 1, audioCtx.currentTime + 0.3);
+    }
+  }
+
+  termMuteBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    toggleMute();
+  });
+
+  // Watch for terminal window close/minimize to pause music
+  var termObserver = new MutationObserver(function() {
+    var isOpen = termWin.classList.contains('open') && !termWin.classList.contains('minimized');
+    if (isOpen && musicNodes === null && gameStarted) {
+      startMusic();
+    } else if (!isOpen && musicNodes) {
+      stopMusic();
+    }
+  });
+  termObserver.observe(termWin, { attributes: true, attributeFilter: ['class'] });
 
   // Timer
   var timerInterval = null;
@@ -4297,6 +4477,7 @@
     }
     if (termWinObj.minimized) {
       WM.restore(termWinObj);
+      startMusic();
       return;
     }
     termWin.classList.add('open');
@@ -4306,6 +4487,7 @@
       initGame();
       startIntro();
     }
+    startMusic();
   }
 
   termBtn.addEventListener('click', openTerminal);
