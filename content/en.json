@@ -1,20 +1,20 @@
 {
   "meta": {
-    "title": "Khalil Drissi — Software Developer",
-    "description": "Software developer crafting performant digital experiences. Based in Morocco, built for global collaboration.",
+    "title": "Khalil Drissi — Software Engineer",
+    "description": "Software engineer building across web, mobile, desktop, and systems. Based in Morocco, built for global collaboration.",
     "lang": "en"
   },
   "intro": {
     "header": "Intro",
     "name": "Khalil Drissi",
-    "title": "Software Developer",
+    "title": "Software Engineer",
     "avatarUrl": "/profile.png",
     "avatarLargeUrl": "/profile.png",
     "hoverPill": "Play — Click to discover",
     "location": "Morocco. GMT+1.",
     "tagline": "Built for Global Collabs.",
     "whatIDo": "What I do",
-    "whatIDoDesc": "I Design and Develop Web Products.",
+    "whatIDoDesc": "I Design and Build Software.",
     "stats": [
       { "value": "15+", "label": "Projects Delivered." },
       { "value": "4+", "label": "Years Experience." },
@@ -24,9 +24,9 @@
   "position": {
     "header": "Position",
     "studio": "Freelance (Independent)",
-    "focus": "Full-Stack & Frontend Focus",
+    "focus": "Full-Stack · All Platforms",
     "stackLabel": "Focus",
-    "stack": ["Web Applications & SPAs", "Interactive UI & Motion", "API Design & Systems", "Performance & Infrastructure"],
+    "stack": ["Web & Mobile Apps", "Desktop & System Software", "API Design & Cloud Infrastructure", "DevOps & Deployment"],
     "previousLabel": "Previous",
     "previous": ["Agency Projects", "Startup Contracts", "Open Source"]
   },
@@ -69,7 +69,7 @@
     ]
   },
   "statement": {
-    "text": "An experienced software developer with a focus on {rotate} and <em>craft</em>. A reliable partner for startups, agencies, and brands building for the <em>modern&nbsp;web</em><span class=\"superscript\">15</span>.",
+    "text": "An experienced software engineer with a focus on {rotate} and <em>craft</em>. A reliable partner for startups, agencies, and brands building <em>across&nbsp;platforms</em><span class=\"superscript\">15</span>.",
     "rotateWords": ["performance", "scalability", "precision", "elegance", "innovation", "quality"]
   },
   "ribbon": ["Available for Work", "React", "Next.js", "TypeScript", "Node.js", "Python", "GSAP", "Morocco GMT+1", "khalil@drissi.org"],
@@ -101,10 +101,10 @@
     "resumeBtn": { "label": "Resume ↗", "url": "#" },
     "tabs": { "bio": "About Me", "chat": "Chat with Alfred" },
     "name": "Khalil Drissi",
-    "role": "Software Developer · Morocco",
+    "role": "Software Engineer · Morocco",
     "bio": [
-      "I'm a software developer based in Morocco with 4+ years of experience building web products for startups, agencies, and brands worldwide. I specialize in crafting performant, visually refined digital experiences.",
-      "My work spans the full stack — from pixel-perfect frontends with React and Next.js to robust backend systems with Node.js and Python. I'm passionate about animation, interaction design, and pushing the boundaries of what's possible on the web.",
+      "I'm a software engineer based in Morocco with 4+ years of experience building products across web, mobile, desktop, and systems for startups, agencies, and brands worldwide.",
+      "My work spans the entire stack and platform spectrum — from React and Next.js frontends to Node.js and Python backends, React Native mobile apps, Electron desktop tools, and systems-level work with Rust and C++. I handle deployment, infrastructure, and everything in between.",
       "When I'm not coding, you'll find me exploring new tools, contributing to open source, or mentoring aspiring developers in the Moroccan tech community."
     ],
     "details": [
@@ -118,7 +118,7 @@
     "greeting": "Hey! 👋 I'm Khalil's AI assistant. Ask me anything about his work, experience, tech stack, or availability. I'm here to help!",
     "senderName": "Khalil's AI Assistant",
     "responses": {
-      "stack": "Khalil works primarily with React, Next.js, and TypeScript on the frontend, paired with Node.js, Python, and PostgreSQL on the backend. He's also experienced with Tailwind CSS, GSAP, Three.js, and various cloud platforms.",
+      "stack": "Khalil works across the full spectrum — React, Next.js, and TypeScript on the frontend; Node.js, Python, and PostgreSQL on the backend; React Native for mobile; Electron for desktop; and Rust/C++ for systems programming. He also handles DevOps, cloud infrastructure, and deployment.",
       "experience": "Khalil has 4+ years of professional experience, delivering 15+ projects for startups, agencies, and brands. He's worked across fintech, e-commerce, health tech, and SaaS industries.",
       "available": "Yes! Khalil is currently available for new projects. He works remotely from Morocco (GMT+1) and collaborates with clients globally. You can schedule a discovery call or request a cost estimate.",
       "pricing": "Khalil's rates depend on the project scope and complexity. For an accurate estimate, it's best to schedule a discovery call or send a project brief to khalil@drissi.org.",

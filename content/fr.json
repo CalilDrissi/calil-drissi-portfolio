@@ -1,20 +1,20 @@
 {
   "meta": {
-    "title": "Khalil Drissi — Développeur Web",
-    "description": "Développeur web créant des expériences digitales performantes. Basé au Maroc, prêt pour la collaboration internationale.",
+    "title": "Khalil Drissi — Ingénieur Logiciel",
+    "description": "Ingénieur logiciel construisant sur web, mobile, desktop et systèmes. Basé au Maroc, prêt pour la collaboration internationale.",
     "lang": "fr"
   },
   "intro": {
     "header": "Intro",
     "name": "Khalil Drissi",
-    "title": "Développeur Web",
+    "title": "Ingénieur Logiciel",
     "avatarUrl": "/profile.png",
     "avatarLargeUrl": "/profile.png",
     "hoverPill": "Cliquez pour découvrir",
     "location": "Maroc. GMT+1.",
     "tagline": "Disponible pour des collaborations internationales.",
     "whatIDo": "Ce que je fais",
-    "whatIDoDesc": "Je conçois et développe des produits web.",
+    "whatIDoDesc": "Je conçois et construis des logiciels.",
     "stats": [
       { "value": "15+", "label": "Projets livrés." },
       { "value": "4+", "label": "Ans d'expérience." },
@@ -24,9 +24,9 @@
   "position": {
     "header": "Poste",
     "studio": "Freelance (Indépendant)",
-    "focus": "Full-Stack & Focus Frontend",
+    "focus": "Full-Stack · Toutes Plateformes",
     "stackLabel": "Focus",
-    "stack": ["Applications Web & SPAs", "UI Interactive & Motion", "Design d'API & Systèmes", "Performance & Infrastructure"],
+    "stack": ["Apps Web & Mobile", "Logiciels Desktop & Systèmes", "Design d'API & Cloud", "DevOps & Déploiement"],
     "previousLabel": "Précédent",
     "previous": ["Projets en agence", "Contrats startup", "Open Source"]
   },
@@ -69,7 +69,7 @@
     ]
   },
   "statement": {
-    "text": "Un développeur web expérimenté axé sur {rotate} et le <em>savoir-faire</em>. Un partenaire fiable pour les startups, agences et marques qui construisent le <em>web&nbsp;moderne</em><span class=\"superscript\">15</span>.",
+    "text": "Un ingénieur logiciel expérimenté axé sur {rotate} et le <em>savoir-faire</em>. Un partenaire fiable pour les startups, agences et marques qui construisent <em>sur&nbsp;toutes&nbsp;plateformes</em><span class=\"superscript\">15</span>.",
     "rotateWords": ["la performance", "la scalabilité", "la précision", "l'élégance", "l'innovation", "la qualité"]
   },
   "ribbon": ["Disponible", "React", "Next.js", "TypeScript", "Node.js", "Python", "GSAP", "Maroc GMT+1", "khalil@drissi.org"],
@@ -101,10 +101,10 @@
     "resumeBtn": { "label": "CV ↗", "url": "#" },
     "tabs": { "bio": "À propos", "chat": "Discuter avec Alfred" },
     "name": "Khalil Drissi",
-    "role": "Développeur Web · Maroc",
+    "role": "Ingénieur Logiciel · Maroc",
     "bio": [
-      "Je suis un développeur web basé au Maroc avec plus de 4 ans d'expérience dans la création de produits web pour des startups, agences et marques du monde entier. Je me spécialise dans la création d'expériences digitales performantes et visuellement raffinées.",
-      "Mon travail couvre l'ensemble de la stack — des frontends pixel-perfect avec React et Next.js aux systèmes backend robustes avec Node.js et Python. Je suis passionné par l'animation, le design d'interaction et repousser les limites du possible sur le web.",
+      "Je suis un ingénieur logiciel basé au Maroc avec plus de 4 ans d'expérience dans la création de produits sur web, mobile, desktop et systèmes pour des startups, agences et marques du monde entier.",
+      "Mon travail couvre l'ensemble de la stack et des plateformes — des frontends React et Next.js aux backends Node.js et Python, des apps mobiles React Native aux outils desktop Electron, en passant par la programmation système en Rust et C++. Je gère aussi le DevOps, l'infrastructure cloud et le déploiement.",
       "Quand je ne code pas, vous me trouverez en train d'explorer de nouveaux outils, de contribuer à l'open source ou de mentorer des développeurs en herbe dans la communauté tech marocaine."
     ],
     "details": [
@@ -118,7 +118,7 @@
     "greeting": "Salut ! 👋 Je suis l'assistant IA de Khalil. Posez-moi vos questions sur son travail, son expérience, sa stack technique ou sa disponibilité. Je suis là pour vous aider !",
     "senderName": "Assistant IA de Khalil",
     "responses": {
-      "stack": "Khalil travaille principalement avec React, Next.js et TypeScript côté frontend, associés à Node.js, Python et PostgreSQL côté backend. Il maîtrise également Tailwind CSS, GSAP, Three.js et diverses plateformes cloud.",
+      "stack": "Khalil travaille sur tout le spectre — React, Next.js et TypeScript côté frontend ; Node.js, Python et PostgreSQL côté backend ; React Native pour le mobile ; Electron pour le desktop ; et Rust/C++ pour la programmation système. Il gère aussi le DevOps, l'infrastructure cloud et le déploiement.",
       "experience": "Khalil a plus de 4 ans d'expérience professionnelle, ayant livré plus de 15 projets pour des startups, agences et marques. Il a travaillé dans la fintech, le e-commerce, la santé et le SaaS.",
       "available": "Oui ! Khalil est actuellement disponible pour de nouveaux projets. Il travaille à distance depuis le Maroc (GMT+1) et collabore avec des clients du monde entier. Vous pouvez planifier un appel découverte ou demander une estimation.",
       "pricing": "Les tarifs de Khalil dépendent de la portée et de la complexité du projet. Pour une estimation précise, le mieux est de planifier un appel découverte ou d'envoyer un brief à khalil@drissi.org.",
