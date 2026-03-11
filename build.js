@@ -1696,9 +1696,9 @@ async function build() {
   for (const lang of languages) {
     const data = readJSON(path.join(CONTENT, lang.file));
 
-    // Use WP posts if available, otherwise fall back to local JSON
-    const posts = lang.wpPosts || readDir(path.join(CONTENT, 'blog', lang.code));
-    const source = lang.wpPosts ? 'WordPress' : 'local JSON';
+    // Use WP posts only — no local fallback
+    const posts = lang.wpPosts || [];
+    const source = lang.wpPosts ? 'WordPress' : 'none';
 
     // Portfolio page
     mkdirp(lang.outDir);
