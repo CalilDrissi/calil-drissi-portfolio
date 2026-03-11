@@ -16,9 +16,9 @@
     "whatIDo": "What I do",
     "whatIDoDesc": "I Design and Build Software.",
     "stats": [
-      { "value": "15+", "label": "Projects Delivered." },
-      { "value": "4+", "label": "Years Experience." },
-      { "value": "100%", "label": "Client Satisfaction." }
+      { "value": "Senior", "label": "Level Developer." },
+      { "value": "Any", "label": "Platform, Any Scale." },
+      { "value": "Open", "label": "For Collaboration." }
     ]
   },
   "position": {

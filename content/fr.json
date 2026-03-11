@@ -16,9 +16,9 @@
     "whatIDo": "Ce que je fais",
     "whatIDoDesc": "Je conçois et construis des logiciels.",
     "stats": [
-      { "value": "15+", "label": "Projets livrés." },
-      { "value": "4+", "label": "Ans d'expérience." },
-      { "value": "100%", "label": "Satisfaction client." }
+      { "value": "Senior", "label": "Développeur." },
+      { "value": "Toute", "label": "Plateforme, Toute Échelle." },
+      { "value": "Ouvert", "label": "À la Collaboration." }
     ]
   },
   "position": {
