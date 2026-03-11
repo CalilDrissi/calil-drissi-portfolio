@@ -1655,64 +1655,71 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
         toc.appendChild(a);
       });
 
-      // Scroll long labels when expanded
-      function checkAndScroll(inner) {
+      // --- Label scroll for overflow ---
+      var scrollTimers = new Map();
+
+      function startScroll(inner) {
+        // Don't double-up if already pending/scrolling
+        if (scrollTimers.has(inner)) return;
         var label = inner.parentElement;
-        // Wait for max-width transition to finish
-        setTimeout(function() {
+        // Timer 1: wait for expand transition, then measure
+        var t1 = setTimeout(function() {
           var overflow = inner.scrollWidth - label.clientWidth;
-          if (overflow > 5) {
-            var dur = Math.max(3, overflow / 30); // ~30px per second
-            inner.style.setProperty('--scroll-dist', '-' + (overflow + 10) + 'px');
-            inner.style.setProperty('--scroll-dur', dur + 's');
-            // Small delay so reader sees the start first
-            setTimeout(function() { inner.classList.add('scrolling'); }, 800);
-          }
-        }, 550); // after max-width transition (500ms)
+          if (overflow <= 5) { scrollTimers.delete(inner); return; }
+          var dur = Math.max(3, overflow / 30);
+          inner.style.setProperty('--scroll-dist', '-' + (overflow + 10) + 'px');
+          inner.style.setProperty('--scroll-dur', dur + 's');
+          // Timer 2: brief pause so reader sees the start
+          var t2 = setTimeout(function() {
+            inner.classList.add('scrolling');
+            scrollTimers.set(inner, null); // running, no pending timer
+          }, 600);
+          scrollTimers.set(inner, t2);
+        }, 550);
+        scrollTimers.set(inner, t1);
       }
-      function resetScroll(inner) {
+
+      function stopScroll(inner) {
+        // Clear any pending timers
+        var t = scrollTimers.get(inner);
+        if (t) clearTimeout(t);
+        scrollTimers.delete(inner);
         inner.classList.remove('scrolling');
-        // Reset position instantly
-        inner.style.transition = 'none';
-        inner.offsetHeight;
-        inner.style.transition = '';
       }
 
       toc.querySelectorAll('.toc-item').forEach(function(item) {
         var inner = item.querySelector('.toc-label-inner');
         var num = item.querySelector('.toc-num');
-        num.addEventListener('mouseenter', function() { checkAndScroll(inner); });
-        num.addEventListener('mouseleave', function() { resetScroll(inner); });
+        num.addEventListener('mouseenter', function() { startScroll(inner); });
+        num.addEventListener('mouseleave', function() { stopScroll(inner); });
       });
 
-      // Also handle active state scrolling
-      var lastActiveInner = null;
-
+      // --- Active section tracking ---
       var items = toc.querySelectorAll('.toc-item');
       var active = -1;
       var tocVisible = false;
+      var activeInner = null;
 
       function updateToc() {
-        // Show TOC only after scrolling past the first heading
         var firstH2Top = headings[0].getBoundingClientRect().top;
         var shouldShow = firstH2Top < window.innerHeight * 0.5;
         if (shouldShow !== tocVisible) {
           tocVisible = shouldShow;
           toc.classList.toggle('visible', shouldShow);
         }
-
         if (!shouldShow) return;
 
         var current = 0;
-        var offset = window.innerHeight * 0.35;
-        headings.forEach(function(h, i) { if (h.getBoundingClientRect().top < offset) current = i; });
+        var scrollOffset = window.innerHeight * 0.35;
+        headings.forEach(function(h, i) { if (h.getBoundingClientRect().top < scrollOffset) current = i; });
         if (current !== active) {
           active = current;
-          if (lastActiveInner) resetScroll(lastActiveInner);
+          // Stop scroll on previous active
+          if (activeInner) stopScroll(activeInner);
           items.forEach(function(item, i) { item.classList.toggle('active', i === current); });
-          var newInner = items[current].querySelector('.toc-label-inner');
-          checkAndScroll(newInner);
-          lastActiveInner = newInner;
+          // Start scroll on new active
+          activeInner = items[current].querySelector('.toc-label-inner');
+          startScroll(activeInner);
         }
       }
       window.addEventListener('scroll', updateToc, { passive: true });
