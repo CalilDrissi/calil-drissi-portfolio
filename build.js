@@ -61,12 +61,14 @@ async function fetchWPPosts(lang) {
         coverImage = post._embedded['wp:featuredmedia'][0].source_url || '';
       }
 
-      // Extract tags from _embedded
+      // Extract categories and tags from _embedded
       let tags = [];
+      let categories = [];
       if (post._embedded && post._embedded['wp:term']) {
         post._embedded['wp:term'].forEach(termGroup => {
           termGroup.forEach(term => {
             if (term.taxonomy === 'post_tag') tags.push(term.name);
+            if (term.taxonomy === 'category' && term.name !== 'Uncategorized') categories.push(term.name);
           });
         });
       }
@@ -80,6 +82,7 @@ async function fetchWPPosts(lang) {
         title: post.title.rendered,
         date: post.date.split('T')[0],
         excerpt: yoast.description || stripHTML(post.excerpt.rendered),
+        category: categories[0] || 'General',
         tags: tags.length ? tags : ['General'],
         coverImage: yoast.og_image?.[0]?.url || coverImage,
         body: post.content.rendered,
@@ -351,6 +354,7 @@ function blogListingHTML(data, posts, lang) {
     title: p.title,
     date: p.date,
     excerpt: p.excerpt || '',
+    category: p.category || 'General',
     tags: p.tags || [],
     coverImage: p.coverImage || '',
   })));
@@ -463,14 +467,31 @@ function blogListingHTML(data, posts, lang) {
     .sidebar-search input::placeholder { color: rgba(255,255,255,0.3); }
     .sidebar-search input:focus { border-color: var(--accent); }
 
+    .sidebar-categories {
+      padding: 12px 16px 8px; display: flex; flex-wrap: wrap; gap: 6px; flex-shrink: 0;
+    }
+    .cat-pill {
+      font-size: 11px; padding: 5px 14px; border-radius: 6px;
+      color: var(--fg-dim); cursor: pointer; transition: all 0.2s;
+      letter-spacing: 0.01em; background: rgba(255,255,255,0.06); border: none;
+      font-family: var(--sans); font-weight: 500;
+    }
+    .cat-pill:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .cat-pill.active { background: var(--accent); color: #fff; }
+
+    .sidebar-filter-label {
+      padding: 0 16px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.25); font-family: var(--mono); flex-shrink: 0;
+    }
+
     .sidebar-tags {
-      padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
-      display: flex; flex-wrap: wrap; gap: 6px; flex-shrink: 0;
+      padding: 6px 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; flex-wrap: wrap; gap: 5px; flex-shrink: 0;
     }
     .tag-pill {
-      font-size: 10px; padding: 3px 10px; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
-      color: var(--fg-dim); cursor: pointer; transition: all 0.2s; text-transform: uppercase;
-      letter-spacing: 0.03em; background: transparent; font-family: var(--mono);
+      font-size: 10px; padding: 2px 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+      color: rgba(255,255,255,0.4); cursor: pointer; transition: all 0.2s;
+      letter-spacing: 0.02em; background: transparent; font-family: var(--mono);
     }
     .tag-pill:hover { border-color: var(--accent); color: #fff; }
     .tag-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
@@ -503,7 +524,8 @@ function blogListingHTML(data, posts, lang) {
       font-family: var(--display); font-size: 13px; font-weight: 300; margin-bottom: 2px; letter-spacing: -0.01em;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .post-item-date { font-size: 10px; color: var(--fg-dim); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .post-item-meta { font-size: 10px; color: var(--fg-dim); margin-bottom: 4px; letter-spacing: 0.02em; }
+    .post-item-cat { color: var(--accent); }
     .post-item-tags { display: flex; gap: 4px; flex-wrap: wrap; }
     .post-item-tags span {
       font-size: 9px; padding: 1px 6px; border: 1px solid rgba(255,255,255,0.1); border-radius: 3px;
@@ -547,6 +569,8 @@ function blogListingHTML(data, posts, lang) {
       <div class="sidebar-search">
         <input type="text" id="searchInput" placeholder="${lang === 'fr' ? 'Rechercher...' : 'Search posts...'}" />
       </div>
+      <div class="sidebar-categories" id="categoryFilters"></div>
+      <div class="sidebar-filter-label">${lang === 'fr' ? 'Tags' : 'Tags'}</div>
       <div class="sidebar-tags" id="tagFilters"></div>
       <div class="active-filters" id="activeFilters">
         <span id="filterLabel"></span>
@@ -580,7 +604,8 @@ function blogListingHTML(data, posts, lang) {
     }
   }
 
-  // --- Collect all tags ---
+  // --- Collect all categories and tags ---
+  const allCategories = [...new Set(POSTS.map(p => p.category))].sort();
   const allTags = [...new Set(POSTS.flatMap(p => p.tags))].sort();
 
   // --- Nodes ---
@@ -613,6 +638,7 @@ function blogListingHTML(data, posts, lang) {
   let focusedIndex = -1; // from sidebar click highlight
 
   // Filter state
+  let activeCategoryFilter = null;
   let activeTagFilters = new Set();
   let searchQuery = '';
   let visibleIndices = new Set(POSTS.map((_, i) => i));
@@ -708,7 +734,7 @@ function blogListingHTML(data, posts, lang) {
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, W, H);
 
-    const isFiltered = activeTagFilters.size > 0 || searchQuery.length > 0;
+    const isFiltered = activeCategoryFilter || activeTagFilters.size > 0 || searchQuery.length > 0;
     const hIdx = hoveredNode !== null ? hoveredNode.postIndex : sidebarHoverIndex;
     const connectedToHover = new Set();
     if (hIdx >= 0) {
@@ -876,7 +902,7 @@ function blogListingHTML(data, posts, lang) {
     else { hoverImg.style.display = 'none'; }
     hoverTitle.textContent = p.title;
     const locale = LANG === 'fr' ? 'fr-FR' : 'en-US';
-    hoverDate.textContent = new Date(p.date).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+    hoverDate.innerHTML = '<span style="color:var(--accent)">' + p.category + '</span> · ' + new Date(p.date).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
     const exc = p.excerpt.length > 120 ? p.excerpt.slice(0, 117) + '...' : p.excerpt;
     hoverExcerpt.textContent = exc;
     hoverTags.innerHTML = p.tags.map(t => '<span>' + t + '</span>').join('');
@@ -1069,6 +1095,26 @@ function blogListingHTML(data, posts, lang) {
     lastTouchDist = 0;
   });
 
+  // --- Sidebar: Categories ---
+  const categoryFilters = document.getElementById('categoryFilters');
+  allCategories.forEach(cat => {
+    const pill = document.createElement('button');
+    pill.className = 'cat-pill';
+    pill.textContent = cat;
+    pill.addEventListener('click', () => {
+      if (activeCategoryFilter === cat) {
+        activeCategoryFilter = null;
+        pill.classList.remove('active');
+      } else {
+        activeCategoryFilter = cat;
+        document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+      }
+      applyFilters();
+    });
+    categoryFilters.appendChild(pill);
+  });
+
   // --- Sidebar: Tags ---
   const tagFilters = document.getElementById('tagFilters');
   allTags.forEach(tag => {
@@ -1096,9 +1142,11 @@ function blogListingHTML(data, posts, lang) {
   const filterLabel = document.getElementById('filterLabel');
   const clearFilters = document.getElementById('clearFilters');
   clearFilters.addEventListener('click', () => {
+    activeCategoryFilter = null;
     activeTagFilters.clear();
     searchQuery = '';
     searchInput.value = '';
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tag-pill').forEach(p => p.classList.remove('active'));
     applyFilters();
   });
@@ -1116,7 +1164,7 @@ function blogListingHTML(data, posts, lang) {
       const item = document.createElement('div');
       item.className = 'post-item';
       item.innerHTML = '<div class="post-item-title">' + p.title + '</div>' +
-        '<div class="post-item-date">' + new Date(p.date).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) + '</div>' +
+        '<div class="post-item-meta"><span class="post-item-cat">' + p.category + '</span> · ' + new Date(p.date).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) + '</div>' +
         '<div class="post-item-tags">' + p.tags.map(t => '<span>' + t + '</span>').join('') + '</div>';
       item.addEventListener('click', () => {
         window.location.href = PREFIX + '/blog/' + p.slug + '/';
@@ -1144,7 +1192,10 @@ function blogListingHTML(data, posts, lang) {
     for (let i = 0; i < POSTS.length; i++) {
       const p = POSTS[i];
       let match = true;
-      if (activeTagFilters.size > 0) {
+      if (activeCategoryFilter) {
+        match = p.category === activeCategoryFilter;
+      }
+      if (match && activeTagFilters.size > 0) {
         match = [...activeTagFilters].some(t => p.tags.includes(t));
       }
       if (match && searchQuery) {
@@ -1155,10 +1206,11 @@ function blogListingHTML(data, posts, lang) {
       if (match) visibleIndices.add(i);
     }
 
-    const hasFilters = activeTagFilters.size > 0 || searchQuery.length > 0;
+    const hasFilters = activeCategoryFilter || activeTagFilters.size > 0 || searchQuery.length > 0;
     activeFiltersEl.classList.toggle('visible', hasFilters);
     if (hasFilters) {
       const parts = [];
+      if (activeCategoryFilter) parts.push(activeCategoryFilter);
       if (searchQuery) parts.push('"' + searchQuery + '"');
       if (activeTagFilters.size) parts.push([...activeTagFilters].join(', '));
       filterLabel.textContent = parts.join(' + ');
