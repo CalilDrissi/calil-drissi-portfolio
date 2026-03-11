@@ -392,8 +392,8 @@ function blogListingHTML(data, posts, lang) {
     .blog-header-back svg { width: 14px; height: 14px; opacity: 0.5; }
     .blog-header-sep { width: 1px; height: 16px; background: rgba(255,255,255,0.1); }
     .blog-header h1 {
-      font-family: var(--mono); font-size: 11px; font-weight: 400;
-      text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg);
+      font-family: var(--mono); font-size: 24px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg);
     }
     .blog-header-count {
       font-size: 10px; color: var(--fg-dim); margin-left: 6px;
@@ -533,7 +533,7 @@ function blogListingHTML(data, posts, lang) {
     <div class="blog-header-left">
       <a class="blog-header-back" href="${prefix}/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>${lang === 'fr' ? 'Accueil' : 'Home'}</a>
       <div class="blog-header-sep"></div>
-      <h1>${lang === 'fr' ? 'Field Notes' : 'Field Notes'}<span class="blog-header-count">${posts.length}</span></h1>
+      <h1>${lang === 'fr' ? 'Blog' : 'Blog'}<span class="blog-header-count">${posts.length}</span></h1>
     </div>
     <nav class="blog-header-nav">
       <a href="${otherLang.url}">${otherLang.label}</a>
