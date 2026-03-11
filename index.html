@@ -388,7 +388,7 @@
     .articles-list {
       display: flex;
       flex-direction: column;
-      gap: 0;
+      gap: 2px;
       color: var(--fg-dim);
       position: relative;
     }
@@ -397,22 +397,15 @@
       text-decoration: none;
       transition: color 0.15s;
       display: block;
-      padding: 6px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .articles-list a:last-child { border-bottom: none; }
-    .articles-list a::before {
-      content: '→';
-      margin-right: 8px;
-      color: rgba(255,255,255,0.15);
-      font-size: 0.85em;
-      transition: color 0.15s;
+      background: linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.5) 12%, var(--fg-dim) 30%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     .articles-list a:hover {
-      color: var(--accent);
-    }
-    .articles-list a:hover::before {
-      color: var(--accent);
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
     }
     .article-preview {
       position: fixed;
