@@ -1899,8 +1899,8 @@
       </div>
 
       <div class="connect-ctas">
-        <a href="#" class="cta-btn">Schedule Call &#8599;</a>
-        <a href="#" class="cta-btn">Cost Estimate &#8599;</a>
+        <button class="cta-btn" id="openScheduleBtn">Schedule a Call &#8599;</button>
+        <button class="cta-btn" id="openCollabBtn">Collaboration &#8599;</button>
         <button class="cta-btn" id="openMessageBtn">Leave a Message &#9993;</button>
         <button class="cta-btn cta-btn-terminal cursor-zone" id="terminalChallengeBtn">Win Free Consult &#9655;</button>
       </div>
@@ -2031,7 +2031,6 @@
     <div class="win-titlebar-text">khalil drissi — about</div>
     <div class="win-titlebar-actions">
       <a class="win-action-btn" href="mailto:hello@khalildrissi.com">Email ↗</a>
-      <a class="win-action-btn primary" href="#">Resume ↗</a>
     </div>
   </div>
   <div class="about-tabs">
@@ -3638,6 +3637,261 @@
         console.error('Send error:', err);
       }
     });
+  });
+})();
+</script>
+
+<!-- SCHEDULE A CALL WINDOW -->
+<div class="win" id="schedulePopup" data-win-id="schedule" data-win-title="Schedule a Call" style="width:480px;height:460px;top:calc(50% - 230px);left:calc(50% - 240px);">
+  <div class="win-resize win-resize-e"></div>
+  <div class="win-resize win-resize-w"></div>
+  <div class="win-resize win-resize-s"></div>
+  <div class="win-resize win-resize-n"></div>
+  <div class="win-resize win-resize-se"></div>
+  <div class="win-resize win-resize-sw"></div>
+  <div class="win-resize win-resize-ne"></div>
+  <div class="win-resize win-resize-nw"></div>
+  <div class="win-titlebar">
+    <div class="win-dots">
+      <span class="win-dot-close"></span>
+      <span class="win-dot-min"></span>
+      <span class="win-dot-max"></span>
+    </div>
+    <div class="win-titlebar-text">schedule a call</div>
+  </div>
+  <div class="win-body" style="padding:24px;overflow-y:auto;">
+    <div class="msg-row">
+      <div class="msg-field"><label>Name</label><input type="text" id="schedName" placeholder="Your name" /></div>
+      <div class="msg-field"><label>Email</label><input type="email" id="schedEmail" placeholder="you@example.com" /></div>
+    </div>
+    <div class="msg-field"><label>Company / Project</label><input type="text" id="schedCompany" placeholder="Company or project name" /></div>
+    <div class="msg-field">
+      <label>Preferred date &amp; time</label>
+      <input type="text" id="schedDate" placeholder="e.g. March 15, 2pm GMT+1" />
+    </div>
+    <div class="msg-field"><label>What would you like to discuss?</label><textarea id="schedTopic" placeholder="Brief description of your project or topic..." rows="3"></textarea></div>
+    <button class="msg-send-btn" id="schedSubmit">Send Request</button>
+    <div class="msg-status" id="schedStatus"></div>
+  </div>
+</div>
+
+<!-- COLLABORATION WINDOW -->
+<div class="win" id="collabPopup" data-win-id="collab" data-win-title="Collaboration" style="width:500px;height:520px;top:calc(50% - 260px);left:calc(50% - 250px);">
+  <div class="win-resize win-resize-e"></div>
+  <div class="win-resize win-resize-w"></div>
+  <div class="win-resize win-resize-s"></div>
+  <div class="win-resize win-resize-n"></div>
+  <div class="win-resize win-resize-se"></div>
+  <div class="win-resize win-resize-sw"></div>
+  <div class="win-resize win-resize-ne"></div>
+  <div class="win-resize win-resize-nw"></div>
+  <div class="win-titlebar">
+    <div class="win-dots">
+      <span class="win-dot-close"></span>
+      <span class="win-dot-min"></span>
+      <span class="win-dot-max"></span>
+    </div>
+    <div class="win-titlebar-text">collaboration</div>
+  </div>
+  <div class="win-body" style="padding:24px;overflow-y:auto;">
+    <div class="msg-row">
+      <div class="msg-field"><label>Name</label><input type="text" id="collabName" placeholder="Your name" /></div>
+      <div class="msg-field"><label>Email</label><input type="email" id="collabEmail" placeholder="you@example.com" /></div>
+    </div>
+    <div class="msg-field"><label>Company / Organization</label><input type="text" id="collabCompany" placeholder="Company name" /></div>
+    <div class="msg-field">
+      <label>Project type</label>
+      <select id="collabType" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:4px;padding:8px 12px;font-family:var(--mono);font-size:var(--body);color:var(--fg);outline:none;">
+        <option value="">Select...</option>
+        <option value="website">Website / Web App</option>
+        <option value="saas">SaaS Product</option>
+        <option value="ecommerce">E-Commerce</option>
+        <option value="consulting">Consulting</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="msg-row">
+      <div class="msg-field"><label>Budget range</label><input type="text" id="collabBudget" placeholder="e.g. $5k-$10k" /></div>
+      <div class="msg-field"><label>Timeline</label><input type="text" id="collabTimeline" placeholder="e.g. 2-3 months" /></div>
+    </div>
+    <div class="msg-field"><label>Project description</label><textarea id="collabDesc" placeholder="Tell me about your project, goals, and requirements..." rows="3"></textarea></div>
+    <button class="msg-send-btn" id="collabSubmit">Send Request</button>
+    <div class="msg-status" id="collabStatus"></div>
+  </div>
+</div>
+
+<script>
+// ======== SCHEDULE A CALL ========
+(function() {
+  var popup = document.getElementById('schedulePopup');
+  var win = WM.register(popup, LANG === 'fr' ? 'Planifier un appel' : 'Schedule a Call');
+  win.persistent = true;
+
+  // i18n
+  if (LANG === 'fr') {
+    popup.querySelector('.win-titlebar-text').textContent = 'planifier un appel';
+    var labels = popup.querySelectorAll('.msg-field label');
+    labels[0].textContent = 'Nom';
+    labels[1].textContent = 'Courriel';
+    labels[2].textContent = 'Entreprise / Projet';
+    labels[3].textContent = 'Date et heure souhaitées';
+    labels[4].textContent = 'De quoi souhaitez-vous discuter ?';
+    popup.querySelector('#schedName').placeholder = 'Votre nom';
+    popup.querySelector('#schedEmail').placeholder = 'vous@exemple.com';
+    popup.querySelector('#schedCompany').placeholder = 'Nom de l\'entreprise ou du projet';
+    popup.querySelector('#schedDate').placeholder = 'ex. 15 mars, 14h GMT+1';
+    popup.querySelector('#schedTopic').placeholder = 'Brève description de votre projet ou sujet...';
+    popup.querySelector('#schedSubmit').textContent = 'Envoyer la demande';
+  }
+
+  document.getElementById('openScheduleBtn').addEventListener('click', function() {
+    if (popup.classList.contains('open') && !win.minimized) { WM.focus(win); return; }
+    if (win.minimized) { WM.restore(win); return; }
+    popup.classList.add('open');
+    WM.focus(win);
+  });
+
+  document.getElementById('schedSubmit').addEventListener('click', function() {
+    var name = document.getElementById('schedName').value.trim();
+    var email = document.getElementById('schedEmail').value.trim();
+    var company = document.getElementById('schedCompany').value.trim();
+    var date = document.getElementById('schedDate').value.trim();
+    var topic = document.getElementById('schedTopic').value.trim();
+    var status = document.getElementById('schedStatus');
+    var btn = this;
+
+    if (!name || !email) {
+      status.textContent = _t('Name and email are required');
+      status.className = 'msg-status error';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = _t('Sending...');
+    status.textContent = '';
+
+    var body = new FormData();
+    body.append('type', 'schedule');
+    body.append('name', name);
+    body.append('email', email);
+    body.append('company', company);
+    body.append('date', date);
+    body.append('message', topic);
+
+    fetch('/api/message', { method: 'POST', body: body })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.ok) {
+          status.textContent = _t('Message sent successfully!');
+          status.className = 'msg-status success';
+          document.getElementById('schedTopic').value = '';
+          document.getElementById('schedDate').value = '';
+        } else {
+          status.textContent = d.error || _t('Failed to send');
+          status.className = 'msg-status error';
+        }
+      })
+      .catch(function() {
+        status.textContent = _t('Network error — please try again');
+        status.className = 'msg-status error';
+      })
+      .finally(function() {
+        btn.disabled = false;
+        btn.textContent = LANG === 'fr' ? 'Envoyer la demande' : 'Send Request';
+      });
+  });
+})();
+
+// ======== COLLABORATION ========
+(function() {
+  var popup = document.getElementById('collabPopup');
+  var win = WM.register(popup, LANG === 'fr' ? 'Collaboration' : 'Collaboration');
+  win.persistent = true;
+
+  // i18n
+  if (LANG === 'fr') {
+    popup.querySelector('.win-titlebar-text').textContent = 'collaboration';
+    var labels = popup.querySelectorAll('.msg-field label');
+    labels[0].textContent = 'Nom';
+    labels[1].textContent = 'Courriel';
+    labels[2].textContent = 'Entreprise / Organisation';
+    labels[3].textContent = 'Type de projet';
+    labels[4].textContent = 'Budget estimé';
+    labels[5].textContent = 'Délai';
+    labels[6].textContent = 'Description du projet';
+    popup.querySelector('#collabName').placeholder = 'Votre nom';
+    popup.querySelector('#collabEmail').placeholder = 'vous@exemple.com';
+    popup.querySelector('#collabCompany').placeholder = 'Nom de l\'entreprise';
+    popup.querySelector('#collabBudget').placeholder = 'ex. 5k-10k €';
+    popup.querySelector('#collabTimeline').placeholder = 'ex. 2-3 mois';
+    popup.querySelector('#collabDesc').placeholder = 'Parlez-moi de votre projet, objectifs et besoins...';
+    popup.querySelector('#collabSubmit').textContent = 'Envoyer la demande';
+    var sel = popup.querySelector('#collabType');
+    sel.options[0].text = 'Sélectionner...';
+    sel.options[1].text = 'Site Web / Application Web';
+    sel.options[2].text = 'Produit SaaS';
+    sel.options[3].text = 'E-Commerce';
+    sel.options[4].text = 'Conseil';
+    sel.options[5].text = 'Autre';
+  }
+
+  document.getElementById('openCollabBtn').addEventListener('click', function() {
+    if (popup.classList.contains('open') && !win.minimized) { WM.focus(win); return; }
+    if (win.minimized) { WM.restore(win); return; }
+    popup.classList.add('open');
+    WM.focus(win);
+  });
+
+  document.getElementById('collabSubmit').addEventListener('click', function() {
+    var name = document.getElementById('collabName').value.trim();
+    var email = document.getElementById('collabEmail').value.trim();
+    var company = document.getElementById('collabCompany').value.trim();
+    var type = document.getElementById('collabType').value;
+    var budget = document.getElementById('collabBudget').value.trim();
+    var timeline = document.getElementById('collabTimeline').value.trim();
+    var desc = document.getElementById('collabDesc').value.trim();
+    var status = document.getElementById('collabStatus');
+    var btn = this;
+
+    if (!name || !email) {
+      status.textContent = _t('Name and email are required');
+      status.className = 'msg-status error';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = _t('Sending...');
+    status.textContent = '';
+
+    var msg = 'Type: ' + (type || 'N/A') + '\\nBudget: ' + (budget || 'N/A') + '\\nTimeline: ' + (timeline || 'N/A') + '\\n\\n' + desc;
+
+    var body = new FormData();
+    body.append('type', 'collaboration');
+    body.append('name', name);
+    body.append('email', email);
+    body.append('company', company);
+    body.append('message', msg);
+
+    fetch('/api/message', { method: 'POST', body: body })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.ok) {
+          status.textContent = _t('Message sent successfully!');
+          status.className = 'msg-status success';
+          document.getElementById('collabDesc').value = '';
+        } else {
+          status.textContent = d.error || _t('Failed to send');
+          status.className = 'msg-status error';
+        }
+      })
+      .catch(function() {
+        status.textContent = _t('Network error — please try again');
+        status.className = 'msg-status error';
+      })
+      .finally(function() {
+        btn.disabled = false;
+        btn.textContent = LANG === 'fr' ? 'Envoyer la demande' : 'Send Request';
+      });
   });
 })();
 </script>

@@ -196,7 +196,8 @@ function render(template, data, lang) {
       </div>
 
       <div class="connect-ctas">
-        ${data.connect.buttons.map(b => `<a href="${b.url}" class="cta-btn">${b.label}</a>`).join('\n        ')}
+        <button class="cta-btn" id="openScheduleBtn">${lang === 'fr' ? 'Planifier un appel' : 'Schedule a Call'} &#8599;</button>
+        <button class="cta-btn" id="openCollabBtn">${lang === 'fr' ? 'Collaboration' : 'Collaboration'} &#8599;</button>
         <button class="cta-btn" id="openMessageBtn">${lang === 'fr' ? 'Laisser un message' : 'Leave a Message'} &#8599;</button>
         <button class="cta-btn cta-btn-flair" id="terminalChallengeBtn">${lang === 'fr' ? 'Consultation Gratuite' : 'Free Consult'} &#8599;</button>
       </div>
@@ -254,10 +255,6 @@ function render(template, data, lang) {
   html = html.replace(
     /<a class="win-action-btn" href="mailto:hello@khalildrissi\.com">Email ↗<\/a>/,
     `<a class="win-action-btn" href="${data.about.emailBtn.url}">${data.about.emailBtn.label}</a>`
-  );
-  html = html.replace(
-    /<a class="win-action-btn primary" href="#">Resume ↗<\/a>/,
-    `<a class="win-action-btn primary" href="${data.about.resumeBtn.url}">${data.about.resumeBtn.label}</a>`
   );
   html = html.replace(
     />About Me<\/button>/,
