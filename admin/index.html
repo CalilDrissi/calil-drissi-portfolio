@@ -1649,46 +1649,102 @@ function renderOpenSource(items) {
   var container = document.getElementById('rep-opensource');
   container.innerHTML = '';
   items.forEach(function(item, i) {
-    var div = document.createElement('div');
-    div.className = 'repeatable-pair';
-    div.style.flexWrap = 'wrap';
-    div.innerHTML =
-      '<input type="text" placeholder="Label" value="' + escapeAttr(item.label || '') + '" data-os="' + i + '" data-os-key="label" style="flex:1;min-width:120px" />' +
-      '<input type="text" placeholder="Stars (e.g. 1.2k)" value="' + escapeAttr(item.stars || '') + '" data-os="' + i + '" data-os-key="stars" style="width:80px" />' +
-      '<input type="text" placeholder="Repo URL" value="' + escapeAttr(item.url || '') + '" data-os="' + i + '" data-os-key="url" style="flex:2;min-width:200px" />' +
-      '<input type="text" placeholder="Image URL" value="' + escapeAttr(item.img || '') + '" data-os="' + i + '" data-os-key="img" style="flex:2;min-width:200px" />' +
-      '<input type="text" placeholder="Description" value="' + escapeAttr(item.desc || '') + '" data-os="' + i + '" data-os-key="desc" style="flex:3;min-width:250px" />' +
-      '<button class="btn-icon remove" onclick="removeOpenSourceItem(' + i + ')" title="Remove">&times;</button>';
-    container.appendChild(div);
+    var card = document.createElement('div');
+    card.className = 'project-card os-card';
+    card.setAttribute('data-os-index', i);
+
+    card.innerHTML =
+      '<div class="project-card-header" onclick="toggleOSCard(this)">' +
+        '<div style="display:flex; align-items:center;">' +
+          '<span class="drag-handle" title="Drag to reorder">&#9776;</span>' +
+          '<h4>' + escapeHTML(item.title || 'Untitled Project') + '</h4>' +
+          '<span style="margin-left:10px;">' + escapeHTML(item.year || '') + ' &middot; ' + escapeHTML(item.role || '') + '</span>' +
+        '</div>' +
+        '<div class="card-actions">' +
+          '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); moveOSProject(' + i + ', -1);">&uarr;</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); moveOSProject(' + i + ', 1);">&darr;</button>' +
+          '<button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="event.stopPropagation(); removeOpenSourceItem(' + i + ');">&times;</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="project-card-body" id="osBody' + i + '">' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Title</label><input type="text" data-os="' + i + '" data-os-key="title" value="' + escapeAttr(item.title || '') + '" /></div>' +
+          '<div class="field"><label>Subtitle</label><input type="text" data-os="' + i + '" data-os-key="subtitle" value="' + escapeAttr(item.subtitle || '') + '" /></div>' +
+        '</div>' +
+        '<div class="field"><label>Description</label><textarea data-os="' + i + '" data-os-key="desc" rows="3">' + escapeHTML(item.desc || '') + '</textarea></div>' +
+        '<div class="field"><label>Tags (comma separated)</label><input type="text" data-os="' + i + '" data-os-key="tags" value="' + escapeAttr((item.tags || []).join(', ')) + '" /></div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Year</label><input type="text" data-os="' + i + '" data-os-key="year" value="' + escapeAttr(item.year || '') + '" /></div>' +
+          '<div class="field"><label>Role</label><input type="text" data-os="' + i + '" data-os-key="role" value="' + escapeAttr(item.role || '') + '" /></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Visit URL</label><input type="text" data-os="' + i + '" data-os-key="visit" value="' + escapeAttr(item.visit || '') + '" /></div>' +
+          '<div class="field"><label>Code URL</label><input type="text" data-os="' + i + '" data-os-key="code" value="' + escapeAttr(item.code || '') + '" /></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Image URL</label><input type="text" data-os="' + i + '" data-os-key="img" value="' + escapeAttr(item.img || '') + '" /></div>' +
+          '<div class="field"><label>Thumbnail URL</label><input type="text" data-os="' + i + '" data-os-key="thumb" value="' + escapeAttr(item.thumb || '') + '" /></div>' +
+        '</div>' +
+      '</div>';
+
+    container.appendChild(card);
   });
+}
+
+function toggleOSCard(header) {
+  var body = header.nextElementSibling;
+  body.classList.toggle('open');
 }
 
 function addOpenSourceItem() {
   collectOpenSource();
   if (!portfolioData.openSource) portfolioData.openSource = [];
-  portfolioData.openSource.push({ label: '', desc: '', stars: '', url: '', img: '' });
+  portfolioData.openSource.push({
+    title: 'New Project', subtitle: '', desc: '', tags: [],
+    year: new Date().getFullYear().toString(), role: '',
+    visit: '#', code: '#', img: '', thumb: ''
+  });
   renderOpenSource(portfolioData.openSource);
+  var bodies = document.querySelectorAll('.os-card .project-card-body');
+  if (bodies.length) bodies[bodies.length - 1].classList.add('open');
 }
 
 function removeOpenSourceItem(index) {
   collectOpenSource();
-  portfolioData.openSource.splice(index, 1);
-  renderOpenSource(portfolioData.openSource);
+  showConfirm('Delete this project?', function() {
+    portfolioData.openSource.splice(index, 1);
+    renderOpenSource(portfolioData.openSource);
+  });
+}
+
+function moveOSProject(index, direction) {
+  collectOpenSource();
+  var arr = portfolioData.openSource;
+  var newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= arr.length) return;
+  var temp = arr[index];
+  arr[index] = arr[newIndex];
+  arr[newIndex] = temp;
+  renderOpenSource(arr);
 }
 
 function collectOpenSource() {
   var container = document.getElementById('rep-opensource');
-  var rows = container.querySelectorAll('.repeatable-pair');
+  var cards = container.querySelectorAll('.os-card');
   var arr = [];
-  rows.forEach(function(row) {
-    var inputs = row.querySelectorAll('input');
-    arr.push({
-      label: inputs[0].value,
-      stars: inputs[1].value,
-      url: inputs[2].value,
-      img: inputs[3].value,
-      desc: inputs[4].value
+  cards.forEach(function(card, i) {
+    var item = {};
+    card.querySelectorAll('[data-os="' + i + '"]').forEach(function(el) {
+      var key = el.getAttribute('data-os-key');
+      if (key === 'tags') {
+        item[key] = el.value.split(',').map(function(t) { return t.trim(); }).filter(function(t) { return t; });
+      } else if (el.tagName === 'TEXTAREA') {
+        item[key] = el.value;
+      } else {
+        item[key] = el.value;
+      }
     });
+    arr.push(item);
   });
   portfolioData.openSource = arr;
 }
