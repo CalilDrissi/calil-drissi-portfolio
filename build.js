@@ -110,7 +110,7 @@ async function fetchWPPosts(lang) {
 }
 
 // ---- Template engine (simple token replacement) ----
-function render(template, data, lang) {
+function render(template, data, lang, featuredPosts) {
   let html = template;
 
   // INTRO section
@@ -180,14 +180,18 @@ function render(template, data, lang) {
 `
   );
 
-  // ARTICLES section
+  // ARTICLES section — from WP posts tagged "Featured"
+  const prefix = lang === 'fr' ? '/fr' : '';
+  const articleLinks = (featuredPosts || []).map(p =>
+    `<a href="${prefix}/blog/${p.slug}/" data-img="${p.coverImage || ''}" data-title="${p.title}" data-excerpt="${p.excerpt || ''}" data-tags="${p.tags.join(', ')}" data-date="${p.date}">${p.title}</a>`
+  ).join('\n        ');
   html = html.replace(
     /<!-- ARTICLES -->[\s\S]*?(?=\n\s*<!-- CONNECT -->)/,
     `<!-- ARTICLES -->
     <div class="col-section">
       <div class="col-header">${data.articles.header}</div>
       <div class="articles-list" id="articlesList">
-        ${data.articles.list.map(a => `<a href="${a.href}" data-img="${a.img}" data-title="${a.title}" data-excerpt="${a.excerpt}" data-tags="${a.tags}" data-date="${a.date}">${a.label}</a>`).join('\n        ')}
+        ${articleLinks}
       </div>
     </div>
 `
@@ -1300,14 +1304,18 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     .post-header a:hover { color: #fff; }
     .post-hero { width: 100%; max-height: 400px; object-fit: cover; }
     .post-container { max-width: 720px; margin: 0 auto; padding: 40px 20px 80px; }
-    .post-meta { display: flex; gap: 16px; align-items: center; margin-bottom: 24px; flex-wrap: wrap; }
-    .post-date { font-size: 11px; color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.04em; }
-    .post-tags { display: flex; gap: 6px; }
+    .post-meta { margin-bottom: 12px; }
+    .post-date { font-size: 11px; color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--mono); }
+    .post-title { font-family: var(--display); font-size: clamp(28px, 5vw, 44px); font-weight: 300; margin-bottom: 16px; line-height: 1.15; letter-spacing: -0.02em; }
+    .post-meta-bottom { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 36px; }
+    .post-category { font-size: 11px; color: var(--accent); font-family: var(--mono); letter-spacing: 0.02em; }
+    .post-meta-sep { font-size: 10px; color: rgba(255,255,255,0.15); }
+    .post-tags { display: flex; gap: 5px; flex-wrap: wrap; }
     .post-tags span {
-      font-size: 10px; padding: 2px 8px; border: 1px solid var(--fg-faint); border-radius: 3px;
-      color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.03em;
+      font-size: 10px; padding: 2px 8px; border-radius: 20px;
+      color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.06);
+      letter-spacing: 0.01em; font-family: var(--mono);
     }
-    .post-title { font-family: var(--display); font-size: clamp(28px, 5vw, 44px); font-weight: 300; margin-bottom: 32px; line-height: 1.15; letter-spacing: -0.02em; }
     .post-body h2 { font-family: var(--display); font-size: 24px; font-weight: 300; margin: 32px 0 12px; letter-spacing: -0.01em; }
     .post-body h3 { font-size: 14px; font-weight: 500; margin: 24px 0 8px; text-transform: uppercase; letter-spacing: 0.03em; }
     .post-body p { color: var(--fg-dim); margin-bottom: 16px; }
@@ -1324,7 +1332,7 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     /* ---- TOC ---- */
     .toc {
       position: fixed; left: 24px; top: 50%; transform: translateY(-50%);
-      display: flex; flex-direction: column; gap: 6px; z-index: 100;
+      display: flex; flex-direction: column; gap: 12px; z-index: 100;
       opacity: 0; pointer-events: none;
       transition: opacity 0.5s ease;
     }
@@ -1355,12 +1363,12 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     .toc-item.active .toc-num { background: var(--accent); color: #fff; }
     .toc-num:hover ~ .toc-label .toc-label-inner.overflows,
     .toc-item.active .toc-label .toc-label-inner.overflows {
-      animation: tocMarquee 6s linear infinite;
+      animation: tocMarquee 10s linear infinite;
     }
     @keyframes tocMarquee {
       0% { transform: translateX(0); }
-      10% { transform: translateX(0); }
-      90% { transform: translateX(var(--marquee-dist)); }
+      15% { transform: translateX(0); }
+      85% { transform: translateX(var(--marquee-dist)); }
       100% { transform: translateX(var(--marquee-dist)); }
     }
 
@@ -1513,9 +1521,13 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
   <article class="post-container">
     <div class="post-meta">
       <span class="post-date">${new Date(post.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-      <div class="post-tags">${post.tags.map(t => `<span>${t}</span>`).join('')}</div>
     </div>
     <h1 class="post-title">${post.title}</h1>
+    <div class="post-meta-bottom">
+      <span class="post-category">${post.category || ''}</span>
+      <span class="post-meta-sep">·</span>
+      <div class="post-tags">${post.tags.filter(t => t.toLowerCase() !== 'featured').map(t => `<span>${t}</span>`).join('')}</div>
+    </div>
     <div class="post-body">${post.body}</div>
   </article>
 
@@ -1806,9 +1818,10 @@ async function build() {
     const posts = lang.wpPosts || [];
     const source = lang.wpPosts ? 'WordPress' : 'none';
 
-    // Portfolio page
+    // Portfolio page — filter featured posts (tagged "Featured")
+    const featuredPosts = posts.filter(p => p.tags.some(t => t.toLowerCase() === 'featured'));
     mkdirp(lang.outDir);
-    const portfolioHTML = render(template, data, lang.code);
+    const portfolioHTML = render(template, data, lang.code, featuredPosts);
     fs.writeFileSync(path.join(lang.outDir, 'index.html'), portfolioHTML);
     console.log(`  ✓ ${lang.code === 'en' ? '/' : '/fr/'}index.html`);
 
