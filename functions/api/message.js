@@ -1,6 +1,6 @@
 // Cloudflare Pages Function: message
 // Handles "Leave a Message" form submissions
-// ENV vars: GOOGLE_SERVICE_ACCOUNT_JSON, GOOGLE_DRIVE_FOLDER_ID
+// KV binding: MESSAGE_FILES (for file storage)
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -19,137 +19,31 @@ export async function onRequestOptions() {
   return jsonResponse({});
 }
 
-// ---- JWT / Google Auth helpers ----
-
-function base64urlEncode(data) {
-  const base64 = btoa(String.fromCharCode(...new Uint8Array(data)));
-  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+// Generate a random ID for file storage
+function generateId() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let id = '';
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  for (const b of bytes) id += chars[b % chars.length];
+  return id;
 }
 
-function strToArrayBuffer(str) {
-  return new TextEncoder().encode(str);
-}
-
-async function createJWT(serviceAccount) {
-  const header = { alg: 'RS256', typ: 'JWT' };
-  const now = Math.floor(Date.now() / 1000);
-  const claim = {
-    iss: serviceAccount.client_email,
-    scope: 'https://www.googleapis.com/auth/drive.file',
-    aud: 'https://oauth2.googleapis.com/token',
-    iat: now,
-    exp: now + 3600,
-  };
-
-  const headerB64 = base64urlEncode(strToArrayBuffer(JSON.stringify(header)));
-  const claimB64 = base64urlEncode(strToArrayBuffer(JSON.stringify(claim)));
-  const unsignedToken = headerB64 + '.' + claimB64;
-
-  // Handle escaped newlines from env vars (Cloudflare stores literal \n)
-  let privateKey = serviceAccount.private_key;
-  if (privateKey && !privateKey.includes('\n') && privateKey.includes('\\n')) {
-    privateKey = privateKey.replace(/\\n/g, '\n');
-  }
-
-  const pemContents = privateKey
-    .replace(/-----BEGIN PRIVATE KEY-----/, '')
-    .replace(/-----END PRIVATE KEY-----/, '')
-    .replace(/\s/g, '');
-  const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
-
-  const cryptoKey = await crypto.subtle.importKey(
-    'pkcs8',
-    binaryKey,
-    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-
-  const signature = await crypto.subtle.sign(
-    'RSASSA-PKCS1-v1_5',
-    cryptoKey,
-    strToArrayBuffer(unsignedToken)
-  );
-
-  return unsignedToken + '.' + base64urlEncode(signature);
-}
-
-async function getAccessToken(serviceAccount) {
-  const jwt = await createJWT(serviceAccount);
-  const res = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`,
+// Upload file to Cloudflare KV
+async function uploadToKV(kvNamespace, fileName, fileData, mimeType, siteUrl) {
+  const id = generateId();
+  await kvNamespace.put(id, fileData, {
+    metadata: { fileName, mimeType },
+    // Files expire after 90 days
+    expirationTtl: 90 * 24 * 60 * 60,
   });
-  const data = await res.json();
-  if (!data.access_token) {
-    throw new Error('Failed to get Google access token: ' + JSON.stringify(data));
-  }
-  return data.access_token;
-}
-
-async function uploadToGoogleDrive(accessToken, folderId, fileName, fileData, mimeType, description) {
-  const metadata = {
-    name: fileName,
-    parents: [folderId],
-    description: description,
-  };
-
-  // Build multipart/related body with raw binary (not base64)
-  const boundary = 'msg_boundary_' + Date.now();
-  const encoder = new TextEncoder();
-
-  const metadataPart = encoder.encode(
-    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`
-  );
-  const fileHeader = encoder.encode(
-    `--${boundary}\r\nContent-Type: ${mimeType}\r\n\r\n`
-  );
-  const fileSuffix = encoder.encode(`\r\n--${boundary}--`);
-  const fileBytes = new Uint8Array(fileData);
-
-  // Concatenate all parts into a single Uint8Array
-  const body = new Uint8Array(metadataPart.length + fileHeader.length + fileBytes.length + fileSuffix.length);
-  let offset = 0;
-  body.set(metadataPart, offset); offset += metadataPart.length;
-  body.set(fileHeader, offset); offset += fileHeader.length;
-  body.set(fileBytes, offset); offset += fileBytes.length;
-  body.set(fileSuffix, offset);
-
-  const res = await fetch(
-    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': `multipart/related; boundary=${boundary}`,
-      },
-      body: body,
-    }
-  );
-
-  const result = await res.json();
-  if (!result.id) {
-    throw new Error('Google Drive upload failed: ' + JSON.stringify(result));
-  }
-
-  // Make the file accessible via link
-  await fetch(`https://www.googleapis.com/drive/v3/files/${result.id}/permissions`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ role: 'reader', type: 'anyone' }),
-  });
-
   return {
-    id: result.id,
-    link: result.webViewLink || `https://drive.google.com/file/d/${result.id}/view`,
+    id,
+    link: `${siteUrl}/api/file/${id}`,
   };
 }
 
-async function sendFormSubmitNotification(senderName, senderEmail, messageText, messageType, driveLinks) {
+async function sendFormSubmitNotification(senderName, senderEmail, messageText, messageType, fileLinks) {
   const typeLabel = messageType.charAt(0).toUpperCase() + messageType.slice(1);
 
   const payload = {
@@ -163,9 +57,9 @@ async function sendFormSubmitNotification(senderName, senderEmail, messageText, 
     Message: messageText || '(no text message)',
   };
 
-  if (driveLinks.length > 0) {
-    payload['Attachments'] = driveLinks.map((l, i) => `File ${i + 1}: ${l}`).join('\n');
-    payload['Note'] = `This submission includes ${driveLinks.length} file(s). Check your Google Drive or click the links above.`;
+  if (fileLinks.length > 0) {
+    payload['Attachments'] = fileLinks.map((l, i) => `File ${i + 1}: ${l}`).join('\n');
+    payload['Note'] = `This submission includes ${fileLinks.length} file(s). Click the links above to view/download. Files expire after 90 days.`;
   }
 
   const res = await fetch('https://formsubmit.co/ajax/khalil@drissi.org', {
@@ -240,67 +134,56 @@ export async function onRequestPost(context) {
     }
   }
 
-  const driveLinks = [];
+  const fileLinks = [];
   const uploadErrors = [];
 
-  // Upload all files to Google Drive
-  if (filesToUpload.length > 0 && env.GOOGLE_SERVICE_ACCOUNT_JSON && env.GOOGLE_DRIVE_FOLDER_ID) {
-    try {
-      // Handle potential escaped characters in the secret value
-      let saJson = env.GOOGLE_SERVICE_ACCOUNT_JSON;
-      // If it starts with a single quote or has escaped quotes, clean up
-      saJson = saJson.trim().replace(/^'|'$/g, '');
-      const serviceAccount = JSON.parse(saJson);
-      const accessToken = await getAccessToken(serviceAccount);
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  // Determine site URL for file links
+  const url = new URL(request.url);
+  const siteUrl = url.origin;
 
-      for (const f of filesToUpload) {
-        try {
-          const fileName = `${f.label}-${name.replace(/[^a-zA-Z0-9]/g, '_')}-${timestamp}-${f.blob.name || 'file'}`;
-          const description = `From: ${name} <${email}>\nType: ${type}\nDate: ${new Date().toISOString()}\n${message ? 'Message: ' + message : ''}`;
-          const fileData = await f.blob.arrayBuffer();
-          const result = await uploadToGoogleDrive(
-            accessToken,
-            env.GOOGLE_DRIVE_FOLDER_ID,
-            fileName,
-            fileData,
-            f.blob.type || 'application/octet-stream',
-            description
-          );
-          driveLinks.push(result.link);
-        } catch (err) {
-          console.error('Drive upload error for', f.label, ':', err.message);
-          uploadErrors.push(f.label + ': ' + err.message);
-        }
+  // Upload files to Cloudflare KV
+  if (filesToUpload.length > 0 && env.MESSAGE_FILES) {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+
+    for (const f of filesToUpload) {
+      try {
+        const fileName = `${f.label}-${name.replace(/[^a-zA-Z0-9]/g, '_')}-${timestamp}-${f.blob.name || 'file'}`;
+        const fileData = await f.blob.arrayBuffer();
+        const result = await uploadToKV(
+          env.MESSAGE_FILES,
+          fileName,
+          fileData,
+          f.blob.type || 'application/octet-stream',
+          siteUrl
+        );
+        fileLinks.push(result.link);
+      } catch (err) {
+        console.error('KV upload error for', f.label, ':', err.message);
+        uploadErrors.push(f.label + ': ' + err.message);
       }
-    } catch (err) {
-      console.error('Google auth error:', err.message);
-      uploadErrors.push('auth: ' + err.message);
     }
   } else if (filesToUpload.length > 0) {
-    // No Google Drive configured — note this in the email
-    uploadErrors.push('drive-not-configured');
+    uploadErrors.push('storage-not-configured');
   }
 
   // Send notification via FormSubmit
   try {
-    // If uploads failed, note it in the message
     let finalMessage = message;
     if (uploadErrors.length > 0 && filesToUpload.length > 0) {
-      finalMessage += `\n\n[Note: ${filesToUpload.length} file(s) could not be uploaded to Google Drive. Error: ${uploadErrors.join(', ')}]`;
+      finalMessage += `\n\n[Note: ${filesToUpload.length} file(s) could not be saved. Error: ${uploadErrors.join(', ')}]`;
     }
-    if (filesToUpload.length > 0 && driveLinks.length === 0) {
+    if (filesToUpload.length > 0 && fileLinks.length === 0 && uploadErrors.length > 0) {
       finalMessage += `\n\n[${type} recording/files were attached but could not be saved. Please follow up with the sender.]`;
     }
 
-    await sendFormSubmitNotification(name, email, finalMessage.trim(), type, driveLinks);
+    await sendFormSubmitNotification(name, email, finalMessage.trim(), type, fileLinks);
   } catch (err) {
     console.error('FormSubmit notification error:', err);
     return jsonResponse({ success: false, error: 'Failed to deliver message. Please email khalil@drissi.org directly.' }, 500);
   }
 
   const result = { success: true };
-  if (driveLinks.length > 0) result.driveLinks = driveLinks;
+  if (fileLinks.length > 0) result.fileLinks = fileLinks;
   if (uploadErrors.length > 0) result.uploadErrors = uploadErrors;
   return jsonResponse(result);
 }

@@ -278,7 +278,7 @@ function render(template, data, lang, featuredPosts) {
     `>${data.about.tabs.bio}</button>`
   );
   html = html.replace(
-    />Chat with Alfred<\/button>/,
+    />Chat with my AI Assistant<\/button>/,
     `>${data.about.tabs.chat}</button>`
   );
   html = html.replace(

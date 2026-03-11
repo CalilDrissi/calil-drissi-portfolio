@@ -2068,12 +2068,12 @@
     </div>
     <div class="win-titlebar-text">khalil drissi — about</div>
     <div class="win-titlebar-actions">
-      <a class="win-action-btn" href="mailto:khalil@drissi.org">Email ↗</a>
+      <a class="win-action-btn" href="mailto:khalil@drissi.org">Email</a>
     </div>
   </div>
   <div class="about-tabs">
     <button class="about-tab active" data-about-tab="bio">About Me</button>
-    <button class="about-tab" data-about-tab="chat">Chat with Alfred</button>
+    <button class="about-tab" data-about-tab="chat">Chat with my AI Assistant</button>
   </div>
   <!-- Bio Panel -->
   <div class="about-panel active" id="aboutBioPanel" data-about-panel="bio">
@@ -2115,8 +2115,8 @@
     <div class="chat-container">
       <div class="chat-messages" id="chatMessages">
         <div class="chat-msg bot">
-          <div class="msg-sender">Alfred</div>
-          Good day. Master Khalil is away at the moment. Feel free to ask me anything, I'm well briefed on his work and availability.
+          <div class="msg-sender">Khalil's AI Assistant</div>
+          Hey! I'm Khalil's AI assistant. Ask me anything about his work, experience, tech stack, or availability. I'm here to help!
           <div class="msg-time">Just now</div>
         </div>
       </div>
@@ -2124,7 +2124,7 @@
         <span></span><span></span><span></span>
       </div>
       <div class="chat-input-bar">
-        <input class="chat-input" id="chatInput" type="text" placeholder="Ask Alfred about Khalil's work, stack, availability..." />
+        <input class="chat-input" id="chatInput" type="text" placeholder="Ask about Khalil's work, stack, availability..." />
         <button class="chat-send" id="chatSend">Send</button>
       </div>
     </div>
@@ -2809,7 +2809,7 @@
       chatTyping.classList.remove('active');
       const botMsg = document.createElement('div');
       botMsg.className = 'chat-msg bot';
-      botMsg.innerHTML = `<div class="msg-sender">Alfred</div>${getResponse(text)}<div class="msg-time">Just now</div>`;
+      botMsg.innerHTML = `<div class="msg-sender">AI Assistant</div>${getResponse(text)}<div class="msg-time">Just now</div>`;
       chatMessages.appendChild(botMsg);
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }, 1000 + Math.random() * 800);
@@ -3279,10 +3279,10 @@
     // Chat intro message
     const chatIntro = document.querySelector('#chatMessages .chat-msg.bot');
     if (chatIntro) {
-      chatIntro.querySelector('.msg-sender').textContent = 'Alfred';
+      chatIntro.querySelector('.msg-sender').textContent = 'Assistant IA de Khalil';
       chatIntro.childNodes.forEach(n => {
         if (n.nodeType === 3 && n.textContent.trim().length > 10) {
-          n.textContent = "\n          Bonjour. Maître Khalil est absent pour le moment. N'hésitez pas à me poser vos questions, je suis bien informé sur son travail et sa disponibilité.\n          ";
+          n.textContent = "\n          Salut ! Je suis l'assistant IA de Khalil. Posez-moi vos questions sur son travail, son expérience, sa stack technique ou sa disponibilité.\n          ";
         }
       });
     }
