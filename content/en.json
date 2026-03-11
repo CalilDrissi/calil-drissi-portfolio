@@ -103,7 +103,7 @@
     "titlebarText": "khalil drissi — about",
     "emailBtn": { "label": "Email ↗", "url": "mailto:hello@khalildrissi.com" },
     "resumeBtn": { "label": "Resume ↗", "url": "#" },
-    "tabs": { "bio": "About Me", "chat": "Chat with AI Assistant" },
+    "tabs": { "bio": "About Me", "chat": "Chat with Alfred" },
     "name": "Khalil Drissi",
     "role": "Software Developer · Morocco",
     "bio": [

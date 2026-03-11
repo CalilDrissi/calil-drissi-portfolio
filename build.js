@@ -263,7 +263,7 @@ function render(template, data, lang) {
     `>${data.about.tabs.bio}</button>`
   );
   html = html.replace(
-    />Chat with AI Assistant<\/button>/,
+    />Chat with Alfred<\/button>/,
     `>${data.about.tabs.chat}</button>`
   );
   html = html.replace(
