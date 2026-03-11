@@ -75,6 +75,7 @@ async function fetchWPPosts(lang) {
       const yoast = post.yoast_head_json || {};
 
       return {
+        wpId: post.id,
         slug: post.slug,
         title: post.title.rendered,
         date: post.date.split('T')[0],
@@ -438,7 +439,9 @@ function blogListingHTML(data, posts, lang) {
     .hover-card-title {
       font-family: var(--serif); font-size: 16px; font-style: italic; margin-bottom: 4px;
     }
-    .hover-card-date { font-size: 10px; color: var(--fg-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .hover-card-meta-row { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
+    .hover-card-meta-row span { font-size: 10px; color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.04em; }
+    .hover-card-views { opacity: 0.6; }
     .hover-card-excerpt {
       font-size: 11px; color: var(--fg-dim); line-height: 1.5; margin-bottom: 8px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
@@ -505,7 +508,9 @@ function blogListingHTML(data, posts, lang) {
       font-family: var(--serif); font-size: 14px; font-style: italic; margin-bottom: 2px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .post-item-date { font-size: 10px; color: var(--fg-dim); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .post-item-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+    .post-item-date { font-size: 10px; color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.04em; }
+    .post-item-views { font-size: 10px; color: var(--fg-faint); }
     .post-item-tags { display: flex; gap: 4px; flex-wrap: wrap; }
     .post-item-tags span {
       font-size: 9px; padding: 1px 6px; border: 1px solid rgba(255,255,255,0.1); border-radius: 3px;
@@ -562,7 +567,7 @@ function blogListingHTML(data, posts, lang) {
   <div class="hover-card" id="hoverCard">
     <img class="hover-card-img" id="hoverImg" src="" alt="" />
     <div class="hover-card-title" id="hoverTitle"></div>
-    <div class="hover-card-date" id="hoverDate"></div>
+    <div class="hover-card-meta-row"><span id="hoverDate"></span><span class="hover-card-views" id="hoverViews"></span></div>
     <div class="hover-card-excerpt" id="hoverExcerpt"></div>
     <div class="hover-card-tags" id="hoverTags"></div>
   </div>
@@ -571,6 +576,14 @@ function blogListingHTML(data, posts, lang) {
   const POSTS = ${postsJSON};
   const PREFIX = '${prefix}';
   const LANG = '${lang}';
+  const VIEW_LABEL = LANG === 'fr' ? 'vues' : 'views';
+
+  // --- Fetch all view counts ---
+  let postViews = {};
+  fetch('/api/views/')
+    .then(r => r.json())
+    .then(v => { postViews = v; renderPostList(); })
+    .catch(() => {});
 
   // --- Build edges from shared tags ---
   const edges = [];
@@ -870,6 +883,7 @@ function blogListingHTML(data, posts, lang) {
   const hoverImg = document.getElementById('hoverImg');
   const hoverTitle = document.getElementById('hoverTitle');
   const hoverDate = document.getElementById('hoverDate');
+  const hoverViews = document.getElementById('hoverViews');
   const hoverExcerpt = document.getElementById('hoverExcerpt');
   const hoverTags = document.getElementById('hoverTags');
 
@@ -880,6 +894,8 @@ function blogListingHTML(data, posts, lang) {
     hoverTitle.textContent = p.title;
     const locale = LANG === 'fr' ? 'fr-FR' : 'en-US';
     hoverDate.textContent = new Date(p.date).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+    const views = postViews[p.slug] || 0;
+    hoverViews.textContent = views ? views + ' ' + VIEW_LABEL : '';
     const exc = p.excerpt.length > 120 ? p.excerpt.slice(0, 117) + '...' : p.excerpt;
     hoverExcerpt.textContent = exc;
     hoverTags.innerHTML = p.tags.map(t => '<span>' + t + '</span>').join('');
@@ -1118,8 +1134,10 @@ function blogListingHTML(data, posts, lang) {
       const p = POSTS[i];
       const item = document.createElement('div');
       item.className = 'post-item';
+      const views = postViews[p.slug] || 0;
+      const viewsHtml = views ? '<span class="post-item-views">' + views + ' ' + VIEW_LABEL + '</span>' : '';
       item.innerHTML = '<div class="post-item-title">' + p.title + '</div>' +
-        '<div class="post-item-date">' + new Date(p.date).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) + '</div>' +
+        '<div class="post-item-meta"><span class="post-item-date">' + new Date(p.date).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) + '</span>' + viewsHtml + '</div>' +
         '<div class="post-item-tags">' + p.tags.map(t => '<span>' + t + '</span>').join('') + '</div>';
       item.addEventListener('click', () => {
         window.location.href = PREFIX + '/blog/' + p.slug + '/';
@@ -1187,6 +1205,24 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
   const nextPost = postIndex < allPosts.length - 1 ? allPosts[postIndex + 1] : null;
   const prevLabel = lang === 'fr' ? 'PRÉCÉDENT' : 'PREVIOUS';
   const nextLabel = lang === 'fr' ? 'SUIVANT' : 'NEXT';
+  const wpId = post.wpId || 0;
+  const wpUrl = process.env.WP_URL || '';
+  const i18n = {
+    comments: lang === 'fr' ? 'Commentaires' : 'Comments',
+    noComments: lang === 'fr' ? 'Aucun commentaire pour le moment.' : 'No comments yet.',
+    beFirst: lang === 'fr' ? 'Soyez le premier a commenter.' : 'Be the first to comment.',
+    leave: lang === 'fr' ? 'Laisser un commentaire' : 'Leave a comment',
+    name: lang === 'fr' ? 'Nom' : 'Name',
+    email: lang === 'fr' ? 'Courriel' : 'Email',
+    comment: lang === 'fr' ? 'Commentaire' : 'Comment',
+    submit: lang === 'fr' ? 'Publier' : 'Submit',
+    sending: lang === 'fr' ? 'Envoi...' : 'Submitting...',
+    success: lang === 'fr' ? 'Commentaire envoyé ! Il sera visible après modération.' : 'Comment submitted! It will appear after moderation.',
+    error: lang === 'fr' ? 'Erreur. Veuillez réessayer.' : 'Error. Please try again.',
+    views: lang === 'fr' ? 'vues' : 'views',
+    reply: lang === 'fr' ? 'Répondre' : 'Reply',
+    ago: lang === 'fr' ? 'il y a' : 'ago',
+  };
   return `<!DOCTYPE html>
 <html lang="${lang}">
 <head>
@@ -1224,6 +1260,8 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     .post-container { max-width: 720px; margin: 0 auto; padding: 40px 20px 80px; }
     .post-meta { display: flex; gap: 16px; align-items: center; margin-bottom: 24px; flex-wrap: wrap; }
     .post-date { font-size: 11px; color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.04em; }
+    .post-views { font-size: 11px; color: var(--fg-dim); letter-spacing: 0.04em; }
+    .post-views::before { content: ''; display: inline-block; width: 1px; height: 10px; background: var(--fg-faint); margin-right: 12px; vertical-align: middle; }
     .post-tags { display: flex; gap: 6px; }
     .post-tags span {
       font-size: 10px; padding: 2px 8px; border: 1px solid var(--fg-faint); border-radius: 3px;
@@ -1270,6 +1308,76 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     .toc-item:hover .toc-label { max-width: 200px; padding: 0 10px; }
     .toc-item.active .toc-num { background: var(--accent); color: #fff; }
     .toc-item.active .toc-label { max-width: 200px; padding: 0 10px; }
+
+    /* ---- Comments ---- */
+    .comments-section {
+      max-width: 720px; margin: 0 auto; padding: 0 20px 60px;
+    }
+    .comments-header {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--fg-dim); margin-bottom: 24px; padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .comments-header span { color: var(--fg-faint); margin-left: 6px; }
+    .comment {
+      padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .comment-head {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+    }
+    .comment-avatar {
+      width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: var(--fg-dim); flex-shrink: 0;
+    }
+    .comment-author { font-size: 12px; color: var(--fg); font-weight: 500; }
+    .comment-date { font-size: 10px; color: var(--fg-faint); }
+    .comment-body { font-size: 12px; color: var(--fg-dim); line-height: 1.6; padding-left: 38px; }
+    .comment-body p { margin-bottom: 8px; }
+    .comment-reply { margin-left: 38px; }
+    .comment-reply-btn {
+      font-size: 10px; color: var(--fg-faint); background: none; border: none;
+      cursor: pointer; font-family: var(--mono); text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 4px 0;
+    }
+    .comment-reply-btn:hover { color: var(--accent); }
+    .comment-children { margin-left: 38px; border-left: 1px solid rgba(255,255,255,0.06); padding-left: 16px; }
+    .comments-empty {
+      font-size: 12px; color: var(--fg-faint); padding: 20px 0; text-align: center;
+    }
+    .comment-form {
+      margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .comment-form-title {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--fg-dim); margin-bottom: 16px;
+    }
+    .comment-form-row { display: flex; gap: 12px; margin-bottom: 12px; }
+    .comment-form-row input {
+      flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px; padding: 8px 12px; color: var(--fg); font-family: var(--mono);
+      font-size: 12px; outline: none;
+    }
+    .comment-form-row input:focus { border-color: var(--accent); }
+    .comment-form textarea {
+      width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px; padding: 10px 12px; color: var(--fg); font-family: var(--mono);
+      font-size: 12px; outline: none; resize: vertical; min-height: 80px; margin-bottom: 12px;
+    }
+    .comment-form textarea:focus { border-color: var(--accent); }
+    .comment-form button {
+      background: var(--accent); color: #fff; border: none; border-radius: 4px;
+      padding: 8px 20px; font-family: var(--mono); font-size: 11px; cursor: pointer;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      transition: opacity 0.2s;
+    }
+    .comment-form button:hover { opacity: 0.85; }
+    .comment-form button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .comment-form-status {
+      font-size: 11px; margin-top: 8px; min-height: 16px;
+    }
+    .comment-form-status.success { color: #4ade80; }
+    .comment-form-status.error { color: #f87171; }
 
     /* ---- Post Nav ---- */
     .post-nav {
@@ -1336,6 +1444,7 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
       .post-container { padding: 24px 16px 60px; }
       .post-nav { padding: 20px 16px; flex-wrap: wrap; gap: 16px; }
       .post-nav-preview { display: none; }
+      .comment-form-row { flex-direction: column; }
     }
   </style>
 </head>
@@ -1348,11 +1457,29 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
   <article class="post-container">
     <div class="post-meta">
       <span class="post-date">${new Date(post.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+      <span class="post-views" id="viewCount"></span>
       <div class="post-tags">${post.tags.map(t => `<span>${t}</span>`).join('')}</div>
     </div>
     <h1 class="post-title">${post.title}</h1>
     <div class="post-body">${post.body}</div>
   </article>
+
+  <!-- Comments -->
+  <section class="comments-section" id="commentsSection">
+    <div class="comments-header">${i18n.comments}<span id="commentCount"></span></div>
+    <div id="commentsList"></div>
+    <div class="comment-form" id="commentForm">
+      <div class="comment-form-title">${i18n.leave}</div>
+      <div class="comment-form-row">
+        <input type="text" id="cmtName" placeholder="${i18n.name}" />
+        <input type="email" id="cmtEmail" placeholder="${i18n.email}" />
+      </div>
+      <textarea id="cmtBody" placeholder="${i18n.comment}"></textarea>
+      <input type="hidden" id="cmtParent" value="0" />
+      <button id="cmtSubmit">${i18n.submit}</button>
+      <div class="comment-form-status" id="cmtStatus"></div>
+    </div>
+  </section>
 
   <nav class="post-nav">
     ${prevPost ? `<a class="post-nav-link post-nav-prev" href="${prefix}/blog/${prevPost.slug}/">
@@ -1394,40 +1521,160 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
 
   <script>
   (function() {
-    // Build TOC from h2 headings
-    const headings = document.querySelectorAll('.post-body h2');
-    const toc = document.getElementById('toc');
-    if (headings.length < 2) { toc.style.display = 'none'; return; }
+    var SLUG = '${post.slug}';
+    var WP_ID = ${wpId};
+    var WP_URL = '${wpUrl}';
+    var I18N = ${JSON.stringify(i18n)};
 
-    headings.forEach((h, i) => {
-      const id = 'section-' + i;
-      h.id = id;
-      const a = document.createElement('a');
-      a.className = 'toc-item';
-      a.href = '#' + id;
-      a.innerHTML = '<span class="toc-num">' + (i + 1) + '</span>'
-        + '<span class="toc-label">' + h.textContent + '</span>';
-      toc.appendChild(a);
-    });
+    // ---- View count ----
+    var viewEl = document.getElementById('viewCount');
+    fetch('/api/views/' + SLUG, { method: 'POST' })
+      .then(function(r) { return r.json(); })
+      .then(function(d) { if (d.views) viewEl.textContent = d.views + ' ' + I18N.views; })
+      .catch(function() {});
 
-    // Highlight active section on scroll
-    const items = toc.querySelectorAll('.toc-item');
-    let active = -1;
-
-    function update() {
-      let current = 0;
-      const offset = window.innerHeight * 0.35;
-      headings.forEach((h, i) => {
-        if (h.getBoundingClientRect().top < offset) current = i;
+    // ---- TOC ----
+    var headings = document.querySelectorAll('.post-body h2');
+    var toc = document.getElementById('toc');
+    if (headings.length >= 2) {
+      headings.forEach(function(h, i) {
+        var id = 'section-' + i;
+        h.id = id;
+        var a = document.createElement('a');
+        a.className = 'toc-item';
+        a.href = '#' + id;
+        a.innerHTML = '<span class="toc-num">' + (i + 1) + '</span>'
+          + '<span class="toc-label">' + h.textContent + '</span>';
+        toc.appendChild(a);
       });
-      if (current !== active) {
-        active = current;
-        items.forEach((item, i) => item.classList.toggle('active', i === current));
+      var items = toc.querySelectorAll('.toc-item');
+      var active = -1;
+      function updateToc() {
+        var current = 0;
+        var offset = window.innerHeight * 0.35;
+        headings.forEach(function(h, i) { if (h.getBoundingClientRect().top < offset) current = i; });
+        if (current !== active) {
+          active = current;
+          items.forEach(function(item, i) { item.classList.toggle('active', i === current); });
+        }
       }
+      window.addEventListener('scroll', updateToc, { passive: true });
+      updateToc();
+    } else {
+      toc.style.display = 'none';
     }
 
-    window.addEventListener('scroll', update, { passive: true });
-    update();
+    // ---- Comments (WordPress REST API) ----
+    if (!WP_ID || !WP_URL) {
+      document.getElementById('commentsSection').style.display = 'none';
+      return;
+    }
+
+    var listEl = document.getElementById('commentsList');
+    var countEl = document.getElementById('commentCount');
+
+    function timeAgo(dateStr) {
+      var diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+      if (diff < 60) return I18N.ago + ' ' + Math.floor(diff) + 's';
+      if (diff < 3600) return I18N.ago + ' ' + Math.floor(diff / 60) + 'm';
+      if (diff < 86400) return I18N.ago + ' ' + Math.floor(diff / 3600) + 'h';
+      if (diff < 2592000) return I18N.ago + ' ' + Math.floor(diff / 86400) + 'd';
+      return new Date(dateStr).toLocaleDateString();
+    }
+
+    function renderComment(c, depth) {
+      var html = '<div class="comment">'
+        + '<div class="comment-head">'
+        + '<div class="comment-avatar">' + (c.author_name || '?').charAt(0).toUpperCase() + '</div>'
+        + '<span class="comment-author">' + (c.author_name || 'Anonymous') + '</span>'
+        + '<span class="comment-date">' + timeAgo(c.date) + '</span>'
+        + '</div>'
+        + '<div class="comment-body">' + c.content.rendered + '</div>';
+      if (depth < 2) {
+        html += '<div class="comment-reply">'
+          + '<button class="comment-reply-btn" data-parent="' + c.id + '">' + I18N.reply + '</button>'
+          + '</div>';
+      }
+      if (c._children && c._children.length) {
+        html += '<div class="comment-children">';
+        c._children.forEach(function(child) { html += renderComment(child, depth + 1); });
+        html += '</div>';
+      }
+      html += '</div>';
+      return html;
+    }
+
+    function loadComments() {
+      fetch(WP_URL + '/wp-json/wp/v2/comments?post=' + WP_ID + '&per_page=100&orderby=date_gmt&order=asc')
+        .then(function(r) { return r.json(); })
+        .then(function(comments) {
+          if (!Array.isArray(comments)) { comments = []; }
+          countEl.textContent = '(' + comments.length + ')';
+          if (!comments.length) {
+            listEl.innerHTML = '<div class="comments-empty">' + I18N.noComments + ' ' + I18N.beFirst + '</div>';
+            return;
+          }
+          // Build tree
+          var map = {}, roots = [];
+          comments.forEach(function(c) { c._children = []; map[c.id] = c; });
+          comments.forEach(function(c) {
+            if (c.parent && map[c.parent]) map[c.parent]._children.push(c);
+            else roots.push(c);
+          });
+          listEl.innerHTML = roots.map(function(c) { return renderComment(c, 0); }).join('');
+          // Reply buttons
+          listEl.querySelectorAll('.comment-reply-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+              document.getElementById('cmtParent').value = btn.dataset.parent;
+              document.getElementById('cmtBody').focus();
+              document.getElementById('cmtBody').placeholder = I18N.reply + '...';
+            });
+          });
+        })
+        .catch(function() {
+          listEl.innerHTML = '<div class="comments-empty">' + I18N.noComments + '</div>';
+        });
+    }
+    loadComments();
+
+    // Submit comment
+    var submitBtn = document.getElementById('cmtSubmit');
+    var statusEl = document.getElementById('cmtStatus');
+    submitBtn.addEventListener('click', function() {
+      var name = document.getElementById('cmtName').value.trim();
+      var email = document.getElementById('cmtEmail').value.trim();
+      var body = document.getElementById('cmtBody').value.trim();
+      var parent = parseInt(document.getElementById('cmtParent').value) || 0;
+      if (!name || !email || !body) { statusEl.textContent = I18N.error; statusEl.className = 'comment-form-status error'; return; }
+      submitBtn.disabled = true;
+      submitBtn.textContent = I18N.sending;
+      statusEl.textContent = '';
+      statusEl.className = 'comment-form-status';
+      fetch(WP_URL + '/wp-json/wp/v2/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post: WP_ID, author_name: name, author_email: email, content: body, parent: parent })
+      })
+      .then(function(r) {
+        if (r.ok || r.status === 201) {
+          statusEl.textContent = I18N.success;
+          statusEl.className = 'comment-form-status success';
+          document.getElementById('cmtBody').value = '';
+          document.getElementById('cmtParent').value = '0';
+          setTimeout(loadComments, 1000);
+        } else {
+          return r.json().then(function(d) { throw new Error(d.message || 'Error'); });
+        }
+      })
+      .catch(function() {
+        statusEl.textContent = I18N.error;
+        statusEl.className = 'comment-form-status error';
+      })
+      .finally(function() {
+        submitBtn.disabled = false;
+        submitBtn.textContent = I18N.submit;
+      });
+    });
   })();
   </script>
 </body>
