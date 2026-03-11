@@ -3263,9 +3263,16 @@
   }
   .term-timer {
     font-family: var(--mono);
-    font-size: 10px;
-    color: rgba(255,255,255,0.4);
-    letter-spacing: 0.05em;
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.08em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.04);
+  }
+  .term-timer.running {
+    color: var(--accent, #a882ff);
+    background: rgba(168,130,255,0.08);
   }
   .term-body {
     flex: 1;
@@ -3547,6 +3554,7 @@
   // ---- TIMER ----
   function startTimer() {
     startTime = Date.now();
+    termTimerEl.classList.add('running');
     timerInterval = setInterval(function() {
       var elapsed = Math.floor((Date.now() - startTime) / 1000);
       var min = String(Math.floor(elapsed / 60)).padStart(2, '0');
@@ -3557,6 +3565,7 @@
 
   function stopTimer() {
     clearInterval(timerInterval);
+    termTimerEl.classList.remove('running');
   }
 
   function getTimeStr() {
@@ -3883,16 +3892,40 @@
 
   function doHelp() {
     addLine('');
-    addLine('=== COMMANDS ===', 'cyan');
-    addLine('Movement:  n/north, s/south, e/east, w/west', 'dim');
-    addLine('           u/up, d/down, enter, exit', 'dim');
-    addLine('Actions:   look, take [item], drop [item]', 'dim');
-    addLine('           use [item], open [item]', 'dim');
-    addLine('Info:      inventory (or i), score, help', 'dim');
-    addLine('Game:      restart, quit', 'dim');
+    addLine('=== HOW TO PLAY ===', 'cyan');
     addLine('');
-    addLine('Collect treasures and defeat foes to reach 50 points.', 'cyan');
-    addLine('Some areas are dark -- bring a lamp!', 'yellow');
+    addLine('You are an adventurer exploring a mysterious cave.', '');
+    addLine('Your goal: collect treasures and defeat foes to', '');
+    addLine('score 50+ points and win a FREE consultation.', 'green');
+    addLine('');
+    addLine('The timer in the top-right tracks your time.', 'dim');
+    addLine('');
+    addLine('--- COMMANDS ---', 'cyan');
+    addLine('');
+    addLine('MOVE:      n / s / e / w / u / d', 'yellow');
+    addLine('           enter, exit, go [direction]', 'yellow');
+    addLine('');
+    addLine('INTERACT:  take [item]    - pick up an item', 'yellow');
+    addLine('           drop [item]    - drop an item', 'yellow');
+    addLine('           use [item]     - use an item', 'yellow');
+    addLine('           open [item]    - open something', 'yellow');
+    addLine('           examine [item] - inspect an item', 'yellow');
+    addLine('           attack         - fight with sword', 'yellow');
+    addLine('');
+    addLine('INFO:      look (l)       - look around', 'yellow');
+    addLine('           inventory (i)  - check your bag', 'yellow');
+    addLine('           score          - check score/moves', 'yellow');
+    addLine('           help           - show this guide', 'yellow');
+    addLine('');
+    addLine('OTHER:     restart, quit, clear', 'yellow');
+    addLine('');
+    addLine('--- TIPS ---', 'cyan');
+    addLine('');
+    addLine('  * Some areas are dark. Bring a lamp!', 'dim');
+    addLine('  * Use keys to unlock things.', 'dim');
+    addLine('  * Treasures glow yellow when you enter a room.', 'dim');
+    addLine('  * Dangerous creatures block your path — fight them.', 'dim');
+    addLine('  * If you die, you respawn but lose your items.', 'dim');
     addLine('');
   }
 
@@ -4135,9 +4168,12 @@
     introLines.push({ text: 'Welcome to COLOSSAL CAVE ADVENTURE', cls: 'green' });
     introLines.push({ text: 'A text adventure challenge by Khalil Drissi', cls: 'green' });
     introLines.push({ text: '', cls: '' });
-    introLines.push({ text: 'Collect treasures and score 50+ points to win', cls: '' });
-    introLines.push({ text: 'a free consultation.', cls: '' });
-    introLines.push({ text: 'Type "help" for commands.', cls: 'dim' });
+    introLines.push({ text: 'GOAL: Score 50+ points to win a FREE consultation.', cls: 'yellow' });
+    introLines.push({ text: '', cls: '' });
+    introLines.push({ text: 'Explore rooms, collect treasures, defeat creatures.', cls: '' });
+    introLines.push({ text: 'Timer starts now — how fast can you conquer the cave?', cls: 'dim' });
+    introLines.push({ text: '', cls: '' });
+    introLines.push({ text: 'Type "help" for full guide, or just start exploring!', cls: 'cyan' });
 
     typeLines(introLines, 45, function() {
       startTimer();
