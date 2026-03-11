@@ -23,12 +23,12 @@
   },
   "position": {
     "header": "Poste",
-    "studio": "Freelance (Indépendant)",
+    "studio": "Directeur Général — Virtus Operandi",
     "focus": "Full-Stack · Toutes Plateformes",
     "stackLabel": "Focus",
     "stack": ["Conception de Systèmes", "Développement de Systèmes", "Calcul Distribué", "IA/ML & Blockchain"],
     "previousLabel": "Précédent",
-    "previous": ["Projets en agence", "Contrats startup", "Open Source"]
+    "previous": ["Co-Fondateur & CTO — Circuit Dynamic SARL", "Projets en agence", "Contrats startup", "Open Source"]
   },
   "ventures": {
     "header": "Ventures",

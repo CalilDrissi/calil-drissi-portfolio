@@ -32,7 +32,7 @@
   },
   "position": {
     "header": "Position",
-    "studio": "Freelance (Independent)",
+    "studio": "General Manager — Virtus Operandi",
     "focus": "Full-Stack All Platforms",
     "stackLabel": "Focus",
     "stack": [
@@ -43,6 +43,7 @@
     ],
     "previousLabel": "Previous",
     "previous": [
+      "Co-Founder & CTO — Circuit Dynamic SARL",
       "Agency Projects",
       "Startup Contracts",
       "Open Source"
