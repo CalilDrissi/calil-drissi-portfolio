@@ -11,10 +11,11 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    a, button, [role="button"] { cursor: pointer; }
     input, textarea { cursor: text; }
 
-    /* Custom cursor */
+    /* Custom cursor — hidden by default, shown only on interactive hover */
     .cursor-dot {
       position: fixed;
       top: 0; left: 0;
@@ -24,8 +25,9 @@
       pointer-events: none;
       z-index: 99999;
       transform: translate(-50%, -50%);
-      transition: width 0.25s cubic-bezier(0.22,1,0.36,1), height 0.25s cubic-bezier(0.22,1,0.36,1), background 0.25s, opacity 0.25s, mix-blend-mode 0.25s;
+      transition: width 0.25s cubic-bezier(0.22,1,0.36,1), height 0.25s cubic-bezier(0.22,1,0.36,1), background 0.25s, opacity 0.25s;
       mix-blend-mode: difference;
+      opacity: 0;
     }
     .cursor-ring {
       position: fixed;
@@ -37,16 +39,26 @@
       z-index: 99998;
       transform: translate(-50%, -50%);
       transition: width 0.3s cubic-bezier(0.22,1,0.36,1), height 0.3s cubic-bezier(0.22,1,0.36,1), border-color 0.3s, opacity 0.3s, background 0.2s;
+      opacity: 0;
+    }
+    /* Active state — visible when hovering interactive elements */
+    .cursor-dot.active {
+      opacity: 1;
+    }
+    .cursor-ring.active {
+      opacity: 1;
     }
     /* Hover state — expand ring, accent glow */
     .cursor-dot.hovering {
       width: 12px; height: 12px;
       background: var(--accent);
+      opacity: 1;
     }
     .cursor-ring.hovering {
       width: 52px; height: 52px;
       border-color: var(--accent);
       background: rgba(94,43,255,0.08);
+      opacity: 1;
     }
     /* Click state */
     .cursor-dot.clicking {
@@ -55,20 +67,11 @@
     .cursor-ring.clicking {
       width: 28px; height: 28px;
     }
-    /* Text input state */
-    .cursor-dot.text-mode {
-      width: 3px; height: 20px;
-      border-radius: 2px;
-      background: var(--accent);
-    }
-    .cursor-ring.text-mode {
-      opacity: 0;
-    }
+    /* Hide custom cursor on interactive elements so dot replaces it */
+    .cursor-zone:hover { cursor: none; }
     /* Hidden on touch / mobile */
     @media (pointer: coarse) {
-      .cursor-dot, .cursor-ring { display: none; }
-      *, *::before, *::after { cursor: auto; }
-      a, button, [role="button"], .project-thumb, .intro-identity { cursor: pointer; }
+      .cursor-dot, .cursor-ring { display: none !important; }
     }
 
     :root {
@@ -472,27 +475,50 @@
     }
     .connect-ctas {
       margin-top: 14px;
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 8px;
+      max-width: 340px;
     }
     .cta-btn {
-      padding: 6px 12px;
+      padding: 5px 10px;
       border: 1px solid var(--fg-faint);
       border-radius: 2px;
       font-family: var(--mono);
-      font-size: calc(var(--label) - 1px);
+      font-size: 9px;
       color: var(--fg-dim);
       text-transform: uppercase;
       letter-spacing: 0.04em;
       cursor: pointer;
       background: none;
-      transition: border-color 0.2s, color 0.2s;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      text-align: center;
     }
     .cta-btn:hover {
       border-color: var(--fg);
       color: var(--fg);
       text-decoration: none;
     }
+    .cta-btn-flair {
+      border-color: var(--accent);
+      color: var(--accent);
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-btn-flair::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(94,43,255,0.12), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .cta-btn-flair:hover {
+      border-color: var(--accent);
+      color: #fff;
+      background: var(--accent);
+    }
+    .cta-btn-flair:hover::before { opacity: 1; }
 
     /* ---- MIDDLE (statement) ---- */
     .middle {
@@ -827,7 +853,7 @@
       .top-grid .col-section { display: block !important; }
       .middle { padding: 16px 0; min-height: 200px; }
       .statement { font-size: clamp(18px, 6vw, 24px); padding: 0 var(--edge); }
-      .connect-ctas { flex-direction: column; }
+      .connect-ctas { grid-template-columns: 1fr; max-width: 100%; }
       .bottom-bar { padding: 0 var(--edge); }
       .project-strip { padding: 0 var(--edge); }
       .ribbon { height: 28px; }
@@ -1366,6 +1392,245 @@
       .win-project-title { font-size: 20px; }
       .win-tags { flex-wrap: wrap; }
     }
+
+    /* ---- LEAVE A MESSAGE WINDOW ---- */
+    .msg-tabs {
+      display: flex;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+    }
+    .msg-tab {
+      flex: 1;
+      padding: 10px 16px;
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--fg-dim);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: color 0.2s, background 0.2s;
+      text-align: center;
+      border-bottom: 2px solid transparent;
+    }
+    .msg-tab.active {
+      color: var(--fg);
+      border-bottom-color: var(--accent);
+      background: rgba(255,255,255,0.02);
+    }
+    .msg-tab:hover:not(.active) {
+      color: var(--fg);
+      background: rgba(255,255,255,0.02);
+    }
+    .msg-panel {
+      display: none;
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 28px;
+    }
+    .msg-panel.active { display: flex; flex-direction: column; }
+
+    .msg-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+    .msg-field label {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--fg-dim);
+    }
+    .msg-field input,
+    .msg-field textarea {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-family: var(--mono);
+      font-size: var(--body);
+      color: var(--fg);
+      outline: none;
+      transition: border-color 0.2s;
+      resize: vertical;
+    }
+    .msg-field input::placeholder,
+    .msg-field textarea::placeholder {
+      color: rgba(255,255,255,0.25);
+    }
+    .msg-field input:focus,
+    .msg-field textarea:focus {
+      border-color: var(--accent);
+    }
+    .msg-field textarea {
+      min-height: 80px;
+    }
+    .msg-row {
+      display: flex;
+      gap: 10px;
+    }
+    .msg-row .msg-field { flex: 1; }
+
+    .msg-send-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 4px;
+      padding: 10px 20px;
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.2s;
+      margin-top: 6px;
+      align-self: flex-start;
+    }
+    .msg-send-btn:hover { background: #7c4dff; }
+    .msg-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Recording UI */
+    .msg-record-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 20px 0;
+      flex: 1;
+    }
+    .msg-record-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.04);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      position: relative;
+    }
+    .msg-record-btn:hover {
+      border-color: var(--accent);
+      transform: scale(1.05);
+    }
+    .msg-record-btn::after {
+      content: '';
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ff4444;
+      transition: border-radius 0.2s, width 0.2s, height 0.2s;
+    }
+    .msg-record-btn.recording::after {
+      width: 18px;
+      height: 18px;
+      border-radius: 3px;
+    }
+    .msg-record-btn.recording {
+      border-color: #ff4444;
+    }
+    .msg-record-status {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--fg-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 16px;
+    }
+    .msg-rec-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ff4444;
+      animation: msgPulse 1s ease-in-out infinite;
+    }
+    @keyframes msgPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .msg-timer {
+      font-family: var(--mono);
+      font-size: 22px;
+      color: var(--fg);
+      letter-spacing: 0.05em;
+      min-height: 28px;
+    }
+    .msg-preview-player {
+      width: 100%;
+      max-width: 320px;
+    }
+    .msg-preview-player audio,
+    .msg-preview-player video {
+      width: 100%;
+      border-radius: 4px;
+      outline: none;
+    }
+    .msg-video-live {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 4px;
+      background: #000;
+      display: none;
+    }
+    .msg-video-live.active { display: block; }
+
+    /* Drop zone */
+    .msg-attach {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .msg-attach-btn {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--fg-dim);
+      cursor: pointer;
+      padding: 4px 8px;
+      border: 1px dashed rgba(255,255,255,0.15);
+      border-radius: 3px;
+      transition: border-color 0.2s, color 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .msg-attach-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .msg-file-name {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--accent);
+      word-break: break-all;
+    }
+    .msg-file-input { display: none; }
+
+    /* Status feedback */
+    .msg-status {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 10px;
+      min-height: 16px;
+    }
+    .msg-status.success { color: #28c840; }
+    .msg-status.error { color: #ff5f57; }
+    .msg-status.sending { color: var(--fg-dim); }
+
+    @media (max-width: 640px) {
+      .msg-panel { padding: 16px; }
+      .msg-row { flex-direction: column; gap: 0; }
+      .msg-tabs { flex-wrap: wrap; }
+    }
   </style>
 </head>
 <body>
@@ -1471,6 +1736,8 @@
       <div class="connect-ctas">
         <a href="#" class="cta-btn">Schedule Call &#8599;</a>
         <a href="#" class="cta-btn">Cost Estimate &#8599;</a>
+        <button class="cta-btn" id="openMessageBtn">Leave a Message &#9993;</button>
+        <button class="cta-btn cta-btn-terminal cursor-zone" id="terminalChallengeBtn">Win Free Consult &#9655;</button>
       </div>
     </div>
 
@@ -1662,6 +1929,117 @@
   </div>
 </div>
 
+<!-- LEAVE A MESSAGE WINDOW -->
+<div class="win" id="messagePopup" data-win-id="message" data-win-title="Leave a Message" style="width:560px;height:480px;top:calc(50% - 240px);left:calc(50% - 280px);">
+  <div class="win-resize win-resize-e"></div>
+  <div class="win-resize win-resize-w"></div>
+  <div class="win-resize win-resize-s"></div>
+  <div class="win-resize win-resize-n"></div>
+  <div class="win-resize win-resize-se"></div>
+  <div class="win-resize win-resize-sw"></div>
+  <div class="win-resize win-resize-ne"></div>
+  <div class="win-resize win-resize-nw"></div>
+  <div class="win-titlebar">
+    <div class="win-dots">
+      <span class="win-dot-close"></span>
+      <span class="win-dot-min"></span>
+      <span class="win-dot-max"></span>
+    </div>
+    <div class="win-titlebar-text">leave a message</div>
+    <div class="win-titlebar-actions"></div>
+  </div>
+  <div class="msg-tabs">
+    <button class="msg-tab active" data-msg-tab="text">Text</button>
+    <button class="msg-tab" data-msg-tab="audio">Audio</button>
+    <button class="msg-tab" data-msg-tab="video">Video</button>
+  </div>
+
+  <!-- Text Panel -->
+  <div class="msg-panel active" data-msg-panel="text">
+    <div class="msg-row">
+      <div class="msg-field">
+        <label>Name</label>
+        <input type="text" placeholder="Your name" class="msg-name" />
+      </div>
+      <div class="msg-field">
+        <label>Email</label>
+        <input type="email" placeholder="you@example.com" class="msg-email" />
+      </div>
+    </div>
+    <div class="msg-field">
+      <label>Message</label>
+      <textarea placeholder="Write your message..." class="msg-text"></textarea>
+    </div>
+    <div class="msg-attach">
+      <label class="msg-attach-btn">&#128206; Attach file <input type="file" class="msg-file-input" /></label>
+      <span class="msg-file-name"></span>
+    </div>
+    <button class="msg-send-btn" data-type="text">Send Message</button>
+    <div class="msg-status"></div>
+  </div>
+
+  <!-- Audio Panel -->
+  <div class="msg-panel" data-msg-panel="audio">
+    <div class="msg-row">
+      <div class="msg-field">
+        <label>Name</label>
+        <input type="text" placeholder="Your name" class="msg-name" />
+      </div>
+      <div class="msg-field">
+        <label>Email</label>
+        <input type="email" placeholder="you@example.com" class="msg-email" />
+      </div>
+    </div>
+    <div class="msg-record-area">
+      <div class="msg-record-status"></div>
+      <div class="msg-timer"></div>
+      <button class="msg-record-btn" data-media="audio" title="Record audio"></button>
+      <div class="msg-preview-player"></div>
+    </div>
+    <div class="msg-field">
+      <label>Leave a note (optional)</label>
+      <textarea placeholder="Add context to your recording..." class="msg-text" rows="2"></textarea>
+    </div>
+    <div class="msg-attach">
+      <label class="msg-attach-btn">&#128206; Attach file <input type="file" class="msg-file-input" /></label>
+      <span class="msg-file-name"></span>
+    </div>
+    <button class="msg-send-btn" data-type="audio" disabled>Send Recording</button>
+    <div class="msg-status"></div>
+  </div>
+
+  <!-- Video Panel -->
+  <div class="msg-panel" data-msg-panel="video">
+    <div class="msg-row">
+      <div class="msg-field">
+        <label>Name</label>
+        <input type="text" placeholder="Your name" class="msg-name" />
+      </div>
+      <div class="msg-field">
+        <label>Email</label>
+        <input type="email" placeholder="you@example.com" class="msg-email" />
+      </div>
+    </div>
+    <div class="msg-record-area">
+      <video class="msg-video-live" muted playsinline></video>
+      <div class="msg-record-status"></div>
+      <div class="msg-timer"></div>
+      <button class="msg-record-btn" data-media="video" title="Record video"></button>
+      <div class="msg-preview-player"></div>
+    </div>
+    <div class="msg-field">
+      <label>Leave a note (optional)</label>
+      <textarea placeholder="Add context to your recording..." class="msg-text" rows="2"></textarea>
+    </div>
+    <div class="msg-attach">
+      <label class="msg-attach-btn">&#128206; Attach file <input type="file" class="msg-file-input" /></label>
+      <span class="msg-file-name"></span>
+    </div>
+    <button class="msg-send-btn" data-type="video" disabled>Send Recording</button>
+    <div class="msg-status"></div>
+  </div>
+</div>
+
 <div class="cursor-dot" id="cursorDot"></div>
 <div class="cursor-ring" id="cursorRing"></div>
 
@@ -1683,11 +2061,13 @@
 </div>
 
 <script>
-  // ======== CUSTOM CURSOR ========
+  // ======== HYBRID CUSTOM CURSOR ========
+  // Default arrow everywhere. Custom dot+ring only on interactive elements.
   const cursorDot = document.getElementById('cursorDot');
   const cursorRing = document.getElementById('cursorRing');
   if (!cursorDot || !cursorRing) { console.warn('Custom cursor elements not found'); }
   let mouseX = -100, mouseY = -100, ringX = -100, ringY = -100;
+  let cursorActive = false;
 
   document.addEventListener('mousemove', e => {
     mouseX = e.clientX;
@@ -1705,49 +2085,39 @@
     requestAnimationFrame(followRing);
   })();
 
-  // Detect hoverable elements
-  const hoverSelectors = 'a, button, [role="button"], .project-thumb, .intro-identity, .win-dot-close, .win-dot-min, .win-dot-max, .win-action-btn, .about-tab, .bottom-tab, .chat-send, .connect-ctas a, .award-badge';
+  // Zones where custom cursor appears (projects, blog, ventures, interactive elements)
+  const cursorZoneSelectors = '.project-thumb, .project-card, .articles-list a, .venture-item, .award-badge, .intro-identity, .connect-ctas a, .connect-ctas button, .about-tab, .bottom-tab, .chat-send, .win-dot-close, .win-dot-min, .win-dot-max, .win-action-btn, #terminalChallengeBtn, .msg-tab, .msg-send-btn, .msg-record-btn, #openMessageBtn';
+
+  // Add cursor-zone class to matching elements for CSS cursor:none
+  document.querySelectorAll(cursorZoneSelectors).forEach(el => el.classList.add('cursor-zone'));
+
   document.addEventListener('mouseover', e => {
-    const target = e.target.closest(hoverSelectors);
-    if (target) {
-      cursorDot.classList.add('hovering');
-      cursorRing.classList.add('hovering');
-    }
-    if (e.target.matches('input, textarea, [contenteditable]')) {
-      cursorDot.classList.add('text-mode');
-      cursorRing.classList.add('text-mode');
+    const zone = e.target.closest(cursorZoneSelectors);
+    if (zone) {
+      cursorActive = true;
+      cursorDot.classList.add('active', 'hovering');
+      cursorRing.classList.add('active', 'hovering');
     }
   });
   document.addEventListener('mouseout', e => {
-    const target = e.target.closest(hoverSelectors);
-    if (target) {
-      cursorDot.classList.remove('hovering');
-      cursorRing.classList.remove('hovering');
-    }
-    if (e.target.matches('input, textarea, [contenteditable]')) {
-      cursorDot.classList.remove('text-mode');
-      cursorRing.classList.remove('text-mode');
+    const zone = e.target.closest(cursorZoneSelectors);
+    if (zone) {
+      cursorActive = false;
+      cursorDot.classList.remove('active', 'hovering');
+      cursorRing.classList.remove('active', 'hovering');
     }
   });
 
-  // Click effect
+  // Click effect only when cursor is active
   document.addEventListener('mousedown', () => {
-    cursorDot.classList.add('clicking');
-    cursorRing.classList.add('clicking');
+    if (cursorActive) {
+      cursorDot.classList.add('clicking');
+      cursorRing.classList.add('clicking');
+    }
   });
   document.addEventListener('mouseup', () => {
     cursorDot.classList.remove('clicking');
     cursorRing.classList.remove('clicking');
-  });
-
-  // Hide when mouse leaves window
-  document.addEventListener('mouseleave', () => {
-    cursorDot.style.opacity = '0';
-    cursorRing.style.opacity = '0';
-  });
-  document.addEventListener('mouseenter', () => {
-    cursorDot.style.opacity = '1';
-    cursorRing.style.opacity = '1';
   });
 
   // Drag scroll for project strip
@@ -2615,6 +2985,1218 @@
       delay: Math.random() * 2,
     });
   });
+</script>
+
+<script>
+// ======== LEAVE A MESSAGE ========
+(function() {
+  const messagePopup = document.getElementById('messagePopup');
+  const msgWin = WM.register(messagePopup, 'Leave a Message');
+  msgWin.persistent = true;
+
+  // Open button
+  document.getElementById('openMessageBtn').addEventListener('click', () => {
+    if (messagePopup.classList.contains('open') && !msgWin.minimized) {
+      WM.focus(msgWin);
+      return;
+    }
+    if (msgWin.minimized) {
+      WM.restore(msgWin);
+      return;
+    }
+    messagePopup.classList.add('open');
+    WM.focus(msgWin);
+  });
+
+  // Tab switching
+  document.querySelectorAll('.msg-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.msg-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.msg-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelector(`[data-msg-panel="${tab.dataset.msgTab}"]`).classList.add('active');
+    });
+  });
+
+  // ---- Recording state ----
+  const recorders = {};
+
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return m + ':' + s;
+  }
+
+  function getPanel(type) {
+    return document.querySelector(`[data-msg-panel="${type}"]`);
+  }
+
+  // ---- Audio / Video record buttons ----
+  document.querySelectorAll('.msg-record-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const mediaType = btn.dataset.media; // 'audio' or 'video'
+      const panel = getPanel(mediaType);
+      const statusEl = panel.querySelector('.msg-record-status');
+      const timerEl = panel.querySelector('.msg-timer');
+      const previewEl = panel.querySelector('.msg-preview-player');
+      const sendBtn = panel.querySelector('.msg-send-btn');
+
+      if (recorders[mediaType] && recorders[mediaType].state === 'recording') {
+        // Stop recording
+        recorders[mediaType].stop();
+        btn.classList.remove('recording');
+        statusEl.innerHTML = '';
+        return;
+      }
+
+      // Clear previous
+      previewEl.innerHTML = '';
+      sendBtn.disabled = true;
+      sendBtn._blob = null;
+
+      try {
+        const constraints = mediaType === 'video'
+          ? { audio: true, video: { width: 640, height: 480, facingMode: 'user' } }
+          : { audio: true };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+        // Show live preview for video
+        if (mediaType === 'video') {
+          const liveVideo = panel.querySelector('.msg-video-live');
+          liveVideo.srcObject = stream;
+          liveVideo.classList.add('active');
+          liveVideo.play();
+        }
+
+        const mimeType = mediaType === 'video'
+          ? (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus') ? 'video/webm;codecs=vp9,opus' : 'video/webm')
+          : (MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm');
+        const recorder = new MediaRecorder(stream, { mimeType });
+        recorders[mediaType] = recorder;
+        const chunks = [];
+        let seconds = 0;
+
+        recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+        const timerInterval = setInterval(() => {
+          seconds++;
+          timerEl.textContent = formatTime(seconds);
+        }, 1000);
+
+        recorder.onstop = () => {
+          clearInterval(timerInterval);
+          stream.getTracks().forEach(t => t.stop());
+
+          if (mediaType === 'video') {
+            const liveVideo = panel.querySelector('.msg-video-live');
+            liveVideo.classList.remove('active');
+            liveVideo.srcObject = null;
+          }
+
+          const blob = new Blob(chunks, { type: mimeType });
+          sendBtn._blob = blob;
+          sendBtn.disabled = false;
+          timerEl.textContent = formatTime(seconds) + ' recorded';
+
+          // Show preview
+          const el = document.createElement(mediaType === 'video' ? 'video' : 'audio');
+          el.src = URL.createObjectURL(blob);
+          el.controls = true;
+          if (mediaType === 'video') el.style.maxHeight = '200px';
+          previewEl.innerHTML = '';
+          previewEl.appendChild(el);
+        };
+
+        recorder.start(200);
+        btn.classList.add('recording');
+        timerEl.textContent = '00:00';
+        statusEl.innerHTML = '<span class="msg-rec-dot"></span> Recording';
+
+      } catch (err) {
+        statusEl.textContent = 'Permission denied or not supported';
+        console.error('Recording error:', err);
+      }
+    });
+  });
+
+  // ---- File attach in each panel ----
+  document.querySelectorAll('.msg-panel').forEach(panel => {
+    const fileInput = panel.querySelector('.msg-file-input');
+    const fileNameEl = panel.querySelector('.msg-file-name');
+    if (!fileInput || !fileNameEl) return;
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (!file) { fileNameEl.textContent = ''; panel._attachedFile = null; return; }
+      if (file.size > 25 * 1024 * 1024) {
+        fileNameEl.textContent = 'Too large (max 25 MB)';
+        fileNameEl.style.color = '#ff5f57';
+        panel._attachedFile = null;
+        return;
+      }
+      fileNameEl.textContent = file.name;
+      fileNameEl.style.color = '';
+      panel._attachedFile = file;
+    });
+  });
+
+  // ---- Send handlers ----
+  document.querySelectorAll('.msg-send-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const type = btn.dataset.type;
+      const panel = getPanel(type);
+      const nameInput = panel.querySelector('.msg-name');
+      const emailInput = panel.querySelector('.msg-email');
+      const statusEl = panel.querySelector('.msg-status');
+
+      const name = nameInput ? nameInput.value.trim() : '';
+      const email = emailInput ? emailInput.value.trim() : '';
+
+      if (!name || !email) {
+        statusEl.textContent = 'Name and email are required';
+        statusEl.className = 'msg-status error';
+        return;
+      }
+
+      const fd = new FormData();
+      fd.append('name', name);
+      fd.append('email', email);
+      fd.append('type', type);
+
+      // Message text (present in all panels)
+      const msgEl = panel.querySelector('.msg-text');
+      const msg = msgEl ? msgEl.value.trim() : '';
+
+      if (type === 'text') {
+        if (!msg) { statusEl.textContent = 'Please write a message'; statusEl.className = 'msg-status error'; return; }
+        fd.append('message', msg);
+      } else if (type === 'audio' || type === 'video') {
+        const blob = btn._blob;
+        if (!blob) { statusEl.textContent = 'No recording found'; statusEl.className = 'msg-status error'; return; }
+        fd.append('file', blob, type + '-message.webm');
+        if (msg) fd.append('message', msg);
+      }
+
+      // Attach file from any panel
+      if (panel._attachedFile) {
+        fd.append('attachment', panel._attachedFile, panel._attachedFile.name);
+      }
+
+      btn.disabled = true;
+      statusEl.textContent = 'Sending...';
+      statusEl.className = 'msg-status sending';
+
+      try {
+        const res = await fetch('/api/message', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+          statusEl.textContent = 'Message sent successfully!';
+          statusEl.className = 'msg-status success';
+          // Reset form
+          if (nameInput) nameInput.value = '';
+          if (emailInput) emailInput.value = '';
+          const textArea = panel.querySelector('.msg-text');
+          if (textArea) textArea.value = '';
+          if (type === 'audio' || type === 'video') {
+            const previewEl = panel.querySelector('.msg-preview-player');
+            previewEl.innerHTML = '';
+            panel.querySelector('.msg-timer').textContent = '';
+            btn._blob = null;
+          }
+          // Clear attachment
+          const fi = panel.querySelector('.msg-file-input');
+          const fn = panel.querySelector('.msg-file-name');
+          if (fi) fi.value = '';
+          if (fn) fn.textContent = '';
+          panel._attachedFile = null;
+          btn.disabled = (type === 'audio' || type === 'video');
+        } else {
+          statusEl.textContent = data.error || 'Failed to send';
+          statusEl.className = 'msg-status error';
+          btn.disabled = false;
+        }
+      } catch (err) {
+        statusEl.textContent = 'Network error — please try again';
+        statusEl.className = 'msg-status error';
+        btn.disabled = false;
+        console.error('Send error:', err);
+      }
+    });
+  });
+})();
+</script>
+
+<!-- TERMINAL CHALLENGE WINDOW -->
+<div class="win" id="terminalWin" data-win-id="terminal" data-win-title="Colossal Cave Adventure" style="width:640px;height:480px;top:calc(50% - 240px);left:calc(50% - 320px);">
+  <div class="win-resize win-resize-e"></div>
+  <div class="win-resize win-resize-w"></div>
+  <div class="win-resize win-resize-s"></div>
+  <div class="win-resize win-resize-n"></div>
+  <div class="win-resize win-resize-se"></div>
+  <div class="win-resize win-resize-sw"></div>
+  <div class="win-resize win-resize-ne"></div>
+  <div class="win-resize win-resize-nw"></div>
+  <div class="win-titlebar term-titlebar">
+    <div class="win-dots">
+      <span class="win-dot-close"></span>
+      <span class="win-dot-min"></span>
+      <span class="win-dot-max"></span>
+    </div>
+    <div class="win-titlebar-text">Colossal Cave Adventure</div>
+    <div class="win-titlebar-actions">
+      <span class="term-timer" id="termTimer">00:00</span>
+    </div>
+  </div>
+  <div class="term-body" id="termBody">
+    <div class="term-output" id="termOutput"></div>
+    <div class="term-input-line" id="termInputLine">
+      <span class="term-prompt">&gt;&nbsp;</span>
+      <input type="text" class="term-input" id="termInput" autocomplete="off" spellcheck="false" />
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ---- TERMINAL CHALLENGE ---- */
+  .term-titlebar {
+    background: #0a0a0a !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+  }
+  .term-timer {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.05em;
+  }
+  .term-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #0a0a0a;
+    overflow: hidden;
+  }
+  .term-output {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 16px 4px;
+    font-family: 'DM Mono', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #e0e0e0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
+  }
+  .term-output::-webkit-scrollbar { width: 6px; }
+  .term-output::-webkit-scrollbar-track { background: transparent; }
+  .term-output::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+  .term-output .term-line { margin-bottom: 2px; }
+  .term-output .term-line-green { color: #22c55e; }
+  .term-output .term-line-red { color: #ff4444; }
+  .term-output .term-line-cyan { color: #22d3ee; }
+  .term-output .term-line-yellow { color: #facc15; }
+  .term-output .term-line-dim { color: rgba(255,255,255,0.35); }
+  .term-output .term-line-bold { font-weight: 500; }
+  .term-output .term-line-ascii { color: #22c55e; line-height: 1.15; font-size: 10px; }
+  .term-output .term-progress-bar { color: #22c55e; }
+  .term-input-line {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px 14px;
+    background: #0a0a0a;
+    flex-shrink: 0;
+  }
+  .term-prompt {
+    font-family: 'DM Mono', 'Courier New', monospace;
+    font-size: 12px;
+    color: #22d3ee;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .term-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: 'DM Mono', 'Courier New', monospace;
+    font-size: 12px;
+    color: #e0e0e0;
+    caret-color: #22c55e;
+    letter-spacing: 0.01em;
+  }
+  .term-input::placeholder {
+    color: rgba(255,255,255,0.2);
+  }
+  .term-reward-link {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 6px 14px;
+    background: rgba(34,197,94,0.12);
+    border: 1px solid #22c55e;
+    border-radius: 3px;
+    color: #22c55e;
+    font-family: var(--mono);
+    font-size: 11px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .term-reward-link:hover {
+    background: rgba(34,197,94,0.2);
+    text-decoration: none;
+  }
+  .term-score-bar {
+    color: #22d3ee;
+    font-size: 11px;
+    margin-top: 4px;
+  }
+  @media (max-width: 640px) {
+    .term-output { font-size: 11px; padding: 10px 12px 4px; }
+    .term-input { font-size: 11px; }
+    .term-prompt { font-size: 11px; }
+    .term-output .term-line-ascii { font-size: 7px; }
+  }
+</style>
+
+<script>
+(function() {
+  // ---- COLOSSAL CAVE ADVENTURE ----
+  var termWin = document.getElementById('terminalWin');
+  var termOutput = document.getElementById('termOutput');
+  var termInput = document.getElementById('termInput');
+  var termInputLine = document.getElementById('termInputLine');
+  var termTimerEl = document.getElementById('termTimer');
+  var termBtn = document.getElementById('terminalChallengeBtn');
+
+  // Register with WM
+  var termWinObj = WM.register(termWin, 'Colossal Cave Adventure');
+  termWinObj.persistent = true;
+
+  // Timer
+  var timerInterval = null;
+  var startTime = null;
+  var commandHistory = [];
+  var historyIndex = -1;
+  var gameStarted = false;
+
+  // ---- GAME STATE ----
+  var G = {};
+
+  function initGame() {
+    G = {
+      currentRoom: 'outside',
+      inventory: [],
+      score: 0,
+      moves: 0,
+      hasWon: false,
+      snakeDead: false,
+      dragonDead: false,
+      chestOpened: false,
+      lampLit: false,
+      alive: true
+    };
+  }
+
+  // ---- ROOMS ----
+  var rooms = {
+    outside: {
+      name: 'Outside Cave',
+      desc: 'You are standing at the end of a road before a small brick building.\nA small stream flows out of the building and down a gully.',
+      exits: { enter: 'building', south: 'valley', east: 'forest' },
+      items: []
+    },
+    building: {
+      name: 'Inside Building',
+      desc: 'You are inside a building, a well house for a large spring.\nThe exit door is to the west.',
+      exits: { exit: 'outside', west: 'outside', down: 'dark_passage' },
+      items: ['keys', 'lamp']
+    },
+    valley: {
+      name: 'Valley',
+      desc: 'You are in a valley in the forest beside a stream tumbling along\na rocky bed. The road leads north to a building, and south\nthrough the forest.',
+      exits: { north: 'outside', south: 'slit', west: 'forest' },
+      items: []
+    },
+    forest: {
+      name: 'Forest',
+      desc: 'You are in open forest, with a deep valley to one side.\nTrees surround you on all sides, their canopy blocking most light.',
+      exits: { east: 'valley', south: 'valley', west: 'outside' },
+      items: []
+    },
+    slit: {
+      name: 'Slit in Rock',
+      desc: 'At your feet all the water of the stream splashes into a\n2-inch slit in the rock. Downstream the streambed is bare rock.\nA narrow passage leads down into darkness.',
+      exits: { north: 'valley', down: 'dark_passage', south: 'outside' },
+      items: []
+    },
+    dark_passage: {
+      name: 'Dark Passage',
+      desc: 'You are in a dark, damp passage. The walls are slick with\nmoisture and you can hear water dripping in the distance.',
+      darkDesc: 'It is pitch dark. You are likely to fall into a pit!',
+      dark: true,
+      exits: { up: 'slit', south: 'hall_of_mists', north: 'building' },
+      items: []
+    },
+    hall_of_mists: {
+      name: 'Hall of Mists',
+      desc: 'You are at one end of a vast hall stretching forward out of\nsight to the west. The hall is filled with wisps of white mist\nswaying to and fro almost as if alive. A wide stone staircase\nruns upward. Rough-hewn passages lead south and east.',
+      exits: { up: 'dark_passage', north: 'dark_passage', south: 'hall_mt_king', east: 'gold_room', west: 'crystal_palace' },
+      items: []
+    },
+    gold_room: {
+      name: 'Gold Room',
+      desc: 'This is a low room with a crude note on the wall. It says:\n"You won\'t get it up the steps."\nThe room glimmers with a warm metallic glow.',
+      exits: { west: 'hall_of_mists' },
+      items: ['gold']
+    },
+    hall_mt_king: {
+      name: 'Hall of the Mountain King',
+      desc: 'You are in the Hall of the Mountain King, with passages off\nin several directions. Ancient carvings cover every wall.',
+      descSnake: 'You are in the Hall of the Mountain King, with passages off\nin several directions. A huge green fierce snake bars the way\nto the south! Ancient carvings cover every wall.',
+      exits: { north: 'hall_of_mists', south: 'dragon_lair', east: 'treasure_chamber' },
+      items: []
+    },
+    crystal_palace: {
+      name: 'Crystal Palace',
+      desc: 'You are in a magnificent cavern with crystals glittering from\nevery surface. Rainbow light dances across the walls as your\nlamp catches facets of quartz, amethyst, and diamond.',
+      exits: { east: 'hall_of_mists' },
+      items: ['diamonds', 'crystal_vase']
+    },
+    dragon_lair: {
+      name: "Dragon's Lair",
+      desc: 'The passage opens into a scorched cavern. Claw marks gouge\nthe stone floor. The air is hot and smells of sulfur.',
+      descDragon: 'A huge red dragon lies across the passage, its scales\nglowing like embers. Smoke curls from its nostrils.\nA mighty sword gleams in the corner, just out of reach\nof the beast.',
+      exits: { north: 'hall_mt_king', south: 'treasure_chamber' },
+      items: ['sword']
+    },
+    treasure_chamber: {
+      name: 'Treasure Chamber',
+      desc: 'This is the treasure room. The walls sparkle with embedded\ngems. Ancient riches are piled in the corners.',
+      exits: { west: 'hall_mt_king', north: 'dragon_lair' },
+      items: ['chest']
+    }
+  };
+
+  // Item definitions
+  var itemDefs = {
+    keys:         { name: 'set of keys',     type: 'tool',     pts: 0,  desc: 'A rusty set of iron keys.' },
+    lamp:         { name: 'brass lamp',       type: 'tool',     pts: 0,  desc: 'A shiny brass lamp. It is currently off.' },
+    gold:         { name: 'gold nugget',      type: 'treasure', pts: 10, desc: 'A large sparkling gold nugget!' },
+    diamonds:     { name: 'handful of diamonds', type: 'treasure', pts: 10, desc: 'Several brilliant-cut diamonds catch the light.' },
+    crystal_vase: { name: 'crystal vase',     type: 'treasure', pts: 10, desc: 'A delicate vase of finest crystal.' },
+    sword:        { name: 'mighty sword',     type: 'tool',     pts: 0,  desc: 'A gleaming sword of ancient make.' },
+    chest:        { name: 'treasure chest',   type: 'fixture',  pts: 0,  desc: 'A large iron-bound chest. It is locked.' }
+  };
+
+  var asciiArt = [
+    '  ____      _                     _  ',
+    ' / ___|___ | | ___  ___ ___  __ _| | ',
+    '| |   / _ \\| |/ _ \\/ __/ __|/ _` | | ',
+    '| |__| (_) | | (_) \\__ \\__ \\ (_| | | ',
+    ' \\____\\___/|_|\\___/|___/___/\\__,_|_| ',
+    '  ____                ',
+    ' / ___|__ ___   _____ ',
+    '| |   / _` \\ \\ / / _ \\',
+    '| |__| (_| |\\ V /  __/',
+    ' \\____\\__,_| \\_/ \\___|'
+  ];
+
+  var winAscii = [
+    '    _    ____  __     _______ _   _ _____ _   _ ____  _____ _ ',
+    '   / \\  |  _ \\ \\ \\   / / ____| \\ | |_   _| | | |  _ \\| ____| |',
+    '  / _ \\ | | | | \\ \\ / /|  _| |  \\| | | | | | | | |_) |  _| | |',
+    ' / ___ \\| |_| |  \\ V / | |___| |\\  | | | | |_| |  _ <| |___|_|',
+    '/_/   \\_\\____/    \\_/  |_____|_| \\_| |_|  \\___/|_| \\_\\_____(_)'
+  ];
+
+  // ---- OUTPUT HELPERS ----
+  function addLine(text, cls) {
+    var div = document.createElement('div');
+    div.className = 'term-line' + (cls ? ' term-line-' + cls : '');
+    div.textContent = text;
+    termOutput.appendChild(div);
+    termOutput.scrollTop = termOutput.scrollHeight;
+  }
+
+  function addHTML(html) {
+    var div = document.createElement('div');
+    div.className = 'term-line';
+    div.innerHTML = html;
+    termOutput.appendChild(div);
+    termOutput.scrollTop = termOutput.scrollHeight;
+  }
+
+  function typeLines(lines, delay, callback) {
+    var i = 0;
+    termInputLine.style.display = 'none';
+    function next() {
+      if (i >= lines.length) {
+        termInputLine.style.display = 'flex';
+        termInput.focus();
+        if (callback) callback();
+        return;
+      }
+      var line = lines[i];
+      addLine(line.text, line.cls);
+      i++;
+      setTimeout(next, delay || 60);
+    }
+    next();
+  }
+
+  // ---- TIMER ----
+  function startTimer() {
+    startTime = Date.now();
+    timerInterval = setInterval(function() {
+      var elapsed = Math.floor((Date.now() - startTime) / 1000);
+      var min = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      var sec = String(elapsed % 60).padStart(2, '0');
+      termTimerEl.textContent = min + ':' + sec;
+    }, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval);
+  }
+
+  function getTimeStr() {
+    if (!startTime) return '0s';
+    var elapsed = Math.floor((Date.now() - startTime) / 1000);
+    var min = Math.floor(elapsed / 60);
+    var sec = elapsed % 60;
+    return min > 0 ? min + 'm ' + sec + 's' : sec + 's';
+  }
+
+  function generateCode() {
+    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var code = '';
+    for (var i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return 'FREE-CONSULT-' + code;
+  }
+
+  // ---- GAME LOGIC ----
+  function showScore() {
+    addLine('[Score: ' + G.score + '/50 | Moves: ' + G.moves + ']', 'cyan');
+  }
+
+  function getRoomDesc(roomId) {
+    var room = rooms[roomId];
+    if (!room) return '';
+
+    // Dark room check
+    if (room.dark && !G.lampLit) {
+      return room.darkDesc || 'It is pitch dark!';
+    }
+
+    // Special descriptions
+    if (roomId === 'hall_mt_king' && !G.snakeDead) {
+      return room.descSnake || room.desc;
+    }
+    if (roomId === 'dragon_lair' && !G.dragonDead) {
+      return room.descDragon || room.desc;
+    }
+    return room.desc;
+  }
+
+  function lookRoom() {
+    var room = rooms[G.currentRoom];
+    addLine('');
+    addLine('--- ' + room.name + ' ---', 'bold');
+    addLine('');
+
+    var desc = getRoomDesc(G.currentRoom);
+    desc.split('\n').forEach(function(line) {
+      addLine(line);
+    });
+
+    // Show items on ground (only if room is visible)
+    if (!room.dark || G.lampLit) {
+      var groundItems = room.items.filter(function(id) {
+        return G.inventory.indexOf(id) === -1;
+      });
+      if (groundItems.length > 0) {
+        addLine('');
+        groundItems.forEach(function(id) {
+          var item = itemDefs[id];
+          if (id === 'chest' && G.chestOpened) {
+            addLine('There is an open treasure chest here (empty).', 'yellow');
+          } else if (id === 'sword' && !G.dragonDead && G.currentRoom === 'dragon_lair') {
+            addLine('A mighty sword gleams in the corner, behind the dragon.', 'yellow');
+          } else {
+            addLine('There is a ' + item.name + ' here.', 'yellow');
+          }
+        });
+      }
+
+      // Show exits
+      var exitDirs = Object.keys(room.exits);
+      addLine('');
+      addLine('Exits: ' + exitDirs.join(', '), 'dim');
+    }
+
+    addLine('');
+    showScore();
+  }
+
+  function doMove(dir) {
+    var room = rooms[G.currentRoom];
+
+    // Dark room - moving without lamp is fatal
+    if (room.dark && !G.lampLit && dir !== 'up' && dir !== 'north') {
+      addLine('');
+      addLine('You stumble in the darkness...', 'red');
+      addLine('You fell into a pit and broke every bone in your body!', 'red');
+      addLine('');
+      doDeath();
+      return;
+    }
+
+    var exits = room.exits;
+    if (!exits[dir]) {
+      addLine('You can\'t go that way.', 'red');
+      return;
+    }
+
+    var destId = exits[dir];
+
+    // Snake blocks south passage in Hall of Mountain King
+    if (G.currentRoom === 'hall_mt_king' && dir === 'south' && !G.snakeDead) {
+      addLine('The huge green snake hisses and blocks your way!', 'red');
+      addLine('You need something to fight it with.', 'yellow');
+      return;
+    }
+
+    // Dragon blocks passage in Dragon's Lair to treasure
+    if (G.currentRoom === 'dragon_lair' && dir === 'south' && !G.dragonDead) {
+      addLine('The dragon roars and blocks the passage with a wall of flame!', 'red');
+      addLine('You need to defeat it first.', 'yellow');
+      return;
+    }
+
+    G.currentRoom = destId;
+    G.moves++;
+
+    // Dark passage without lamp: warn once then kill on next move
+    var newRoom = rooms[destId];
+    if (newRoom.dark && !G.lampLit) {
+      addLine('');
+      addLine('--- ' + newRoom.name + ' ---', 'bold');
+      addLine('');
+      addLine('It is pitch dark. You are likely to fall into a pit!', 'red');
+      addLine('You should go back or find a light source.', 'yellow');
+      addLine('');
+      showScore();
+      return;
+    }
+
+    lookRoom();
+  }
+
+  function doTake(itemName) {
+    if (!itemName) {
+      addLine('Take what?', 'red');
+      return;
+    }
+
+    var room = rooms[G.currentRoom];
+    if (room.dark && !G.lampLit) {
+      addLine('It\'s too dark to see anything!', 'red');
+      return;
+    }
+
+    // Match item
+    var matchedId = null;
+    room.items.forEach(function(id) {
+      if (G.inventory.indexOf(id) !== -1) return;
+      var def = itemDefs[id];
+      if (id === itemName || def.name.toLowerCase().indexOf(itemName) !== -1) {
+        matchedId = id;
+      }
+    });
+
+    if (!matchedId) {
+      addLine('You don\'t see that here.', 'red');
+      return;
+    }
+
+    // Can't take the chest
+    if (matchedId === 'chest') {
+      addLine('The chest is far too heavy to carry. Try opening it instead.', 'yellow');
+      return;
+    }
+
+    // Sword behind dragon
+    if (matchedId === 'sword' && G.currentRoom === 'dragon_lair' && !G.dragonDead) {
+      addLine('The sword is behind the dragon! You can\'t reach it.', 'red');
+      return;
+    }
+
+    G.inventory.push(matchedId);
+    var def = itemDefs[matchedId];
+    addLine('Taken: ' + def.name + '.', 'green');
+
+    if (def.type === 'treasure') {
+      G.score += def.pts;
+      addLine('** You found a treasure worth ' + def.pts + ' points! **', 'green');
+      showScore();
+      checkWin();
+    }
+  }
+
+  function doDrop(itemName) {
+    if (!itemName) {
+      addLine('Drop what?', 'red');
+      return;
+    }
+    var matchedIdx = -1;
+    G.inventory.forEach(function(id, idx) {
+      var def = itemDefs[id];
+      if (id === itemName || def.name.toLowerCase().indexOf(itemName) !== -1) {
+        matchedIdx = idx;
+      }
+    });
+    if (matchedIdx === -1) {
+      addLine('You\'re not carrying that.', 'red');
+      return;
+    }
+    var dropped = G.inventory.splice(matchedIdx, 1)[0];
+    rooms[G.currentRoom].items.push(dropped);
+    addLine('Dropped: ' + itemDefs[dropped].name + '.', 'cyan');
+  }
+
+  function doUse(itemName) {
+    if (!itemName) {
+      addLine('Use what?', 'red');
+      return;
+    }
+
+    // Lamp
+    if (itemName === 'lamp' || itemName === 'brass lamp') {
+      if (G.inventory.indexOf('lamp') === -1) {
+        addLine('You\'re not carrying a lamp.', 'red');
+        return;
+      }
+      if (!G.lampLit) {
+        G.lampLit = true;
+        addLine('The lamp is now lit, casting a warm golden glow.', 'green');
+        // If we are in a dark room, show it now
+        if (rooms[G.currentRoom].dark) {
+          lookRoom();
+        }
+      } else {
+        G.lampLit = false;
+        addLine('You turn off the lamp. Darkness closes in.', 'yellow');
+      }
+      return;
+    }
+
+    // Sword
+    if (itemName === 'sword' || itemName === 'mighty sword') {
+      if (G.inventory.indexOf('sword') === -1) {
+        addLine('You\'re not carrying a sword.', 'red');
+        return;
+      }
+
+      if (G.currentRoom === 'hall_mt_king' && !G.snakeDead) {
+        G.snakeDead = true;
+        G.score += 10;
+        addLine('You swing the mighty sword at the snake!', 'green');
+        addLine('The snake recoils and slithers away into the darkness.', 'green');
+        addLine('** Snake defeated! +10 points **', 'green');
+        showScore();
+        checkWin();
+        return;
+      }
+
+      if (G.currentRoom === 'dragon_lair' && !G.dragonDead) {
+        G.dragonDead = true;
+        G.score += 10;
+        addLine('You charge the dragon with the mighty sword!', 'green');
+        addLine('With a tremendous blow, you strike the beast!', 'green');
+        addLine('The dragon lets out a final roar and collapses.', 'green');
+        addLine('** Dragon defeated! +10 points **', 'green');
+        showScore();
+        checkWin();
+        return;
+      }
+
+      addLine('You swing the sword dramatically. Nothing happens.', 'dim');
+      return;
+    }
+
+    // Keys
+    if (itemName === 'keys' || itemName === 'key') {
+      addLine('You can use the keys to open things. Try "open chest".', 'cyan');
+      return;
+    }
+
+    addLine('You can\'t use that here.', 'red');
+  }
+
+  function doOpen(itemName) {
+    if (!itemName) {
+      addLine('Open what?', 'red');
+      return;
+    }
+
+    if (itemName === 'chest' || itemName === 'treasure chest') {
+      if (G.currentRoom !== 'treasure_chamber') {
+        addLine('You don\'t see a chest here.', 'red');
+        return;
+      }
+      if (G.chestOpened) {
+        addLine('The chest is already open and empty.', 'dim');
+        return;
+      }
+      if (G.inventory.indexOf('keys') === -1) {
+        addLine('The chest is locked. You need keys to open it.', 'yellow');
+        return;
+      }
+      G.chestOpened = true;
+      G.score += 20;
+      addLine('You unlock the chest with the iron keys...', 'green');
+      addLine('Inside you find a magnificent hoard of ancient coins,', 'green');
+      addLine('precious jewels, and a golden crown!', 'green');
+      addLine('** Treasure chest opened! +20 points **', 'green');
+      showScore();
+      checkWin();
+      return;
+    }
+
+    addLine('You can\'t open that.', 'red');
+  }
+
+  function doInventory() {
+    if (G.inventory.length === 0) {
+      addLine('You are empty-handed.', 'dim');
+      return;
+    }
+    addLine('You are carrying:', 'cyan');
+    G.inventory.forEach(function(id) {
+      var def = itemDefs[id];
+      addLine('  - ' + def.name, 'yellow');
+    });
+    if (G.lampLit) {
+      addLine('  (lamp is lit)', 'dim');
+    }
+  }
+
+  function doHelp() {
+    addLine('');
+    addLine('=== COMMANDS ===', 'cyan');
+    addLine('Movement:  n/north, s/south, e/east, w/west', 'dim');
+    addLine('           u/up, d/down, enter, exit', 'dim');
+    addLine('Actions:   look, take [item], drop [item]', 'dim');
+    addLine('           use [item], open [item]', 'dim');
+    addLine('Info:      inventory (or i), score, help', 'dim');
+    addLine('Game:      restart, quit', 'dim');
+    addLine('');
+    addLine('Collect treasures and defeat foes to reach 50 points.', 'cyan');
+    addLine('Some areas are dark -- bring a lamp!', 'yellow');
+    addLine('');
+  }
+
+  function doDeath() {
+    addLine('    *** You have died ***', 'red');
+    addLine('');
+    addLine('You awaken back in the well house, dazed but alive.', 'cyan');
+    addLine('Your belongings have been scattered...', 'cyan');
+    addLine('');
+
+    // Reset position and inventory, keep score from treasures already scored
+    G.inventory = [];
+    G.lampLit = false;
+    G.currentRoom = 'building';
+    G.alive = true;
+
+    // Reset items to original rooms
+    Object.keys(rooms).forEach(function(rid) {
+      rooms[rid].items = [];
+    });
+    rooms.building.items = ['keys', 'lamp'];
+    if (G.score < 10 || !G.chestOpened) rooms.gold_room.items = ['gold'];
+    rooms.crystal_palace.items = [];
+    if (G.score < 10) rooms.crystal_palace.items.push('diamonds');
+    if (G.score < 10) rooms.crystal_palace.items.push('crystal_vase');
+    if (!G.dragonDead) rooms.dragon_lair.items = ['sword'];
+    else rooms.dragon_lair.items = [];
+    if (!G.chestOpened) rooms.treasure_chamber.items = ['chest'];
+
+    lookRoom();
+  }
+
+  function checkWin() {
+    if (G.score >= 50 && !G.hasWon) {
+      G.hasWon = true;
+      showWin();
+    }
+  }
+
+  function showWin() {
+    stopTimer();
+    var timeStr = getTimeStr();
+
+    addLine('');
+    winAscii.forEach(function(l) { addLine(l, 'ascii'); });
+    addLine('');
+    addLine('*** CONGRATULATIONS, ADVENTURER! ***', 'green');
+    addLine('');
+    addLine('You have mastered the Colossal Cave and proven yourself', 'green');
+    addLine('worthy of the title: MASTER ADVENTURER!', 'green');
+    addLine('');
+    addLine('Final Score: ' + G.score + '/50 | Moves: ' + G.moves + ' | Time: ' + timeStr, 'cyan');
+    addLine('');
+
+    var code = generateCode();
+    addLine('YOUR REWARD CODE:', 'yellow');
+    addLine('');
+    addLine('  >> ' + code + ' <<', 'green');
+    addLine('');
+    addLine('Show this code when booking to claim your', '');
+    addLine('FREE 30-minute consultation.', 'green');
+    addLine('');
+    addHTML('<a class="term-reward-link cursor-zone" href="#">Schedule Your Free Call &rarr;</a>');
+    addLine('');
+    addLine('The cave awaits further exploration. Type "help" for commands.', 'dim');
+    addLine('');
+
+    // Restart timer so they can keep exploring
+    startTimer();
+  }
+
+  // ---- DIRECTION ALIASES ----
+  var dirMap = {
+    n: 'north', s: 'south', e: 'east', w: 'west',
+    u: 'up', d: 'down',
+    north: 'north', south: 'south', east: 'east', west: 'west',
+    up: 'up', down: 'down',
+    enter: 'enter', exit: 'exit'
+  };
+
+  // ---- COMMAND PARSER ----
+  function handleInput(value) {
+    var raw = value.trim();
+    if (!raw) return;
+
+    commandHistory.push(raw);
+    historyIndex = commandHistory.length;
+
+    var val = raw.toLowerCase();
+    addLine('> ' + raw, 'dim');
+
+    // Meta commands
+    if (val === 'restart' || val === 'reset') {
+      resetGame();
+      return;
+    }
+    if (val === 'quit') {
+      addLine('Thanks for playing Colossal Cave Adventure!', 'cyan');
+      addLine('Type "restart" to play again.', 'dim');
+      return;
+    }
+    if (val === 'clear') {
+      termOutput.innerHTML = '';
+      return;
+    }
+    if (val === 'help' || val === '?') {
+      doHelp();
+      return;
+    }
+
+    // Game commands
+    if (val === 'look' || val === 'l') {
+      lookRoom();
+      return;
+    }
+    if (val === 'inventory' || val === 'i') {
+      doInventory();
+      return;
+    }
+    if (val === 'score') {
+      showScore();
+      return;
+    }
+
+    // Movement
+    if (dirMap[val]) {
+      doMove(dirMap[val]);
+      return;
+    }
+    // "go north" style
+    if (val.indexOf('go ') === 0) {
+      var goDir = val.substring(3).trim();
+      if (dirMap[goDir]) {
+        doMove(dirMap[goDir]);
+        return;
+      }
+    }
+
+    // Take / get
+    if (val.indexOf('take ') === 0 || val.indexOf('get ') === 0 || val.indexOf('pick up ') === 0) {
+      var takeItem = val.replace(/^(take |get |pick up )/, '').trim();
+      doTake(takeItem);
+      return;
+    }
+
+    // Drop
+    if (val.indexOf('drop ') === 0) {
+      var dropItem = val.substring(5).trim();
+      doDrop(dropItem);
+      return;
+    }
+
+    // Use
+    if (val.indexOf('use ') === 0 || val.indexOf('light ') === 0) {
+      var useItem = val.replace(/^(use |light )/, '').trim();
+      doUse(useItem);
+      return;
+    }
+
+    // Open
+    if (val.indexOf('open ') === 0 || val.indexOf('unlock ') === 0) {
+      var openItem = val.replace(/^(open |unlock )/, '').trim();
+      doOpen(openItem);
+      return;
+    }
+
+    // Kill / attack / fight
+    if (val.indexOf('kill ') === 0 || val.indexOf('attack ') === 0 || val.indexOf('fight ') === 0) {
+      if (G.inventory.indexOf('sword') !== -1) {
+        doUse('sword');
+      } else {
+        addLine('With what? Your bare hands?', 'red');
+      }
+      return;
+    }
+
+    // Examine
+    if (val.indexOf('examine ') === 0 || val.indexOf('x ') === 0) {
+      var exItem = val.replace(/^(examine |x )/, '').trim();
+      // Check inventory
+      var found = false;
+      G.inventory.forEach(function(id) {
+        var def = itemDefs[id];
+        if (id === exItem || def.name.toLowerCase().indexOf(exItem) !== -1) {
+          addLine(def.desc, 'yellow');
+          found = true;
+        }
+      });
+      // Check room
+      if (!found) {
+        var room = rooms[G.currentRoom];
+        room.items.forEach(function(id) {
+          if (G.inventory.indexOf(id) !== -1) return;
+          var def = itemDefs[id];
+          if (id === exItem || def.name.toLowerCase().indexOf(exItem) !== -1) {
+            addLine(def.desc, 'yellow');
+            found = true;
+          }
+        });
+      }
+      if (!found) {
+        addLine('You don\'t see that here.', 'red');
+      }
+      return;
+    }
+
+    addLine('I don\'t understand "' + raw + '". Type "help" for commands.', 'red');
+  }
+
+  // ---- GAME INIT ----
+  function resetGame() {
+    initGame();
+    commandHistory = [];
+    historyIndex = -1;
+    termOutput.innerHTML = '';
+    stopTimer();
+    termTimerEl.textContent = '00:00';
+
+    // Reset room items to defaults
+    rooms.outside.items = [];
+    rooms.building.items = ['keys', 'lamp'];
+    rooms.valley.items = [];
+    rooms.forest.items = [];
+    rooms.slit.items = [];
+    rooms.dark_passage.items = [];
+    rooms.hall_of_mists.items = [];
+    rooms.gold_room.items = ['gold'];
+    rooms.hall_mt_king.items = [];
+    rooms.crystal_palace.items = ['diamonds', 'crystal_vase'];
+    rooms.dragon_lair.items = ['sword'];
+    rooms.treasure_chamber.items = ['chest'];
+
+    startIntro();
+  }
+
+  function startIntro() {
+    var introLines = [];
+    asciiArt.forEach(function(l) { introLines.push({ text: l, cls: 'ascii' }); });
+    introLines.push({ text: '', cls: '' });
+    introLines.push({ text: 'Welcome to COLOSSAL CAVE ADVENTURE', cls: 'green' });
+    introLines.push({ text: 'A text adventure challenge by Khalil Drissi', cls: 'green' });
+    introLines.push({ text: '', cls: '' });
+    introLines.push({ text: 'Collect treasures and score 50+ points to win', cls: '' });
+    introLines.push({ text: 'a free consultation.', cls: '' });
+    introLines.push({ text: 'Type "help" for commands.', cls: 'dim' });
+
+    typeLines(introLines, 45, function() {
+      startTimer();
+      lookRoom();
+    });
+  }
+
+  // Open terminal
+  function openTerminal() {
+    if (termWin.classList.contains('open') && !termWinObj.minimized) {
+      WM.focus(termWinObj);
+      return;
+    }
+    if (termWinObj.minimized) {
+      WM.restore(termWinObj);
+      return;
+    }
+    termWin.classList.add('open');
+    WM.focus(termWinObj);
+    if (!gameStarted) {
+      gameStarted = true;
+      initGame();
+      startIntro();
+    }
+  }
+
+  termBtn.addEventListener('click', openTerminal);
+
+  // Input handling
+  termInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      var val = termInput.value;
+      termInput.value = '';
+      handleInput(val);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (commandHistory.length > 0 && historyIndex > 0) {
+        historyIndex--;
+        termInput.value = commandHistory[historyIndex];
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIndex < commandHistory.length - 1) {
+        historyIndex++;
+        termInput.value = commandHistory[historyIndex];
+      } else {
+        historyIndex = commandHistory.length;
+        termInput.value = '';
+      }
+    }
+  });
+
+  // Focus input when clicking terminal body
+  document.getElementById('termBody').addEventListener('click', function(e) {
+    if (e.target.tagName !== 'A') {
+      termInput.focus();
+    }
+  });
+})();
 </script>
 
 </body>

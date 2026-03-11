@@ -196,6 +196,8 @@ function render(template, data, lang) {
 
       <div class="connect-ctas">
         ${data.connect.buttons.map(b => `<a href="${b.url}" class="cta-btn">${b.label}</a>`).join('\n        ')}
+        <button class="cta-btn" id="openMessageBtn">Leave a Message &#8599;</button>
+        <button class="cta-btn cta-btn-flair" id="terminalChallengeBtn">Free Consult &#8599;</button>
       </div>
     </div>
 
@@ -345,19 +347,15 @@ function blogListingHTML(data, posts, lang) {
   const prefix = lang === 'fr' ? '/fr' : '';
   const otherLang = lang === 'fr' ? { label: 'EN', url: '/blog/' } : { label: 'FR', url: '/fr/blog/' };
 
-  const postCards = posts
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .map(p => `
-      <a href="${prefix}/blog/${p.slug}/" class="blog-card">
-        ${p.coverImage ? `<img src="${p.coverImage}" alt="" loading="lazy" />` : ''}
-        <div class="blog-card-body">
-          <div class="blog-card-date">${new Date(p.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
-          <h2>${p.title}</h2>
-          <p>${p.excerpt}</p>
-          <div class="blog-card-tags">${p.tags.map(t => `<span>${t}</span>`).join('')}</div>
-        </div>
-      </a>
-    `).join('\n');
+  const sortedPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const postsJSON = JSON.stringify(sortedPosts.map(p => ({
+    slug: p.slug,
+    title: p.title,
+    date: p.date,
+    excerpt: p.excerpt || '',
+    tags: p.tags || [],
+    coverImage: p.coverImage || '',
+  })));
 
   return `<!DOCTYPE html>
 <html lang="${lang}">
@@ -372,46 +370,149 @@ function blogListingHTML(data, posts, lang) {
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --bg: #121212; --fg: #ffffff; --fg-dim: rgba(255,255,255,0.6);
-      --fg-faint: rgba(255,255,255,0.22); --accent: #5e2bff;
+      --bg: #000000; --sidebar-bg: #1a1a1a; --fg: #ffffff; --fg-dim: rgba(255,255,255,0.6);
+      --fg-faint: rgba(255,255,255,0.22); --accent: #a882ff;
       --mono: 'DM Mono', monospace; --serif: 'Instrument Serif', serif;
     }
     html { -webkit-font-smoothing: antialiased; }
-    body { background: var(--bg); color: var(--fg); font-family: var(--mono); font-size: 13px; line-height: 1.6; }
+    body { background: var(--bg); color: var(--fg); font-family: var(--mono); font-size: 13px; line-height: 1.6; overflow: hidden; height: 100vh; }
     a { color: inherit; text-decoration: none; }
-    img { display: block; max-width: 100%; }
+
     .blog-header {
       display: flex; justify-content: space-between; align-items: center;
       padding: 20px 40px; border-bottom: 1px solid rgba(255,255,255,0.08);
+      flex-shrink: 0; background: var(--bg);
     }
     .blog-header-left { display: flex; align-items: center; gap: 16px; }
     .blog-header-left a { font-size: 12px; color: var(--fg-dim); }
+    .blog-header-left a:hover { color: #fff; }
     .blog-header h1 { font-family: var(--serif); font-size: 24px; font-weight: 400; font-style: italic; }
     .blog-header-nav { display: flex; gap: 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
     .blog-header-nav a {
       color: var(--fg-dim); padding: 4px 10px; border: 1px solid var(--fg-faint); border-radius: 4px;
+      transition: border-color 0.2s, color 0.2s;
     }
     .blog-header-nav a:hover { border-color: var(--accent); color: #fff; }
-    .blog-grid { max-width: 900px; margin: 60px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 32px; }
-    .blog-card {
-      display: flex; gap: 24px; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px;
-      overflow: hidden; transition: border-color 0.2s;
+
+    .main-layout {
+      display: flex; height: calc(100vh - 65px); overflow: hidden;
     }
-    .blog-card:hover { border-color: var(--accent); }
-    .blog-card img { width: 280px; height: 180px; object-fit: cover; flex-shrink: 0; }
-    .blog-card-body { padding: 20px; display: flex; flex-direction: column; gap: 8px; }
-    .blog-card-date { font-size: 11px; color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.04em; }
-    .blog-card h2 { font-family: var(--serif); font-size: 20px; font-weight: 400; font-style: italic; }
-    .blog-card p { color: var(--fg-dim); font-size: 12px; line-height: 1.5; }
-    .blog-card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
-    .blog-card-tags span {
-      font-size: 10px; padding: 2px 8px; border: 1px solid var(--fg-faint); border-radius: 3px;
-      color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.03em;
+
+    /* Graph panel */
+    .graph-panel {
+      flex: 7; position: relative; overflow: hidden; background: #000000;
     }
-    @media (max-width: 640px) {
+    .graph-panel canvas {
+      display: block; width: 100%; height: 100%;
+    }
+    .graph-hint {
+      position: absolute; bottom: 16px; left: 16px;
+      font-size: 10px; color: rgba(255,255,255,0.2);
+      pointer-events: none; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    /* Hover card */
+    .hover-card {
+      position: fixed; pointer-events: none; z-index: 100;
+      background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; padding: 14px 16px; max-width: 300px; min-width: 200px;
+      opacity: 0; transition: opacity 0.18s ease;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    }
+    .hover-card.visible { opacity: 1; }
+    .hover-card-img {
+      width: 160px; height: 90px; object-fit: cover; border-radius: 4px; margin-bottom: 10px;
+    }
+    .hover-card-title {
+      font-family: var(--serif); font-size: 16px; font-style: italic; margin-bottom: 4px;
+    }
+    .hover-card-date { font-size: 10px; color: var(--fg-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .hover-card-excerpt {
+      font-size: 11px; color: var(--fg-dim); line-height: 1.5; margin-bottom: 8px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .hover-card-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+    .hover-card-tags span {
+      font-size: 9px; padding: 1px 6px; border: 1px solid rgba(255,255,255,0.15); border-radius: 3px;
+      color: var(--fg-dim); text-transform: uppercase;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      flex: 3; display: flex; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.08);
+      background: var(--sidebar-bg); min-width: 260px; max-width: 380px;
+    }
+    .sidebar-search {
+      padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+    }
+    .sidebar-search input {
+      width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px; padding: 8px 12px; color: var(--fg); font-family: var(--mono);
+      font-size: 12px; outline: none; transition: border-color 0.2s;
+    }
+    .sidebar-search input::placeholder { color: rgba(255,255,255,0.3); }
+    .sidebar-search input:focus { border-color: var(--accent); }
+
+    .sidebar-tags {
+      padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; flex-wrap: wrap; gap: 6px; flex-shrink: 0;
+    }
+    .tag-pill {
+      font-size: 10px; padding: 3px 10px; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
+      color: var(--fg-dim); cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+      letter-spacing: 0.03em; background: transparent; font-family: var(--mono);
+    }
+    .tag-pill:hover { border-color: var(--accent); color: #fff; }
+    .tag-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .active-filters {
+      padding: 8px 16px; display: none; align-items: center; gap: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+    }
+    .active-filters.visible { display: flex; }
+    .active-filters span { font-size: 10px; color: var(--fg-dim); }
+    .clear-filters {
+      font-size: 10px; color: var(--accent); cursor: pointer; background: none;
+      border: none; font-family: var(--mono); padding: 2px 6px;
+    }
+    .clear-filters:hover { text-decoration: underline; }
+
+    .sidebar-list {
+      flex: 1; overflow-y: auto; padding: 8px 0;
+    }
+    .sidebar-list::-webkit-scrollbar { width: 3px; }
+    .sidebar-list::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+
+    .post-item {
+      display: block; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04);
+      cursor: pointer; transition: background 0.15s;
+    }
+    .post-item:hover { background: rgba(255,255,255,0.04); }
+    .post-item-title {
+      font-family: var(--serif); font-size: 14px; font-style: italic; margin-bottom: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .post-item-date { font-size: 10px; color: var(--fg-dim); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .post-item-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+    .post-item-tags span {
+      font-size: 9px; padding: 1px 6px; border: 1px solid rgba(255,255,255,0.1); border-radius: 3px;
+      color: rgba(255,255,255,0.4); text-transform: uppercase;
+    }
+
+    .sidebar-count {
+      padding: 10px 16px; border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase;
+      letter-spacing: 0.04em; flex-shrink: 0; text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      body { overflow-y: auto; height: auto; }
+      .main-layout { flex-direction: column; height: auto; }
+      .graph-panel { height: 50vh; flex: none; }
+      .sidebar { flex: none; max-width: none; min-width: 0; border-left: none; border-top: 1px solid rgba(255,255,255,0.08); }
+      .sidebar-list { max-height: 60vh; }
       .blog-header { padding: 16px 20px; }
-      .blog-card { flex-direction: column; }
-      .blog-card img { width: 100%; height: 200px; }
     }
   </style>
 </head>
@@ -426,9 +527,638 @@ function blogListingHTML(data, posts, lang) {
       <a href="${otherLang.url}">${otherLang.label}</a>
     </nav>
   </header>
-  <div class="blog-grid">
-    ${postCards}
+
+  <div class="main-layout">
+    <div class="graph-panel">
+      <canvas id="graphCanvas"></canvas>
+      <div class="graph-hint">${lang === 'fr' ? 'Glisser pour d\\u00e9placer \\u2022 Molette pour zoomer' : 'Drag to move \\u2022 Scroll to zoom'}</div>
+    </div>
+    <aside class="sidebar">
+      <div class="sidebar-search">
+        <input type="text" id="searchInput" placeholder="${lang === 'fr' ? 'Rechercher...' : 'Search posts...'}" />
+      </div>
+      <div class="sidebar-tags" id="tagFilters"></div>
+      <div class="active-filters" id="activeFilters">
+        <span id="filterLabel"></span>
+        <button class="clear-filters" id="clearFilters">${lang === 'fr' ? 'Effacer' : 'Clear'}</button>
+      </div>
+      <div class="sidebar-list" id="postList"></div>
+      <div class="sidebar-count" id="postCount"></div>
+    </aside>
   </div>
+
+  <div class="hover-card" id="hoverCard">
+    <img class="hover-card-img" id="hoverImg" src="" alt="" />
+    <div class="hover-card-title" id="hoverTitle"></div>
+    <div class="hover-card-date" id="hoverDate"></div>
+    <div class="hover-card-excerpt" id="hoverExcerpt"></div>
+    <div class="hover-card-tags" id="hoverTags"></div>
+  </div>
+
+  <script>
+  const POSTS = ${postsJSON};
+  const PREFIX = '${prefix}';
+  const LANG = '${lang}';
+
+  // --- Build edges from shared tags ---
+  const edges = [];
+  for (let i = 0; i < POSTS.length; i++) {
+    for (let j = i + 1; j < POSTS.length; j++) {
+      const shared = POSTS[i].tags.filter(t => POSTS[j].tags.includes(t));
+      if (shared.length > 0) {
+        edges.push({ source: i, target: j, weight: shared.length });
+      }
+    }
+  }
+
+  // --- Collect all tags ---
+  const allTags = [...new Set(POSTS.flatMap(p => p.tags))].sort();
+
+  // --- Nodes ---
+  const NODE_RADIUS = 4;
+  const NODE_COLOR = '#a882ff';
+  const NODE_COLOR_R = 168, NODE_COLOR_G = 130, NODE_COLOR_B = 255;
+
+  const nodes = POSTS.map((p, i) => {
+    const angle = (i / Math.max(POSTS.length, 1)) * Math.PI * 2;
+    const spread = 100 + Math.random() * 60;
+    return {
+      x: Math.cos(angle) * spread + (Math.random() - 0.5) * 40,
+      y: Math.sin(angle) * spread + (Math.random() - 0.5) * 40,
+      vx: 0, vy: 0,
+      postIndex: i,
+      pinned: false,
+      // Breathing phase offset per node
+      breathPhase: Math.random() * Math.PI * 2,
+    };
+  });
+
+  // --- Canvas setup ---
+  const canvas = document.getElementById('graphCanvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  let camX = 0, camY = 0, camZoom = 1;
+  let hoveredNode = null, dragNode = null, dragOffset = { x: 0, y: 0 };
+  let isPanning = false, panStart = { x: 0, y: 0 }, camStart = { x: 0, y: 0 };
+  let sidebarHoverIndex = -1;
+  let focusedIndex = -1; // from sidebar click highlight
+
+  // Filter state
+  let activeTagFilters = new Set();
+  let searchQuery = '';
+  let visibleIndices = new Set(POSTS.map((_, i) => i));
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    W = rect.width; H = rect.height;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // --- Coordinate transforms ---
+  function screenToWorld(sx, sy) {
+    return { x: (sx - W / 2) / camZoom + camX, y: (sy - H / 2) / camZoom + camY };
+  }
+  function worldToScreen(wx, wy) {
+    return { x: (wx - camX) * camZoom + W / 2, y: (wy - camY) * camZoom + H / 2 };
+  }
+
+  // --- Physics ---
+  const REPULSION = 4000;
+  const ATTRACTION = 0.004;
+  const CENTER_GRAVITY = 0.008;
+  const DAMPING = 0.92;
+  const MIN_DIST = 30;
+  const BREATHING_STRENGTH = 0.03; // tiny random drift force
+  let simAlpha = 1;
+  let simTime = 0;
+
+  function simulate() {
+    simTime++;
+
+    // Keep a minimum alpha for breathing — never fully stop
+    const effectiveAlpha = Math.max(simAlpha, 0.005);
+    if (simAlpha > 0.001) simAlpha *= 0.995;
+
+    for (let i = 0; i < nodes.length; i++) {
+      if (nodes[i].pinned) continue;
+
+      // Center gravity
+      nodes[i].vx -= nodes[i].x * CENTER_GRAVITY * effectiveAlpha;
+      nodes[i].vy -= nodes[i].y * CENTER_GRAVITY * effectiveAlpha;
+
+      // Subtle breathing / drift force (always active)
+      const bp = nodes[i].breathPhase;
+      const bx = Math.sin(simTime * 0.008 + bp) * BREATHING_STRENGTH;
+      const by = Math.cos(simTime * 0.006 + bp * 1.3) * BREATHING_STRENGTH;
+      nodes[i].vx += bx;
+      nodes[i].vy += by;
+
+      // Repulsion
+      for (let j = i + 1; j < nodes.length; j++) {
+        let dx = nodes[j].x - nodes[i].x;
+        let dy = nodes[j].y - nodes[i].y;
+        let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        if (dist < MIN_DIST) dist = MIN_DIST;
+        const force = REPULSION * effectiveAlpha / (dist * dist);
+        const fx = (dx / dist) * force;
+        const fy = (dy / dist) * force;
+        nodes[i].vx -= fx; nodes[i].vy -= fy;
+        if (!nodes[j].pinned) { nodes[j].vx += fx; nodes[j].vy += fy; }
+      }
+    }
+
+    // Attraction along edges
+    for (const e of edges) {
+      const a = nodes[e.source], b = nodes[e.target];
+      let dx = b.x - a.x, dy = b.y - a.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const force = dist * ATTRACTION * e.weight * effectiveAlpha;
+      const fx = (dx / dist) * force;
+      const fy = (dy / dist) * force;
+      if (!a.pinned) { a.vx += fx; a.vy += fy; }
+      if (!b.pinned) { b.vx -= fx; b.vy -= fy; }
+    }
+
+    // Apply velocity with damping
+    for (const n of nodes) {
+      if (n.pinned) continue;
+      n.vx *= DAMPING; n.vy *= DAMPING;
+      n.x += n.vx; n.y += n.vy;
+    }
+  }
+
+  // --- Drawing ---
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    // Pure black background
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, W, H);
+
+    const isFiltered = activeTagFilters.size > 0 || searchQuery.length > 0;
+    const hIdx = hoveredNode !== null ? hoveredNode.postIndex : sidebarHoverIndex;
+    const connectedToHover = new Set();
+    if (hIdx >= 0) {
+      connectedToHover.add(hIdx);
+      for (const e of edges) {
+        if (e.source === hIdx) connectedToHover.add(e.target);
+        if (e.target === hIdx) connectedToHover.add(e.source);
+      }
+    }
+
+    // Draw edges — very thin, barely visible
+    for (const e of edges) {
+      const a = nodes[e.source], b = nodes[e.target];
+      const sa = worldToScreen(a.x, a.y), sb = worldToScreen(b.x, b.y);
+
+      let alpha, width;
+
+      if (hIdx >= 0) {
+        if ((e.source === hIdx || e.target === hIdx)) {
+          // Edge connects to hovered node — highlight purple
+          alpha = 0.6;
+          width = 1;
+          ctx.strokeStyle = 'rgba(' + NODE_COLOR_R + ',' + NODE_COLOR_G + ',' + NODE_COLOR_B + ',' + alpha + ')';
+        } else {
+          // All other edges — near invisible
+          alpha = 0.02;
+          width = 0.5;
+          ctx.strokeStyle = 'rgba(255,255,255,' + alpha + ')';
+        }
+      } else if (isFiltered) {
+        if (!visibleIndices.has(e.source) || !visibleIndices.has(e.target)) {
+          alpha = 0.02;
+        } else {
+          alpha = 0.08;
+        }
+        width = 0.5;
+        ctx.strokeStyle = 'rgba(255,255,255,' + alpha + ')';
+      } else {
+        // Default: barely visible gray
+        alpha = 0.08;
+        width = 0.5;
+        ctx.strokeStyle = 'rgba(255,255,255,' + alpha + ')';
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(sa.x, sa.y);
+      ctx.lineTo(sb.x, sb.y);
+      ctx.lineWidth = width;
+      ctx.stroke();
+    }
+
+    // Draw nodes
+    const showAllLabels = camZoom > 1.5;
+
+    for (let i = 0; i < nodes.length; i++) {
+      const n = nodes[i];
+      const s = worldToScreen(n.x, n.y);
+      const isHovered = hoveredNode === n || sidebarHoverIndex === i;
+      const isFocused = focusedIndex === i;
+      const isConnected = connectedToHover.has(i);
+      const isVisible = visibleIndices.has(i);
+
+      // Determine node opacity
+      let nodeAlpha = 1;
+      if (hIdx >= 0) {
+        nodeAlpha = isConnected ? 1 : 0.1;
+      } else if (isFiltered) {
+        nodeAlpha = isVisible ? 1 : 0.1;
+      }
+
+      // Determine radius
+      const r = isHovered ? 6 : NODE_RADIUS;
+      const screenR = r * camZoom;
+
+      // Glow — radial gradient halo
+      const glowR = r * 3;
+      const screenGlowR = glowR * camZoom;
+      let glowAlpha = 0.15;
+      if (isHovered) glowAlpha = 0.4;
+      else if (hIdx >= 0 && !isConnected) glowAlpha = 0;
+      else if (isFiltered && !isVisible) glowAlpha = 0;
+
+      if (glowAlpha > 0) {
+        const grad = ctx.createRadialGradient(s.x, s.y, screenR * 0.3, s.x, s.y, screenGlowR);
+        grad.addColorStop(0, 'rgba(' + NODE_COLOR_R + ',' + NODE_COLOR_G + ',' + NODE_COLOR_B + ',' + (glowAlpha * nodeAlpha) + ')');
+        grad.addColorStop(1, 'rgba(' + NODE_COLOR_R + ',' + NODE_COLOR_G + ',' + NODE_COLOR_B + ',0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, screenGlowR, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Node circle
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, screenR, 0, Math.PI * 2);
+      ctx.globalAlpha = nodeAlpha;
+      if (isFocused) {
+        ctx.fillStyle = '#ffffff';
+      } else {
+        ctx.fillStyle = NODE_COLOR;
+      }
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Label logic:
+      // Hidden by default. Show on hover for hovered node + neighbors.
+      // When zoomed past 1.5x, show all at reduced opacity.
+      let showLabel = false;
+      let labelAlpha = 0;
+
+      if (isHovered) {
+        showLabel = true;
+        labelAlpha = 1;
+      } else if (hIdx >= 0 && isConnected) {
+        showLabel = true;
+        labelAlpha = 0.7;
+      } else if (showAllLabels) {
+        showLabel = true;
+        labelAlpha = 0.35 * nodeAlpha;
+      }
+
+      if (showLabel) {
+        const label = POSTS[i].title.length > 24 ? POSTS[i].title.slice(0, 22) + '...' : POSTS[i].title;
+        ctx.globalAlpha = labelAlpha;
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '10px "DM Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, s.x, s.y + screenR + 12);
+        ctx.globalAlpha = 1;
+      }
+    }
+  }
+
+  // --- Animation loop ---
+  function loop() {
+    simulate();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  // --- Mouse interactions ---
+  function getNodeAt(sx, sy) {
+    const w = screenToWorld(sx, sy);
+    // Use a generous hit area: node radius + some padding, in world coords
+    const hitPad = 6 / camZoom;
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      const n = nodes[i];
+      const dx = w.x - n.x, dy = w.y - n.y;
+      const hitR = NODE_RADIUS + hitPad;
+      if (dx * dx + dy * dy < hitR * hitR) return n;
+    }
+    return null;
+  }
+
+  const hoverCard = document.getElementById('hoverCard');
+  const hoverImg = document.getElementById('hoverImg');
+  const hoverTitle = document.getElementById('hoverTitle');
+  const hoverDate = document.getElementById('hoverDate');
+  const hoverExcerpt = document.getElementById('hoverExcerpt');
+  const hoverTags = document.getElementById('hoverTags');
+
+  function showHoverCard(node, mx, my) {
+    const p = POSTS[node.postIndex];
+    if (p.coverImage) { hoverImg.src = p.coverImage; hoverImg.style.display = 'block'; }
+    else { hoverImg.style.display = 'none'; }
+    hoverTitle.textContent = p.title;
+    const locale = LANG === 'fr' ? 'fr-FR' : 'en-US';
+    hoverDate.textContent = new Date(p.date).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+    const exc = p.excerpt.length > 120 ? p.excerpt.slice(0, 117) + '...' : p.excerpt;
+    hoverExcerpt.textContent = exc;
+    hoverTags.innerHTML = p.tags.map(t => '<span>' + t + '</span>').join('');
+
+    let left = mx + 16, top = my - 20;
+    if (left + 310 > window.innerWidth) left = mx - 320;
+    if (top + 250 > window.innerHeight) top = window.innerHeight - 260;
+    if (top < 10) top = 10;
+    hoverCard.style.left = left + 'px';
+    hoverCard.style.top = top + 'px';
+    hoverCard.classList.add('visible');
+  }
+
+  function hideHoverCard() {
+    hoverCard.classList.remove('visible');
+  }
+
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+
+    if (dragNode) {
+      const w = screenToWorld(mx, my);
+      dragNode.x = w.x + dragOffset.x;
+      dragNode.y = w.y + dragOffset.y;
+      dragNode.vx = 0; dragNode.vy = 0;
+      simAlpha = Math.max(simAlpha, 0.1);
+      return;
+    }
+    if (isPanning) {
+      camX = camStart.x - (e.clientX - panStart.x) / camZoom;
+      camY = camStart.y - (e.clientY - panStart.y) / camZoom;
+      return;
+    }
+
+    const node = getNodeAt(mx, my);
+    if (node !== hoveredNode) {
+      hoveredNode = node;
+      canvas.style.cursor = node ? 'pointer' : 'grab';
+      if (node) showHoverCard(node, e.clientX, e.clientY);
+      else hideHoverCard();
+    } else if (node) {
+      showHoverCard(node, e.clientX, e.clientY);
+    }
+  });
+
+  canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    const node = getNodeAt(mx, my);
+    if (node) {
+      dragNode = node;
+      node.pinned = true;
+      const w = screenToWorld(mx, my);
+      dragOffset.x = node.x - w.x;
+      dragOffset.y = node.y - w.y;
+      canvas.style.cursor = 'grabbing';
+      hideHoverCard();
+    } else {
+      isPanning = true;
+      panStart = { x: e.clientX, y: e.clientY };
+      camStart = { x: camX, y: camY };
+      canvas.style.cursor = 'grabbing';
+    }
+  });
+
+  window.addEventListener('mouseup', (e) => {
+    if (dragNode) {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      const w = screenToWorld(mx, my);
+      const dx = (dragNode.x - dragOffset.x) - w.x;
+      const dy = (dragNode.y - dragOffset.y) - w.y;
+      if (Math.abs(dx) < 3 && Math.abs(dy) < 3) {
+        const p = POSTS[dragNode.postIndex];
+        window.location.href = PREFIX + '/blog/' + p.slug + '/';
+      }
+      dragNode.pinned = false;
+      dragNode = null;
+    }
+    if (isPanning) isPanning = false;
+    canvas.style.cursor = hoveredNode ? 'pointer' : 'grab';
+  });
+
+  canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    const w = screenToWorld(mx, my);
+    const factor = e.deltaY < 0 ? 1.08 : 0.92;
+    camZoom = Math.max(0.15, Math.min(5, camZoom * factor));
+    camX = w.x - (mx - W / 2) / camZoom;
+    camY = w.y - (my - H / 2) / camZoom;
+  }, { passive: false });
+
+  canvas.addEventListener('mouseleave', () => {
+    hoveredNode = null;
+    hideHoverCard();
+  });
+
+  // --- Touch support ---
+  let lastTouchDist = 0;
+  let touchStartNode = null;
+
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const mx = t.clientX - rect.left, my = t.clientY - rect.top;
+      const node = getNodeAt(mx, my);
+      if (node) {
+        dragNode = node;
+        touchStartNode = node;
+        node.pinned = true;
+        const w = screenToWorld(mx, my);
+        dragOffset.x = node.x - w.x;
+        dragOffset.y = node.y - w.y;
+      } else {
+        isPanning = true;
+        panStart = { x: t.clientX, y: t.clientY };
+        camStart = { x: camX, y: camY };
+      }
+    } else if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      lastTouchDist = Math.sqrt(dx * dx + dy * dy);
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const mx = t.clientX - rect.left, my = t.clientY - rect.top;
+      if (dragNode) {
+        const w = screenToWorld(mx, my);
+        dragNode.x = w.x + dragOffset.x;
+        dragNode.y = w.y + dragOffset.y;
+        dragNode.vx = 0; dragNode.vy = 0;
+        simAlpha = Math.max(simAlpha, 0.1);
+      } else if (isPanning) {
+        camX = camStart.x - (t.clientX - panStart.x) / camZoom;
+        camY = camStart.y - (t.clientY - panStart.y) / camZoom;
+      }
+    } else if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (lastTouchDist > 0) {
+        const factor = dist / lastTouchDist;
+        const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        const rect = canvas.getBoundingClientRect();
+        const mx = cx - rect.left, my = cy - rect.top;
+        const w = screenToWorld(mx, my);
+        camZoom = Math.max(0.15, Math.min(5, camZoom * factor));
+        camX = w.x - (mx - W / 2) / camZoom;
+        camY = w.y - (my - H / 2) / camZoom;
+      }
+      lastTouchDist = dist;
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', (e) => {
+    if (dragNode) {
+      if (touchStartNode === dragNode && e.changedTouches.length === 1) {
+        const t = e.changedTouches[0];
+        const rect = canvas.getBoundingClientRect();
+        const mx = t.clientX - rect.left, my = t.clientY - rect.top;
+        const w = screenToWorld(mx, my);
+        const ddx = (dragNode.x - dragOffset.x) - w.x;
+        const ddy = (dragNode.y - dragOffset.y) - w.y;
+        if (Math.abs(ddx) < 8 && Math.abs(ddy) < 8) {
+          const p = POSTS[dragNode.postIndex];
+          window.location.href = PREFIX + '/blog/' + p.slug + '/';
+        }
+      }
+      dragNode.pinned = false;
+      dragNode = null;
+      touchStartNode = null;
+    }
+    isPanning = false;
+    lastTouchDist = 0;
+  });
+
+  // --- Sidebar: Tags ---
+  const tagFilters = document.getElementById('tagFilters');
+  allTags.forEach(tag => {
+    const pill = document.createElement('button');
+    pill.className = 'tag-pill';
+    pill.textContent = tag;
+    pill.addEventListener('click', () => {
+      if (activeTagFilters.has(tag)) activeTagFilters.delete(tag);
+      else activeTagFilters.add(tag);
+      pill.classList.toggle('active');
+      applyFilters();
+    });
+    tagFilters.appendChild(pill);
+  });
+
+  // --- Sidebar: Search ---
+  const searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', () => {
+    searchQuery = searchInput.value.toLowerCase().trim();
+    applyFilters();
+  });
+
+  // --- Sidebar: Active filters bar ---
+  const activeFiltersEl = document.getElementById('activeFilters');
+  const filterLabel = document.getElementById('filterLabel');
+  const clearFilters = document.getElementById('clearFilters');
+  clearFilters.addEventListener('click', () => {
+    activeTagFilters.clear();
+    searchQuery = '';
+    searchInput.value = '';
+    document.querySelectorAll('.tag-pill').forEach(p => p.classList.remove('active'));
+    applyFilters();
+  });
+
+  // --- Sidebar: Post list ---
+  const postListEl = document.getElementById('postList');
+  const postCountEl = document.getElementById('postCount');
+
+  function renderPostList() {
+    postListEl.innerHTML = '';
+    const locale = LANG === 'fr' ? 'fr-FR' : 'en-US';
+    const indices = [...visibleIndices].sort((a, b) => new Date(POSTS[b].date) - new Date(POSTS[a].date));
+    for (const i of indices) {
+      const p = POSTS[i];
+      const item = document.createElement('div');
+      item.className = 'post-item';
+      item.innerHTML = '<div class="post-item-title">' + p.title + '</div>' +
+        '<div class="post-item-date">' + new Date(p.date).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) + '</div>' +
+        '<div class="post-item-tags">' + p.tags.map(t => '<span>' + t + '</span>').join('') + '</div>';
+      item.addEventListener('click', () => {
+        window.location.href = PREFIX + '/blog/' + p.slug + '/';
+      });
+      item.addEventListener('mouseenter', () => {
+        sidebarHoverIndex = i;
+        focusedIndex = i;
+      });
+      item.addEventListener('mouseleave', () => {
+        sidebarHoverIndex = -1;
+        focusedIndex = -1;
+      });
+      postListEl.appendChild(item);
+    }
+
+    const total = POSTS.length;
+    const shown = indices.length;
+    postCountEl.textContent = shown === total
+      ? total + ' ' + (LANG === 'fr' ? 'articles' : 'posts')
+      : shown + ' / ' + total;
+  }
+
+  function applyFilters() {
+    visibleIndices.clear();
+    for (let i = 0; i < POSTS.length; i++) {
+      const p = POSTS[i];
+      let match = true;
+      if (activeTagFilters.size > 0) {
+        match = [...activeTagFilters].some(t => p.tags.includes(t));
+      }
+      if (match && searchQuery) {
+        match = p.title.toLowerCase().includes(searchQuery) ||
+                p.excerpt.toLowerCase().includes(searchQuery) ||
+                p.tags.some(t => t.toLowerCase().includes(searchQuery));
+      }
+      if (match) visibleIndices.add(i);
+    }
+
+    const hasFilters = activeTagFilters.size > 0 || searchQuery.length > 0;
+    activeFiltersEl.classList.toggle('visible', hasFilters);
+    if (hasFilters) {
+      const parts = [];
+      if (searchQuery) parts.push('"' + searchQuery + '"');
+      if (activeTagFilters.size) parts.push([...activeTagFilters].join(', '));
+      filterLabel.textContent = parts.join(' + ');
+    }
+
+    renderPostList();
+    simAlpha = Math.max(simAlpha, 0.05);
+  }
+
+  // --- Init ---
+  applyFilters();
+  canvas.style.cursor = 'grab';
+  loop();
+  </script>
 </body>
 </html>`;
 }
