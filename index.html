@@ -1497,8 +1497,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 14px;
-      padding: 20px 0;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px 0;
       flex: 1;
     }
     .msg-record-btn {
@@ -1582,35 +1583,83 @@
     }
     .msg-video-live.active { display: block; }
 
-    /* Drop zone */
+    /* File drop zone */
     .msg-attach {
       display: flex;
-      align-items: center;
-      gap: 8px;
+      flex-direction: column;
+      gap: 6px;
       margin-bottom: 10px;
     }
-    .msg-attach-btn {
+    .msg-dropzone {
+      border: 1px dashed rgba(255,255,255,0.12);
+      border-radius: 6px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      background: rgba(255,255,255,0.02);
+    }
+    .msg-dropzone:hover,
+    .msg-dropzone.dragover {
+      border-color: var(--accent);
+      background: rgba(168,130,255,0.04);
+    }
+    .msg-dropzone-icon {
+      font-size: 18px;
+      margin-bottom: 6px;
+      opacity: 0.4;
+    }
+    .msg-dropzone-text {
       font-family: var(--mono);
       font-size: 9px;
-      color: var(--fg-dim);
-      cursor: pointer;
-      padding: 4px 8px;
-      border: 1px dashed rgba(255,255,255,0.15);
-      border-radius: 3px;
-      transition: border-color 0.2s, color 0.2s;
       text-transform: uppercase;
       letter-spacing: 0.04em;
+      color: var(--fg-dim);
     }
-    .msg-attach-btn:hover {
-      border-color: var(--accent);
+    .msg-dropzone-text span {
       color: var(--accent);
+      cursor: pointer;
     }
-    .msg-file-name {
+    .msg-file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .msg-file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 8px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .msg-file-item-name {
       font-family: var(--mono);
       font-size: 9px;
-      color: var(--accent);
+      color: var(--fg);
       word-break: break-all;
+      flex: 1;
     }
+    .msg-file-item-size {
+      font-family: var(--mono);
+      font-size: 8px;
+      color: var(--fg-dim);
+      margin: 0 8px;
+      flex-shrink: 0;
+    }
+    .msg-file-item-remove {
+      font-size: 12px;
+      color: var(--fg-dim);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0 2px;
+      line-height: 1;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .msg-file-item-remove:hover { color: #ff5f57; }
     .msg-file-input { display: none; }
 
     /* Status feedback */
@@ -1971,8 +2020,12 @@
       <textarea placeholder="Write your message..." class="msg-text"></textarea>
     </div>
     <div class="msg-attach">
-      <label class="msg-attach-btn">&#128206; Attach file <input type="file" class="msg-file-input" /></label>
-      <span class="msg-file-name"></span>
+      <div class="msg-dropzone">
+        <div class="msg-dropzone-icon">&#8593;</div>
+        <div class="msg-dropzone-text">Drop files here or <span>browse</span></div>
+        <input type="file" class="msg-file-input" multiple />
+      </div>
+      <div class="msg-file-list"></div>
     </div>
     <button class="msg-send-btn" data-type="text">Send Message</button>
     <div class="msg-status"></div>
@@ -2001,8 +2054,12 @@
       <textarea placeholder="Add context to your recording..." class="msg-text" rows="2"></textarea>
     </div>
     <div class="msg-attach">
-      <label class="msg-attach-btn">&#128206; Attach file <input type="file" class="msg-file-input" /></label>
-      <span class="msg-file-name"></span>
+      <div class="msg-dropzone">
+        <div class="msg-dropzone-icon">&#8593;</div>
+        <div class="msg-dropzone-text">Drop files here or <span>browse</span></div>
+        <input type="file" class="msg-file-input" multiple />
+      </div>
+      <div class="msg-file-list"></div>
     </div>
     <button class="msg-send-btn" data-type="audio" disabled>Send Recording</button>
     <div class="msg-status"></div>
@@ -2032,8 +2089,12 @@
       <textarea placeholder="Add context to your recording..." class="msg-text" rows="2"></textarea>
     </div>
     <div class="msg-attach">
-      <label class="msg-attach-btn">&#128206; Attach file <input type="file" class="msg-file-input" /></label>
-      <span class="msg-file-name"></span>
+      <div class="msg-dropzone">
+        <div class="msg-dropzone-icon">&#8593;</div>
+        <div class="msg-dropzone-text">Drop files here or <span>browse</span></div>
+        <input type="file" class="msg-file-input" multiple />
+      </div>
+      <div class="msg-file-list"></div>
     </div>
     <button class="msg-send-btn" data-type="video" disabled>Send Recording</button>
     <div class="msg-status"></div>
@@ -3119,23 +3180,58 @@
     });
   });
 
-  // ---- File attach in each panel ----
+  // ---- File attach in each panel (multi-file + drag/drop) ----
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
   document.querySelectorAll('.msg-panel').forEach(panel => {
+    const dropzone = panel.querySelector('.msg-dropzone');
     const fileInput = panel.querySelector('.msg-file-input');
-    const fileNameEl = panel.querySelector('.msg-file-name');
-    if (!fileInput || !fileNameEl) return;
-    fileInput.addEventListener('change', () => {
-      const file = fileInput.files[0];
-      if (!file) { fileNameEl.textContent = ''; panel._attachedFile = null; return; }
-      if (file.size > 25 * 1024 * 1024) {
-        fileNameEl.textContent = 'Too large (max 25 MB)';
-        fileNameEl.style.color = '#ff5f57';
-        panel._attachedFile = null;
-        return;
+    const fileList = panel.querySelector('.msg-file-list');
+    if (!dropzone || !fileInput || !fileList) return;
+
+    panel._attachedFiles = [];
+
+    function renderFileList() {
+      fileList.innerHTML = '';
+      panel._attachedFiles.forEach((file, idx) => {
+        const item = document.createElement('div');
+        item.className = 'msg-file-item';
+        item.innerHTML = '<span class="msg-file-item-name">' + file.name + '</span>'
+          + '<span class="msg-file-item-size">' + formatSize(file.size) + '</span>'
+          + '<button class="msg-file-item-remove" title="Remove">&times;</button>';
+        item.querySelector('.msg-file-item-remove').addEventListener('click', () => {
+          panel._attachedFiles.splice(idx, 1);
+          renderFileList();
+        });
+        fileList.appendChild(item);
+      });
+    }
+
+    function addFiles(files) {
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        if (f.size > 25 * 1024 * 1024) continue;
+        panel._attachedFiles.push(f);
       }
-      fileNameEl.textContent = file.name;
-      fileNameEl.style.color = '';
-      panel._attachedFile = file;
+      renderFileList();
+    }
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      addFiles(fileInput.files);
+      fileInput.value = '';
+    });
+
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      addFiles(e.dataTransfer.files);
     });
   });
 
@@ -3176,9 +3272,9 @@
         if (msg) fd.append('message', msg);
       }
 
-      // Attach file from any panel
-      if (panel._attachedFile) {
-        fd.append('attachment', panel._attachedFile, panel._attachedFile.name);
+      // Attach files from any panel
+      if (panel._attachedFiles && panel._attachedFiles.length > 0) {
+        panel._attachedFiles.forEach(f => fd.append('attachment', f, f.name));
       }
 
       btn.disabled = true;
@@ -3202,12 +3298,12 @@
             panel.querySelector('.msg-timer').textContent = '';
             btn._blob = null;
           }
-          // Clear attachment
+          // Clear attachments
           const fi = panel.querySelector('.msg-file-input');
-          const fn = panel.querySelector('.msg-file-name');
+          const fl = panel.querySelector('.msg-file-list');
           if (fi) fi.value = '';
-          if (fn) fn.textContent = '';
-          panel._attachedFile = null;
+          if (fl) fl.innerHTML = '';
+          panel._attachedFiles = [];
           btn.disabled = (type === 'audio' || type === 'video');
         } else {
           statusEl.textContent = data.error || 'Failed to send';
