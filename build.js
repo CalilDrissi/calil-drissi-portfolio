@@ -46,6 +46,9 @@ async function wpFetch(endpoint) {
 function stripHTML(html) {
   return html.replace(/<[^>]*>/g, '').replace(/\n/g, ' ').trim();
 }
+function decodeEntities(str) {
+  return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#039;/g, "'").replace(/&quot;/g, '"');
+}
 
 async function fetchWPPosts(lang) {
   try {
@@ -67,8 +70,8 @@ async function fetchWPPosts(lang) {
       if (post._embedded && post._embedded['wp:term']) {
         post._embedded['wp:term'].forEach(termGroup => {
           termGroup.forEach(term => {
-            if (term.taxonomy === 'post_tag') tags.push(term.name);
-            if (term.taxonomy === 'category' && term.name !== 'Uncategorized') categories.push(term.name);
+            if (term.taxonomy === 'post_tag') tags.push(decodeEntities(term.name));
+            if (term.taxonomy === 'category' && term.name !== 'Uncategorized') categories.push(decodeEntities(term.name));
           });
         });
       }
@@ -563,7 +566,7 @@ function blogListingHTML(data, posts, lang) {
   <div class="main-layout">
     <div class="graph-panel">
       <canvas id="graphCanvas"></canvas>
-      <div class="graph-hint">${lang === 'fr' ? 'Glisser pour d\\u00e9placer \\u2022 Molette pour zoomer' : 'Drag to move \\u2022 Scroll to zoom'}</div>
+      <div class="graph-hint">${lang === 'fr' ? 'Glisser pour déplacer · Molette pour zoomer' : 'Drag to move · Scroll to zoom'}</div>
     </div>
     <aside class="sidebar">
       <div class="sidebar-search">
