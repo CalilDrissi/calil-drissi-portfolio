@@ -591,6 +591,13 @@ async function build() {
     console.log('  ✓ /admin/');
   }
 
+  // Copy _redirects (Cloudflare Pages SEO redirects)
+  const redirectsSrc = path.join(__dirname, '_redirects');
+  if (fs.existsSync(redirectsSrc)) {
+    fs.copyFileSync(redirectsSrc, path.join(DIST, '_redirects'));
+    console.log('  ✓ /_redirects');
+  }
+
   console.log('Done!');
 }
 
