@@ -365,6 +365,7 @@ function blogListingHTML(data, posts, lang) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Blog — ${data.intro.name}</title>
+  <link rel="canonical" href="https://khalildrissi.com${prefix}/blog/" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
@@ -446,6 +447,7 @@ function blogPostHTML(data, post, lang) {
   <meta property="og:title" content="${seo.title || post.title}" />
   <meta property="og:description" content="${seo.description || post.excerpt}" />
   <meta property="og:type" content="article" />
+  <link rel="canonical" href="https://khalildrissi.com${prefix}/blog/${post.slug}/" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
