@@ -531,12 +531,11 @@ function blogListingHTML(data, posts, lang) {
 <body>
   <header class="blog-header">
     <div class="blog-header-left">
-      <a class="blog-header-back" href="${prefix}/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>${data.intro.name}</a>
+      <a class="blog-header-back" href="${prefix}/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>${lang === 'fr' ? 'Accueil' : 'Home'}</a>
       <div class="blog-header-sep"></div>
-      <h1>${lang === 'fr' ? 'Second Brain' : 'Second Brain'}<span class="blog-header-count">${posts.length}</span></h1>
+      <h1>${lang === 'fr' ? 'Field Notes' : 'Field Notes'}<span class="blog-header-count">${posts.length}</span></h1>
     </div>
     <nav class="blog-header-nav">
-      <a href="${prefix}/">Portfolio</a>
       <a href="${otherLang.url}">${otherLang.label}</a>
     </nav>
   </header>
