@@ -612,20 +612,19 @@ function blogListingHTML(data, posts, lang) {
   const allTags = [...new Set(POSTS.flatMap(p => p.tags))].sort();
 
   // --- Nodes ---
-  const NODE_RADIUS = 4;
+  const NODE_RADIUS = 5;
   const NODE_COLOR = '#a882ff';
   const NODE_COLOR_R = 168, NODE_COLOR_G = 130, NODE_COLOR_B = 255;
 
   const nodes = POSTS.map((p, i) => {
     const angle = (i / Math.max(POSTS.length, 1)) * Math.PI * 2;
-    const spread = 100 + Math.random() * 60;
+    const spread = 120 + Math.random() * 80;
     return {
       x: Math.cos(angle) * spread + (Math.random() - 0.5) * 40,
       y: Math.sin(angle) * spread + (Math.random() - 0.5) * 40,
       vx: 0, vy: 0,
       postIndex: i,
       pinned: false,
-      // Breathing phase offset per node
       breathPhase: Math.random() * Math.PI * 2,
     };
   });
@@ -634,7 +633,7 @@ function blogListingHTML(data, posts, lang) {
   const canvas = document.getElementById('graphCanvas');
   const ctx = canvas.getContext('2d');
   let W, H;
-  let camX = 0, camY = 0, camZoom = 1;
+  let camX = 0, camY = 0, camZoom = 1.8;
   let hoveredNode = null, dragNode = null, dragOffset = { x: 0, y: 0 };
   let isPanning = false, panStart = { x: 0, y: 0 }, camStart = { x: 0, y: 0 };
   let sidebarHoverIndex = -1;
@@ -748,7 +747,7 @@ function blogListingHTML(data, posts, lang) {
       }
     }
 
-    // Draw edges — very thin, barely visible
+    // Draw edges — Obsidian style: visible lines
     for (const e of edges) {
       const a = nodes[e.source], b = nodes[e.target];
       const sa = worldToScreen(a.x, a.y), sb = worldToScreen(b.x, b.y);
@@ -757,28 +756,25 @@ function blogListingHTML(data, posts, lang) {
 
       if (hIdx >= 0) {
         if ((e.source === hIdx || e.target === hIdx)) {
-          // Edge connects to hovered node — highlight purple
-          alpha = 0.6;
-          width = 1;
+          alpha = 0.8;
+          width = 1.5;
           ctx.strokeStyle = 'rgba(' + NODE_COLOR_R + ',' + NODE_COLOR_G + ',' + NODE_COLOR_B + ',' + alpha + ')';
         } else {
-          // All other edges — near invisible
-          alpha = 0.02;
+          alpha = 0.06;
           width = 0.5;
           ctx.strokeStyle = 'rgba(255,255,255,' + alpha + ')';
         }
       } else if (isFiltered) {
         if (!visibleIndices.has(e.source) || !visibleIndices.has(e.target)) {
-          alpha = 0.02;
+          alpha = 0.04;
         } else {
-          alpha = 0.08;
+          alpha = 0.25;
         }
-        width = 0.5;
+        width = 0.8;
         ctx.strokeStyle = 'rgba(255,255,255,' + alpha + ')';
       } else {
-        // Default: barely visible gray
-        alpha = 0.08;
-        width = 0.5;
+        alpha = 0.18;
+        width = 0.8;
         ctx.strokeStyle = 'rgba(255,255,255,' + alpha + ')';
       }
 
@@ -789,9 +785,7 @@ function blogListingHTML(data, posts, lang) {
       ctx.stroke();
     }
 
-    // Draw nodes
-    const showAllLabels = camZoom > 1.5;
-
+    // Draw nodes — Obsidian style: always show labels
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i];
       const s = worldToScreen(n.x, n.y);
@@ -803,26 +797,21 @@ function blogListingHTML(data, posts, lang) {
       // Determine node opacity
       let nodeAlpha = 1;
       if (hIdx >= 0) {
-        nodeAlpha = isConnected ? 1 : 0.1;
+        nodeAlpha = isConnected ? 1 : 0.15;
       } else if (isFiltered) {
-        nodeAlpha = isVisible ? 1 : 0.1;
+        nodeAlpha = isVisible ? 1 : 0.15;
       }
 
-      // Determine radius
-      const r = isHovered ? 6 : NODE_RADIUS;
+      // Determine radius — hovered nodes are bigger like Obsidian
+      const r = isHovered ? NODE_RADIUS * 1.6 : NODE_RADIUS;
       const screenR = r * camZoom;
 
-      // Glow — radial gradient halo
-      const glowR = r * 3;
-      const screenGlowR = glowR * camZoom;
-      let glowAlpha = 0.15;
-      if (isHovered) glowAlpha = 0.4;
-      else if (hIdx >= 0 && !isConnected) glowAlpha = 0;
-      else if (isFiltered && !isVisible) glowAlpha = 0;
-
-      if (glowAlpha > 0) {
+      // Glow for hovered/focused nodes
+      if (isHovered || isFocused) {
+        const glowR = r * 3.5;
+        const screenGlowR = glowR * camZoom;
         const grad = ctx.createRadialGradient(s.x, s.y, screenR * 0.3, s.x, s.y, screenGlowR);
-        grad.addColorStop(0, 'rgba(' + NODE_COLOR_R + ',' + NODE_COLOR_G + ',' + NODE_COLOR_B + ',' + (glowAlpha * nodeAlpha) + ')');
+        grad.addColorStop(0, 'rgba(' + NODE_COLOR_R + ',' + NODE_COLOR_G + ',' + NODE_COLOR_B + ',0.35)');
         grad.addColorStop(1, 'rgba(' + NODE_COLOR_R + ',' + NODE_COLOR_G + ',' + NODE_COLOR_B + ',0)');
         ctx.fillStyle = grad;
         ctx.beginPath();
@@ -830,44 +819,36 @@ function blogListingHTML(data, posts, lang) {
         ctx.fill();
       }
 
-      // Node circle
+      // Node circle — filled dot
       ctx.beginPath();
       ctx.arc(s.x, s.y, screenR, 0, Math.PI * 2);
       ctx.globalAlpha = nodeAlpha;
-      if (isFocused) {
-        ctx.fillStyle = '#ffffff';
-      } else {
-        ctx.fillStyle = NODE_COLOR;
-      }
+      ctx.fillStyle = (isHovered || isFocused) ? '#ffffff' : NODE_COLOR;
       ctx.fill();
       ctx.globalAlpha = 1;
 
-      // Label logic:
-      // Hidden by default. Show on hover for hovered node + neighbors.
-      // When zoomed past 1.5x, show all at reduced opacity.
-      let showLabel = false;
-      let labelAlpha = 0;
-
-      if (isHovered) {
-        showLabel = true;
+      // Label — always visible, to the right of the node (Obsidian style)
+      const label = POSTS[i].title.length > 30 ? POSTS[i].title.slice(0, 28) + '\u2026' : POSTS[i].title;
+      let labelAlpha;
+      if (isHovered || isFocused) {
         labelAlpha = 1;
       } else if (hIdx >= 0 && isConnected) {
-        showLabel = true;
-        labelAlpha = 0.7;
-      } else if (showAllLabels) {
-        showLabel = true;
-        labelAlpha = 0.35 * nodeAlpha;
+        labelAlpha = 0.85;
+      } else if (hIdx >= 0) {
+        labelAlpha = 0.08;
+      } else if (isFiltered && !isVisible) {
+        labelAlpha = 0.08;
+      } else {
+        labelAlpha = 0.55;
       }
 
-      if (showLabel) {
-        const label = POSTS[i].title.length > 24 ? POSTS[i].title.slice(0, 22) + '...' : POSTS[i].title;
-        ctx.globalAlpha = labelAlpha;
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '10px "DM Mono", monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(label, s.x, s.y + screenR + 12);
-        ctx.globalAlpha = 1;
-      }
+      ctx.globalAlpha = labelAlpha;
+      ctx.fillStyle = '#ffffff';
+      ctx.font = (isHovered ? '500 ' : '400 ') + Math.max(10, 11 / Math.max(camZoom * 0.6, 0.5)) + 'px "Space Grotesk", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, s.x + screenR + 6, s.y);
+      ctx.globalAlpha = 1;
     }
   }
 
