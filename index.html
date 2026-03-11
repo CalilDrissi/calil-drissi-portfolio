@@ -2286,7 +2286,7 @@
   })();
 
   // Zones where custom cursor appears (projects, blog, ventures, interactive elements)
-  const cursorZoneSelectors = '.project-thumb, .project-card, .articles-list a, .venture-item, .award-badge, .intro-identity, .connect-ctas a, .connect-ctas button, .about-tab, .bottom-tab, .chat-send, .win-dot-close, .win-dot-min, .win-dot-max, .win-action-btn, #terminalChallengeBtn, .msg-tab, .msg-send-btn, .msg-record-btn, #openMessageBtn';
+  const cursorZoneSelectors = '.project-thumb, .project-card, .articles-list a, .venture-item, .award-badge, .intro-identity';
 
   // Add cursor-zone class to matching elements for CSS cursor:none
   document.querySelectorAll(cursorZoneSelectors).forEach(el => el.classList.add('cursor-zone'));
