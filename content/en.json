@@ -10,7 +10,7 @@
     "title": "Software Developer",
     "avatarUrl": "/profile.png",
     "avatarLargeUrl": "/profile.png",
-    "hoverPill": "Play â Click to discover",
+    "hoverPill": "Play Ã¢ÂÂ Click to discover",
     "location": "Currently staying in Morocco.",
     "tagline": "Built for Global Collabs.",
     "whatIDo": "What I do",
@@ -32,7 +32,7 @@
   },
   "position": {
     "header": "Position",
-    "studio": "General Manager — Virtus Operandi",
+    "studio": "General Manager â Virtus Operandi",
     "focus": "Full-Stack All Platforms",
     "stackLabel": "Focus",
     "stack": [
@@ -43,7 +43,7 @@
     ],
     "previousLabel": "Previous",
     "previous": [
-      "Co-Founder & CTO — Circuit Dynamic SARL",
+      "Co-Founder & CTO â Circuit Dynamic SARL",
       "Agency Projects",
       "Startup Contracts",
       "Open Source"
@@ -64,20 +64,20 @@
       },
       {
         "name": "Pagerank",
-        "desc": "SEO audit tool for developers â Lighthouse + Core Web Vitals in one dashboard",
+        "desc": "SEO audit tool for developers Ã¢ÂÂ Lighthouse + Core Web Vitals in one dashboard",
         "status": "Beta"
       },
       {
         "name": "Dotfiles",
-        "desc": "Personal dev environment config â Neovim, tmux, Warp, and more",
+        "desc": "Personal dev environment config Ã¢ÂÂ Neovim, tmux, Warp, and more",
         "status": "Ongoing"
       }
     ],
     "changelogLabel": "Changelog",
     "changelog": [
-      "DevKit CLI v2.3 â Mar 2026",
-      "MotionLib v1.1 â Feb 2026",
-      "Pagerank Beta â Jan 2026"
+      "DevKit CLI v2.3 Ã¢ÂÂ Mar 2026",
+      "MotionLib v1.1 Ã¢ÂÂ Feb 2026",
+      "Pagerank Beta Ã¢ÂÂ Jan 2026"
     ]
   },
   "articles": {
@@ -88,7 +88,7 @@
         "href": "/blog/gsap-scroll-animations/",
         "img": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=560&h=280&fit=crop",
         "title": "Mastering Scroll Animations with GSAP ScrollTrigger",
-        "excerpt": "A deep dive into creating buttery-smooth scroll-driven animations with GSAP's ScrollTrigger plugin â from basic reveals to complex parallax effects.",
+        "excerpt": "A deep dive into creating buttery-smooth scroll-driven animations with GSAP's ScrollTrigger plugin Ã¢ÂÂ from basic reveals to complex parallax effects.",
         "tags": "GSAP, Animation",
         "date": "2026-01"
       },
@@ -97,7 +97,7 @@
         "href": "/blog/building-performant-dashboards/",
         "img": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=560&h=280&fit=crop",
         "title": "Building Performant Real-Time Dashboards",
-        "excerpt": "Strategies for building dashboards that handle thousands of data points without dropping frames â virtualization, WebSockets, and smart re-rendering.",
+        "excerpt": "Strategies for building dashboards that handle thousands of data points without dropping frames Ã¢ÂÂ virtualization, WebSockets, and smart re-rendering.",
         "tags": "React, Performance",
         "date": "2026-01"
       },
@@ -115,7 +115,7 @@
         "href": "#",
         "img": "https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=560&h=280&fit=crop",
         "title": "Design Systems That Scale: From Tokens to Components",
-        "excerpt": "Building a design system from scratch â design tokens, component APIs, documentation, and the tooling that ties it all together.",
+        "excerpt": "Building a design system from scratch Ã¢ÂÂ design tokens, component APIs, documentation, and the tooling that ties it all together.",
         "tags": "Design Systems, CSS",
         "date": "2025-09"
       },
@@ -124,7 +124,7 @@
         "href": "#",
         "img": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=560&h=280&fit=crop",
         "title": "Edge Computing with Cloudflare Workers and Durable Objects",
-        "excerpt": "Deploying stateful applications at the edge â real-time collaboration, rate limiting, and session management without a traditional backend.",
+        "excerpt": "Deploying stateful applications at the edge Ã¢ÂÂ real-time collaboration, rate limiting, and session management without a traditional backend.",
         "tags": "Edge, Cloudflare",
         "date": "2025-07"
       },
@@ -133,7 +133,7 @@
         "href": "#",
         "img": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=560&h=280&fit=crop",
         "title": "WebAssembly in Production: Lessons Learned",
-        "excerpt": "Practical experiences integrating Wasm modules into production web apps â image processing, crypto, and computational geometry at near-native speed.",
+        "excerpt": "Practical experiences integrating Wasm modules into production web apps Ã¢ÂÂ image processing, crypto, and computational geometry at near-native speed.",
         "tags": "WebAssembly, Rust",
         "date": "2025-05"
       },
@@ -142,7 +142,7 @@
         "href": "#",
         "img": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=560&h=280&fit=crop",
         "title": "The Art of Code Review: Beyond Syntax Checking",
-        "excerpt": "How to give reviews that improve architecture, mentorship, and team velocity â not just catch bugs.",
+        "excerpt": "How to give reviews that improve architecture, mentorship, and team velocity Ã¢ÂÂ not just catch bugs.",
         "tags": "Engineering, Teams",
         "date": "2025-03"
       }
@@ -172,11 +172,11 @@
     "availCta": "Book 30-Min Discovery Call",
     "buttons": [
       {
-        "label": "Schedule Call â",
+        "label": "Schedule Call Ã¢ÂÂ",
         "url": "#"
       },
       {
-        "label": "Cost Estimate â",
+        "label": "Cost Estimate Ã¢ÂÂ",
         "url": "#"
       }
     ]
@@ -201,7 +201,7 @@
   "projects": [
     {
       "title": "Dashboard App",
-      "subtitle": "Fintech Startup â Web Application",
+      "subtitle": "Fintech Startup Ã¢ÂÂ Web Application",
       "desc": "A real-time financial dashboard with interactive charts, portfolio tracking, and automated reporting. Built with Next.js and D3.js for high-performance data visualization across multiple asset classes.",
       "tags": [
         "Next.js",
@@ -219,7 +219,7 @@
     },
     {
       "title": "Analytics Platform",
-      "subtitle": "SaaS Company â Full Product",
+      "subtitle": "SaaS Company Ã¢ÂÂ Full Product",
       "desc": "End-to-end analytics platform processing millions of events daily. Custom query builder, real-time dashboards, and automated insight generation.",
       "tags": [
         "React",
@@ -237,7 +237,7 @@
     },
     {
       "title": "E-Commerce",
-      "subtitle": "Retail Brand â Storefront & CMS",
+      "subtitle": "Retail Brand Ã¢ÂÂ Storefront & CMS",
       "desc": "High-conversion e-commerce platform with headless CMS, dynamic product filtering, and a custom checkout flow. Optimized for Core Web Vitals with 98+ Lighthouse scores.",
       "tags": [
         "Next.js",
@@ -255,7 +255,7 @@
     },
     {
       "title": "Social Platform",
-      "subtitle": "Startup â MVP to Launch",
+      "subtitle": "Startup Ã¢ÂÂ MVP to Launch",
       "desc": "Community-driven social platform with real-time messaging, content feeds, and user-generated content moderation. Scaled from MVP to 10K active users in 3 months.",
       "tags": [
         "React",
@@ -273,7 +273,7 @@
     },
     {
       "title": "AI Product",
-      "subtitle": "AI/ML Startup â Interface Design & Dev",
+      "subtitle": "AI/ML Startup Ã¢ÂÂ Interface Design & Dev",
       "desc": "Conversational AI interface with streaming responses, context management, and multimodal input for enterprise workflows.",
       "tags": [
         "Next.js",
@@ -291,7 +291,7 @@
     },
     {
       "title": "Cloud Platform",
-      "subtitle": "DevOps Tool â Infrastructure",
+      "subtitle": "DevOps Tool Ã¢ÂÂ Infrastructure",
       "desc": "Cloud infrastructure management dashboard with automated deployments, monitoring, and cost optimization.",
       "tags": [
         "React",
@@ -309,7 +309,7 @@
     },
     {
       "title": "Dev Tools",
-      "subtitle": "Open Source â Developer Experience",
+      "subtitle": "Open Source Ã¢ÂÂ Developer Experience",
       "desc": "A suite of CLI tools and VS Code extensions for accelerating development workflows.",
       "tags": [
         "TypeScript",
@@ -327,7 +327,7 @@
     },
     {
       "title": "Mobile App",
-      "subtitle": "Health Tech â Cross-Platform",
+      "subtitle": "Health Tech Ã¢ÂÂ Cross-Platform",
       "desc": "Health tracking mobile application with real-time biometric data sync, personalized insights, and telehealth integration.",
       "tags": [
         "React Native",
@@ -345,7 +345,7 @@
     },
     {
       "title": "Team Platform",
-      "subtitle": "Enterprise â Collaboration Suite",
+      "subtitle": "Enterprise Ã¢ÂÂ Collaboration Suite",
       "desc": "Internal team collaboration tool with project management, document sharing, and real-time whiteboarding.",
       "tags": [
         "Next.js",
@@ -363,7 +363,7 @@
     },
     {
       "title": "Data Viz",
-      "subtitle": "Media Company â Interactive Stories",
+      "subtitle": "Media Company Ã¢ÂÂ Interactive Stories",
       "desc": "Interactive data visualization platform for editorial storytelling with animated charts, maps, and WebGL effects.",
       "tags": [
         "D3.js",
@@ -381,7 +381,7 @@
     },
     {
       "title": "Landing Pages",
-      "subtitle": "Agency â Conversion-Focused",
+      "subtitle": "Agency Ã¢ÂÂ Conversion-Focused",
       "desc": "High-performance landing pages with GSAP scroll animations, achieving 40% uplift in conversion rates.",
       "tags": [
         "HTML",
@@ -399,7 +399,7 @@
     },
     {
       "title": "Open Source",
-      "subtitle": "Community â Libraries & Tools",
+      "subtitle": "Community Ã¢ÂÂ Libraries & Tools",
       "desc": "Maintained open-source libraries including a React animation toolkit and Node.js API boilerplate. 2K+ GitHub stars.",
       "tags": [
         "TypeScript",
@@ -408,7 +408,7 @@
         "GitHub Actions",
         "NPM"
       ],
-      "year": "2021âPresent",
+      "year": "2021Ã¢ÂÂPresent",
       "role": "Creator & Maintainer",
       "visit": "#",
       "code": "#",
@@ -419,7 +419,7 @@
   "openSource": [
     {
       "title": "React Animation Kit",
-      "subtitle": "Open Source â React Library",
+      "subtitle": "Open Source Ã¢ÂÂ React Library",
       "desc": "Composable animation primitives for React with declarative API, spring physics, and gesture support. Used in 500+ projects.",
       "tags": [
         "React",
@@ -436,7 +436,7 @@
     },
     {
       "title": "Node API Boilerplate",
-      "subtitle": "Open Source â Backend Starter",
+      "subtitle": "Open Source Ã¢ÂÂ Backend Starter",
       "desc": "Production-ready Express + TypeScript starter with auth, validation, testing, Docker, and CI/CD pre-configured.",
       "tags": [
         "Node.js",
@@ -453,7 +453,7 @@
     },
     {
       "title": "DevKit CLI",
-      "subtitle": "Open Source â Developer Tool",
+      "subtitle": "Open Source Ã¢ÂÂ Developer Tool",
       "desc": "Scaffolding and automation toolkit for developers. Project generators, code formatters, and deployment scripts in one CLI.",
       "tags": [
         "Node.js",
@@ -470,7 +470,7 @@
     },
     {
       "title": "MotionLib",
-      "subtitle": "Open Source â Animation Library",
+      "subtitle": "Open Source Ã¢ÂÂ Animation Library",
       "desc": "Lightweight scroll animation library with zero dependencies. Intersection Observer-based triggers with customizable easing.",
       "tags": [
         "JavaScript",
@@ -487,7 +487,7 @@
     },
     {
       "title": "PageRank",
-      "subtitle": "Open Source â Rust Library",
+      "subtitle": "Open Source Ã¢ÂÂ Rust Library",
       "desc": "Fast PageRank implementation in Rust with parallel computation support. Handles graphs with millions of nodes efficiently.",
       "tags": [
         "Rust",
@@ -504,8 +504,8 @@
     },
     {
       "title": "Dotfiles",
-      "subtitle": "Open Source â Dev Environment",
-      "desc": "Personal development environment configurations. Zsh, Neovim, tmux, and macOS defaults â one command setup.",
+      "subtitle": "Open Source Ã¢ÂÂ Dev Environment",
+      "desc": "Personal development environment configurations. Zsh, Neovim, tmux, and macOS defaults Ã¢ÂÂ one command setup.",
       "tags": [
         "Shell",
         "Neovim",
@@ -521,13 +521,13 @@
     }
   ],
   "about": {
-    "titlebarText": "khalil drissi â about",
+    "titlebarText": "khalil drissi  about",
     "emailBtn": {
-      "label": "Email â",
+      "label": "Email ",
       "url": "mailto:khalil@drissi.org"
     },
     "resumeBtn": {
-      "label": "Resume â",
+      "label": "Resume ",
       "url": "#"
     },
     "tabs": {
@@ -538,7 +538,7 @@
     "role": "Software Developer",
     "bio": [
       "I'm a senior software developer building products across web, mobile, desktop, and systems programming for clients worldwide.",
-      "My work spans the entire stack and platform spectrum â from React and Next.js frontends to Node.js and Python backends, mobile apps with React Native, Flutter, and native iOS/Android, Electron desktop tools, game development with Godot, systems-level work with Rust, Go, and C++, AI/ML pipelines, and blockchain/Web3 applications.",
+      "My work spans the entire stack and platform spectrum Ã¢ÂÂ from React and Next.js frontends to Node.js and Python backends, mobile apps with React Native, Flutter, and native iOS/Android, Electron desktop tools, game development with Godot, systems-level work with Rust, Go, and C++, AI/ML pipelines, and blockchain/Web3 applications.",
       "When I'm not coding, you'll find me exploring new tools, contributing to open source, or mentoring aspiring developers."
     ],
     "details": [
@@ -548,7 +548,7 @@
       },
       {
         "label": "Languages",
-        "value": "Arabic Â· French Â· English<br>Written & spoken fluently"
+        "value": "Arabic ÃÂ· French ÃÂ· English<br>Written & spoken fluently"
       },
       {
         "label": "Education",
@@ -556,15 +556,15 @@
       },
       {
         "label": "Interests",
-        "value": "Creative Coding Â· AI/ML<br>Open Source Â· Design Systems"
+        "value": "Creative Coding ÃÂ· AI/ML<br>Open Source ÃÂ· Design Systems"
       }
     ]
   },
   "chat": {
-    "greeting": "Hey! I'm Khalil's AI assistant. Ask me anything about his work, experience, tech stack, or availability. I'm here to help!",
+    "greeting": "Hey!ÂÂÂ I'm Khalil's AI assistant. Ask me anything about his work, experience, tech stack, or availability. I'm here to help!",
     "senderName": "Khalil's AI Assistant",
     "responses": {
-      "stack": "Khalil works across the full spectrum â React, Next.js, and TypeScript on the frontend; Node.js, Python, and PostgreSQL on the backend; React Native, Flutter, and native iOS/Android for mobile; Electron for desktop; Godot for game dev; Rust/Go/C++ for systems programming; plus AI/ML and blockchain/Web3.",
+      "stack": "Khalil works across the full spectrum Ã¢ÂÂ React, Next.js, and TypeScript on the frontend; Node.js, Python, and PostgreSQL on the backend; React Native, Flutter, and native iOS/Android for mobile; Electron for desktop; Godot for game dev; Rust/Go/C++ for systems programming; plus AI/ML and blockchain/Web3.",
       "experience": "Khalil is a senior developer who has delivered 15+ projects for startups, agencies, and brands. He's worked across fintech, e-commerce, health tech, and SaaS industries.",
       "available": "Yes! Khalil is currently available for new projects. He collaborates with clients globally. You can schedule a discovery call or request a cost estimate.",
       "pricing": "Khalil's rates depend on the project scope and complexity. For an accurate estimate, it's best to schedule a discovery call or send a project brief to khalil@drissi.org.",
