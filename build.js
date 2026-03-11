@@ -380,19 +380,31 @@ function blogListingHTML(data, posts, lang) {
 
     .blog-header {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 20px 40px; border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 14px 40px; border-bottom: 1px solid rgba(255,255,255,0.06);
       flex-shrink: 0; background: var(--bg);
     }
-    .blog-header-left { display: flex; align-items: center; gap: 16px; }
-    .blog-header-left a { font-size: 12px; color: var(--fg-dim); }
-    .blog-header-left a:hover { color: #fff; }
-    .blog-header h1 { font-family: var(--serif); font-size: 24px; font-weight: 400; font-style: italic; }
-    .blog-header-nav { display: flex; gap: 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
-    .blog-header-nav a {
-      color: var(--fg-dim); padding: 4px 10px; border: 1px solid var(--fg-faint); border-radius: 4px;
-      transition: border-color 0.2s, color 0.2s;
+    .blog-header-left { display: flex; align-items: center; gap: 12px; }
+    .blog-header-back {
+      font-size: 11px; color: var(--fg-dim); transition: color 0.2s;
+      display: flex; align-items: center; gap: 5px;
     }
-    .blog-header-nav a:hover { border-color: var(--accent); color: #fff; }
+    .blog-header-back:hover { color: #fff; }
+    .blog-header-back svg { width: 14px; height: 14px; opacity: 0.5; }
+    .blog-header-sep { width: 1px; height: 16px; background: rgba(255,255,255,0.1); }
+    .blog-header h1 {
+      font-family: var(--mono); font-size: 11px; font-weight: 400;
+      text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg);
+    }
+    .blog-header-count {
+      font-size: 10px; color: var(--fg-dim); margin-left: 6px;
+      background: rgba(255,255,255,0.05); padding: 2px 7px; border-radius: 3px;
+    }
+    .blog-header-nav { display: flex; gap: 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .blog-header-nav a {
+      color: var(--fg-dim); padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 3px;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .blog-header-nav a:hover { border-color: rgba(255,255,255,0.2); color: #fff; background: rgba(255,255,255,0.03); }
 
     .main-layout {
       display: flex; height: calc(100vh - 65px); overflow: hidden;
@@ -519,11 +531,12 @@ function blogListingHTML(data, posts, lang) {
 <body>
   <header class="blog-header">
     <div class="blog-header-left">
-      <a href="${prefix}/">&larr; ${data.intro.name}</a>
-      <h1>Blog</h1>
+      <a class="blog-header-back" href="${prefix}/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>${data.intro.name}</a>
+      <div class="blog-header-sep"></div>
+      <h1>${lang === 'fr' ? 'Second Brain' : 'Second Brain'}<span class="blog-header-count">${posts.length}</span></h1>
     </div>
     <nav class="blog-header-nav">
-      <a href="${prefix}/">${lang === 'fr' ? 'Portfolio' : 'Portfolio'}</a>
+      <a href="${prefix}/">Portfolio</a>
       <a href="${otherLang.url}">${otherLang.label}</a>
     </nav>
   </header>
