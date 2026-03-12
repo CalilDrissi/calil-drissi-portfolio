@@ -530,6 +530,13 @@
       text-decoration-color: rgba(255,255,255,0.12);
       text-underline-offset: 0.2em;
       transition: text-decoration-color 0.15s;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+    .articles-list a {
+      overflow: hidden;
     }
     .articles-list a:hover,
     .articles-list a:focus-visible {
