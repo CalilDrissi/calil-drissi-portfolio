@@ -758,15 +758,17 @@
     }
     .gh-body {
       display: flex;
+      flex-wrap: wrap;
       align-items: stretch;
       position: relative;
+      gap: clamp(6px, 1vh, 12px) 0;
     }
     .gh-wrap {
       flex: 1 1 50%;
+      min-width: 400px;
       display: flex;
       flex-direction: column;
       gap: clamp(3px, 0.4vh, 6px);
-      min-width: 0;
       position: relative;
       z-index: 1;
     }
@@ -782,7 +784,7 @@
     /* Statement (right of contribution grid) */
     .gh-body .statement {
       flex: 1 1 50%;
-      min-width: 0;
+      min-width: 280px;
       font-family: var(--mono);
       font-size: clamp(11px, 1vw, 14px);
       line-height: 1.55;
