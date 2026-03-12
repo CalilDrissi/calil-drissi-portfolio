@@ -183,7 +183,7 @@ function render(template, data, lang, featuredPosts) {
   // ARTICLES section — from WP posts tagged "Featured"
   const prefix = lang === 'fr' ? '/fr' : '';
   const articleLinks = (featuredPosts || []).map(p =>
-    `<a href="${prefix}/blog/${p.slug}/" data-img="${p.coverImage || ''}" data-title="${p.title}" data-excerpt="${p.excerpt || ''}" data-tags="${p.tags.join(', ')}" data-date="${p.date}">${p.title}</a>`
+    `<a href="${prefix}/blog/${p.slug}/" data-img="${p.coverImage || ''}" data-title="${p.title}" data-excerpt="${p.excerpt || ''}" data-tags="${p.tags.join(', ')}" data-date="${p.date}"><span>${p.title}</span></a>`
   ).join('\n        ');
   html = html.replace(
     /<!-- ARTICLES -->[\s\S]*?(?=\n\s*<!-- CONNECT -->)/,

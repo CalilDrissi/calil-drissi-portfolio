@@ -416,10 +416,7 @@
     .articles-list a {
       color: var(--fg-dim);
       text-decoration: none;
-      text-decoration-line: underline;
-      text-decoration-color: rgba(255,255,255,0.12);
-      text-underline-offset: 0.2em;
-      transition: color 0.15s, text-decoration-color 0.15s;
+      transition: color 0.15s;
       display: flex;
       align-items: baseline;
       gap: 0.4em;
@@ -429,11 +426,17 @@
       content: '·';
       color: var(--fg-faint);
       flex-shrink: 0;
-      display: inline-block;
-      text-decoration: none;
+    }
+    .articles-list a span {
+      text-decoration: underline;
+      text-decoration-color: rgba(255,255,255,0.12);
+      text-underline-offset: 0.2em;
+      transition: text-decoration-color 0.15s;
     }
     .articles-list a:hover {
       color: var(--accent);
+    }
+    .articles-list a:hover span {
       text-decoration-color: var(--accent);
     }
     .article-preview {
@@ -1971,13 +1974,13 @@
     <div class="col-section">
       <div class="col-header">Articles</div>
       <div class="articles-list" id="articlesList">
-        <a href="/blog/gsap-scroll-animations/" data-img="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=560&h=280&fit=crop" data-title="Mastering Scroll Animations with GSAP ScrollTrigger" data-excerpt="A deep dive into creating buttery-smooth scroll-driven animations with GSAP's ScrollTrigger plugin — from basic reveals to complex parallax effects." data-tags="GSAP, Animation" data-date="2026-01">GSAP Scroll Animations</a>
-        <a href="/blog/building-performant-dashboards/" data-img="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=560&h=280&fit=crop" data-title="Building Performant Real-Time Dashboards" data-excerpt="Strategies for building dashboards that handle thousands of data points without dropping frames — virtualization, WebSockets, and smart re-rendering." data-tags="React, Performance" data-date="2026-01">Performant Dashboards</a>
-        <a href="#" data-img="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=560&h=280&fit=crop" data-title="Modern C++ Patterns for Web Developers" data-excerpt="How concepts from modern C++ like RAII, move semantics, and compile-time computation can improve how you think about JavaScript and TypeScript." data-tags="C++, Architecture" data-date="2025-11">C++ for Web Devs</a>
-        <a href="#" data-img="https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=560&h=280&fit=crop" data-title="Design Systems That Scale: From Tokens to Components" data-excerpt="Building a design system from scratch — design tokens, component APIs, documentation, and the tooling that ties it all together." data-tags="Design Systems, CSS" data-date="2025-09">Scalable Design Systems</a>
-        <a href="#" data-img="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=560&h=280&fit=crop" data-title="Edge Computing with Cloudflare Workers and Durable Objects" data-excerpt="Deploying stateful applications at the edge — real-time collaboration, rate limiting, and session management without a traditional backend." data-tags="Edge, Cloudflare" data-date="2025-07">Edge Computing</a>
-        <a href="#" data-img="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=560&h=280&fit=crop" data-title="WebAssembly in Production: Lessons Learned" data-excerpt="Practical experiences integrating Wasm modules into production web apps — image processing, crypto, and computational geometry at near-native speed." data-tags="WebAssembly, Rust" data-date="2025-05">Wasm in Production</a>
-        <a href="#" data-img="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=560&h=280&fit=crop" data-title="The Art of Code Review: Beyond Syntax Checking" data-excerpt="How to give reviews that improve architecture, mentorship, and team velocity — not just catch bugs." data-tags="Engineering, Teams" data-date="2025-03">Art of Code Review</a>
+        <a href="/blog/gsap-scroll-animations/" data-img="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=560&h=280&fit=crop" data-title="Mastering Scroll Animations with GSAP ScrollTrigger" data-excerpt="A deep dive into creating buttery-smooth scroll-driven animations with GSAP's ScrollTrigger plugin — from basic reveals to complex parallax effects." data-tags="GSAP, Animation" data-date="2026-01"><span>GSAP Scroll Animations</span></a>
+        <a href="/blog/building-performant-dashboards/" data-img="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=560&h=280&fit=crop" data-title="Building Performant Real-Time Dashboards" data-excerpt="Strategies for building dashboards that handle thousands of data points without dropping frames — virtualization, WebSockets, and smart re-rendering." data-tags="React, Performance" data-date="2026-01"><span>Performant Dashboards</span></a>
+        <a href="#" data-img="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=560&h=280&fit=crop" data-title="Modern C++ Patterns for Web Developers" data-excerpt="How concepts from modern C++ like RAII, move semantics, and compile-time computation can improve how you think about JavaScript and TypeScript." data-tags="C++, Architecture" data-date="2025-11"><span>C++ for Web Devs</span></a>
+        <a href="#" data-img="https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=560&h=280&fit=crop" data-title="Design Systems That Scale: From Tokens to Components" data-excerpt="Building a design system from scratch — design tokens, component APIs, documentation, and the tooling that ties it all together." data-tags="Design Systems, CSS" data-date="2025-09"><span>Scalable Design Systems</span></a>
+        <a href="#" data-img="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=560&h=280&fit=crop" data-title="Edge Computing with Cloudflare Workers and Durable Objects" data-excerpt="Deploying stateful applications at the edge — real-time collaboration, rate limiting, and session management without a traditional backend." data-tags="Edge, Cloudflare" data-date="2025-07"><span>Edge Computing</span></a>
+        <a href="#" data-img="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=560&h=280&fit=crop" data-title="WebAssembly in Production: Lessons Learned" data-excerpt="Practical experiences integrating Wasm modules into production web apps — image processing, crypto, and computational geometry at near-native speed." data-tags="WebAssembly, Rust" data-date="2025-05"><span>Wasm in Production</span></a>
+        <a href="#" data-img="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=560&h=280&fit=crop" data-title="The Art of Code Review: Beyond Syntax Checking" data-excerpt="How to give reviews that improve architecture, mentorship, and team velocity — not just catch bugs." data-tags="Engineering, Teams" data-date="2025-03"><span>Art of Code Review</span></a>
       </div>
     </div>
 
