@@ -151,7 +151,7 @@
       flex-shrink: 0;
     }
 
-    .col-section { font-size: var(--body); }
+    .col-section { font-size: var(--label); }
 
     /* Intro column */
     .intro-identity {
@@ -289,7 +289,7 @@
       display: inline-block;
       border: 1px solid var(--fg-faint);
       border-radius: 4px;
-      padding: 2px 8px;
+      padding: clamp(1px, 0.2vh, 3px) clamp(4px, 0.5vw, 10px);
     }
     .intro-stats {
       margin-top: clamp(4px, 1vh, 10px);
@@ -304,7 +304,7 @@
     .position-studio {
       color: var(--fg-dim);
       font-weight: 500;
-      margin-bottom: 2px;
+      margin-bottom: clamp(1px, 0.2vh, 3px);
     }
     .position-revenue {
       color: var(--fg-dim);
@@ -320,7 +320,7 @@
       display: inline-block;
       border: 1px solid var(--fg-faint);
       border-radius: 4px;
-      padding: 2px 8px;
+      padding: clamp(1px, 0.2vh, 3px) clamp(4px, 0.5vw, 10px);
     }
     .position-cost,
     .position-prev {
@@ -368,7 +368,7 @@
     }
     .venture-status {
       font-size: calc(var(--label) - 1px);
-      padding: 2px 7px;
+      padding: clamp(1px, 0.2vh, 3px) clamp(4px, 0.4vw, 8px);
       border-radius: 2px;
       background: var(--fg-faint);
       color: var(--fg-dim);
@@ -415,16 +415,15 @@
     }
     .articles-list a {
       color: var(--fg-dim);
-      font-size: var(--label);
       text-decoration: none;
       text-decoration-line: underline;
       text-decoration-color: rgba(255,255,255,0.12);
-      text-underline-offset: 3px;
+      text-underline-offset: 0.2em;
       transition: color 0.15s, text-decoration-color 0.15s;
       display: flex;
       align-items: baseline;
       gap: 0.4em;
-      padding: 4px 0;
+      padding: clamp(2px, 0.4vh, 5px) 0;
     }
     .articles-list a::before {
       content: '·';
