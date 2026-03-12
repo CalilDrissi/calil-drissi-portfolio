@@ -1183,6 +1183,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      margin-top: clamp(8px, 1.5vh, 16px);
     }
     .bottom-bar {
       display: flex;
@@ -1427,7 +1428,7 @@
       .gh-repos { display: none; }
       .cta-btn { min-height: 44px; font-size: 14px; padding: 12px 16px; }
       .connect-ctas { grid-template-columns: 1fr; max-width: 100%; gap: 8px; }
-      .bottom-bar { padding: 0 var(--edge); flex-wrap: wrap; gap: 8px; }
+      .bottom-bar { padding: 0; flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
       .projects-strip { max-width: 100vw; }
       .project-strip { padding: 0 var(--edge); }
       .ribbon-track span { padding: 0 clamp(8px, 3vw, 16px); }
