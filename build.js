@@ -1534,7 +1534,7 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     .toc-label {
       font-size: 11px; font-family: var(--mono); color: var(--fg);
       white-space: nowrap; max-width: 0; overflow: hidden;
-      transition: max-width 0.5s cubic-bezier(0.25, 0.1, 0.25, 1), padding 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+      transition: max-width 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), padding 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
       padding: 0; background: var(--accent); border-radius: 4px;
       height: 32px; display: flex; align-items: center;
     }
@@ -2088,7 +2088,7 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
           peekTimer = setTimeout(function() {
             currentItem.classList.remove('peek');
             stopScroll(activeInner);
-          }, 2500);
+          }, 800);
         }
       }
       window.addEventListener('scroll', updateToc, { passive: true });
