@@ -3095,6 +3095,7 @@
 
     minimize(win) {
       win.minimized = true;
+      gsap.set(win.el, { clearProps: 'opacity,transform' });
       win.el.classList.add('minimized');
       this.updateTaskbar();
     },
@@ -3102,6 +3103,7 @@
     restore(win) {
       win.minimized = false;
       win.el.classList.remove('minimized');
+      gsap.set(win.el, { clearProps: 'opacity,transform' });
       this.focus(win);
       this.updateTaskbar();
     },
