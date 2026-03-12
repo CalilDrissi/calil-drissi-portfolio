@@ -1471,10 +1471,14 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
       transition: transform 0s linear;
     }
     .toc-label-inner.scrolling {
-      transition: transform var(--scroll-dur, 4s) linear;
-      transform: translateX(var(--scroll-dist, 0));
+      animation: tocMarquee var(--scroll-dur, 4s) linear infinite;
     }
-    .toc-item:hover .toc-label { max-width: 260px; padding: 0 12px; }
+    @keyframes tocMarquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .toc-item:hover .toc-label,
+    .toc-item.peek .toc-label { max-width: 260px; padding: 0 12px; }
     .toc-item.active .toc-num { background: var(--accent); color: #fff; }
 
     /* ---- Comments ---- */
@@ -1551,12 +1555,12 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     .post-nav {
       border-top: 1px solid rgba(255,255,255,0.08);
       display: flex; align-items: center; justify-content: space-between;
-      padding: 24px 40px; position: relative;
+      padding: 24px 40px; position: relative; gap: 24px;
     }
     .post-nav-link {
       display: flex; align-items: center; gap: 12px;
       text-decoration: none; color: var(--fg-dim); position: relative;
-      transition: color 0.2s; flex: 1; min-width: 0;
+      transition: color 0.2s; flex: 1; min-width: 0; max-width: 42%;
     }
     .post-nav-link:hover { color: var(--fg); }
     .post-nav-link svg { width: 16px; height: 16px; flex-shrink: 0; }
@@ -1619,7 +1623,7 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
       .post-hero-content { padding: 0 20px 28px; }
       .post-container { padding: 24px 16px 60px; }
       .post-nav { padding: 20px 16px; flex-wrap: wrap; gap: 16px; }
-      .post-nav-link { flex: 1 1 100%; }
+      .post-nav-link { flex: 1 1 100%; max-width: 100%; }
       .post-nav-next { flex-direction: row; text-align: left; }
       .post-nav-next .post-nav-info { text-align: right; }
       .post-nav-grid { order: -1; margin: 0 auto; }
@@ -1936,24 +1940,21 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
         toc.appendChild(a);
       });
 
-      // --- Label scroll for overflow ---
+      // --- Label marquee for overflow ---
       var scrollTimers = new Map();
+      var peekTimer = null;
 
       function startScroll(inner) {
-        // Don't double-up if already pending/scrolling
         if (scrollTimers.has(inner)) return;
         var label = inner.parentElement;
-        // Timer 1: wait for expand transition, then measure
         var t1 = setTimeout(function() {
-          var overflow = inner.scrollWidth - label.clientWidth;
+          var overflow = inner.scrollWidth / 2 - label.clientWidth;
           if (overflow <= 5) { scrollTimers.delete(inner); return; }
-          var dur = Math.max(3, overflow / 30);
-          inner.style.setProperty('--scroll-dist', '-' + (overflow + 10) + 'px');
+          var dur = Math.max(4, inner.scrollWidth / 2 / 25);
           inner.style.setProperty('--scroll-dur', dur + 's');
-          // Timer 2: brief pause so reader sees the start
           var t2 = setTimeout(function() {
             inner.classList.add('scrolling');
-            scrollTimers.set(inner, null); // running, no pending timer
+            scrollTimers.set(inner, null);
           }, 600);
           scrollTimers.set(inner, t2);
         }, 550);
@@ -1961,21 +1962,25 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
       }
 
       function stopScroll(inner) {
-        // Clear any pending timers
         var t = scrollTimers.get(inner);
         if (t) clearTimeout(t);
         scrollTimers.delete(inner);
         inner.classList.remove('scrolling');
       }
 
-      toc.querySelectorAll('.toc-item').forEach(function(item) {
-        var inner = item.querySelector('.toc-label-inner');
-        var num = item.querySelector('.toc-num');
-        num.addEventListener('mouseenter', function() { startScroll(inner); });
-        num.addEventListener('mouseleave', function() { stopScroll(inner); });
+      // Duplicate label text for seamless looping
+      toc.querySelectorAll('.toc-label-inner').forEach(function(inner) {
+        var text = inner.textContent;
+        inner.textContent = text + '   ·   ' + text + '   ·   ';
       });
 
-      // --- Active section tracking ---
+      toc.querySelectorAll('.toc-item').forEach(function(item) {
+        var inner = item.querySelector('.toc-label-inner');
+        item.addEventListener('mouseenter', function() { startScroll(inner); });
+        item.addEventListener('mouseleave', function() { stopScroll(inner); });
+      });
+
+      // --- Active section tracking with peek ---
       var items = toc.querySelectorAll('.toc-item');
       var active = -1;
       var tocVisible = false;
@@ -1994,13 +1999,24 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
         var scrollOffset = window.innerHeight * 0.35;
         headings.forEach(function(h, i) { if (h.getBoundingClientRect().top < scrollOffset) current = i; });
         if (current !== active) {
-          active = current;
-          // Stop scroll on previous active
+          // Stop scroll & peek on previous active
           if (activeInner) stopScroll(activeInner);
+          if (active >= 0) items[active].classList.remove('peek');
+          if (peekTimer) clearTimeout(peekTimer);
+
+          active = current;
           items.forEach(function(item, i) { item.classList.toggle('active', i === current); });
-          // Start scroll on new active
-          activeInner = items[current].querySelector('.toc-label-inner');
+
+          // Peek: briefly show active label, then hide
+          var currentItem = items[current];
+          activeInner = currentItem.querySelector('.toc-label-inner');
+          currentItem.classList.add('peek');
           startScroll(activeInner);
+
+          peekTimer = setTimeout(function() {
+            currentItem.classList.remove('peek');
+            stopScroll(activeInner);
+          }, 2500);
         }
       }
       window.addEventListener('scroll', updateToc, { passive: true });

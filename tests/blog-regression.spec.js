@@ -33,19 +33,19 @@ for (const vp of VIEWPORTS) {
     });
 
     if (vp.width > 900) {
-      test('TOC active item label is collapsed', async ({ browser }) => {
+      test('TOC active item collapses after peek', async ({ browser }) => {
         const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
         const page = await ctx.newPage();
         await page.goto(BASE + POSTS[0], { waitUntil: 'domcontentloaded' });
         await page.waitForTimeout(2000);
         await page.evaluate(() => window.scrollTo(0, 800));
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(4000);
 
-        const labelWidth = await page.evaluate(() => {
-          const active = document.querySelector('.toc-item.active .toc-label');
-          return active ? active.offsetWidth : 0;
+        const hasPeek = await page.evaluate(() => {
+          const active = document.querySelector('.toc-item.active');
+          return active ? active.classList.contains('peek') : false;
         });
-        expect(labelWidth).toBeLessThanOrEqual(1);
+        expect(hasPeek).toBe(false);
         await ctx.close();
       });
     }

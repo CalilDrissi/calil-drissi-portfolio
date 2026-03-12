@@ -5,22 +5,22 @@ const POST = '/blog/ui-animations-motion-design/';
 
 test.describe('Phase 1 — TOC Label Behavior', () => {
 
-  test('active TOC item does NOT show label by default', async ({ browser }) => {
+  test('active TOC item collapses label after peek', async ({ browser }) => {
     const ctx = await browser.newContext({ viewport: { width: 1200, height: 900 } });
     const page = await ctx.newPage();
     await page.goto(BASE + POST, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(2000);
 
     await page.evaluate(() => window.scrollTo(0, 800));
-    await page.waitForTimeout(1000);
+    // Wait for peek (2.5s) + transition (0.5s) to finish
+    await page.waitForTimeout(4000);
 
-    const labelMaxWidth = await page.evaluate(() => {
-      const active = document.querySelector('.toc-item.active .toc-label');
-      if (!active) return 'no-active';
-      return getComputedStyle(active).maxWidth;
+    const hasPeek = await page.evaluate(() => {
+      const active = document.querySelector('.toc-item.active');
+      return active ? active.classList.contains('peek') : false;
     });
 
-    expect(labelMaxWidth).toBe('0px');
+    expect(hasPeek).toBe(false);
     await ctx.close();
   });
 
@@ -55,26 +55,15 @@ test.describe('Phase 1 — TOC Label Behavior', () => {
     await page.waitForTimeout(2000);
 
     await page.evaluate(() => window.scrollTo(0, 800));
-    await page.waitForTimeout(1000);
+    // Wait for peek to finish
+    await page.waitForTimeout(4000);
 
-    const overlap = await page.evaluate(() => {
+    const hasPeek = await page.evaluate(() => {
       const active = document.querySelector('.toc-item.active');
-      if (!active) return { overlap: false, reason: 'no active item', labelWidth: 0 };
-      const label = active.querySelector('.toc-label');
-      const labelRect = label.getBoundingClientRect();
-      const container = document.querySelector('.post-container') || document.querySelector('.post-body');
-      if (!container) return { overlap: false, reason: 'no container', labelWidth: 0 };
-      const containerRect = container.getBoundingClientRect();
-
-      return {
-        overlap: labelRect.right > containerRect.left && labelRect.width > 0,
-        labelRight: labelRect.right,
-        labelWidth: labelRect.width,
-        containerLeft: containerRect.left
-      };
+      return active ? active.classList.contains('peek') : false;
     });
 
-    expect(overlap.labelWidth).toBeLessThanOrEqual(1);
+    expect(hasPeek).toBe(false);
     await ctx.close();
   });
 });
