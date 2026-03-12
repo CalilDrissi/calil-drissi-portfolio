@@ -79,7 +79,7 @@
     :root {
       --bg: #121212;
       --fg: #ffffff;
-      --fg-dim: rgba(255,255,255,0.85);
+      --fg-dim: rgba(255,255,255,0.9);
       --fg-faint: rgba(255,255,255,0.25);
       --accent: #5e2bff;
       --border: rgba(255,255,255,0.08);
@@ -98,6 +98,7 @@
       color: var(--fg);
       font-family: var(--mono);
       font-size: var(--body);
+      font-weight: 400;
       line-height: 1.5;
       letter-spacing: 0;
       overflow: hidden;
@@ -117,7 +118,7 @@
       height: 100vh;
       height: 100dvh;
       padding: var(--edge);
-      padding-bottom: clamp(16px, 2.5vh, 28px);
+      padding-bottom: clamp(24px, 3.5vh, 36px); /* clears the fixed footer ribbon */
       gap: 0;
     }
 
@@ -321,11 +322,24 @@
       border-radius: 4px;
       padding: 2px 8px;
     }
-    .position-cost {
-      color: var(--fg-dim);
-    }
+    .position-cost,
     .position-prev {
       color: var(--fg-dim);
+      display: flex;
+      flex-direction: column;
+      gap: 0.15em;
+    }
+    .position-cost span,
+    .position-prev span {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4em;
+    }
+    .position-cost span::before,
+    .position-prev span::before {
+      content: '·';
+      color: var(--fg-faint);
+      flex-shrink: 0;
     }
 
     /* Recognition column */
@@ -342,6 +356,11 @@
       cursor: default;
     }
     .venture-item:hover .venture-name { color: var(--accent); }
+    .venture-item::before {
+      content: '·';
+      color: var(--fg-faint);
+      flex-shrink: 0;
+    }
     .venture-name {
       color: var(--fg-dim);
       font-weight: 500;
@@ -401,8 +420,16 @@
       text-decoration-color: rgba(255,255,255,0.12);
       text-underline-offset: 3px;
       transition: color 0.15s, text-decoration-color 0.15s;
-      display: block;
+      display: flex;
+      align-items: baseline;
+      gap: 0.4em;
       padding: 4px 0;
+    }
+    .articles-list a::before {
+      content: '·';
+      color: var(--fg-faint);
+      flex-shrink: 0;
+      text-decoration: none;
     }
     .articles-list a:hover {
       color: var(--accent);
@@ -469,6 +496,14 @@
     .connect-links a {
       color: var(--fg-dim);
       transition: color 0.15s;
+      display: flex;
+      align-items: baseline;
+      gap: 0.4em;
+    }
+    .connect-links a::before {
+      content: '·';
+      color: var(--fg-faint);
+      flex-shrink: 0;
     }
     .connect-links a:hover {
       color: var(--accent);
@@ -490,11 +525,11 @@
       max-width: 340px;
     }
     .cta-btn {
-      padding: clamp(4px, 0.8vh, 8px) clamp(8px, 0.8vw, 12px);
+      padding: clamp(3px, 0.5vh, 5px) clamp(6px, 0.6vw, 10px);
       border: 1px solid var(--fg-faint);
       border-radius: 2px;
       font-family: var(--mono);
-      font-size: var(--label);
+      font-size: clamp(8px, 0.5vw, 9px);
       color: var(--fg-dim);
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -1900,17 +1935,17 @@
 
       <div class="sub-label">Focus</div>
       <div class="position-cost">
-        Web Applications &amp; SPAs<br />
-        Interactive UI &amp; Motion<br />
-        API Design &amp; Systems<br />
-        Performance &amp; Infrastructure
+        <span>Web Applications &amp; SPAs</span>
+        <span>Interactive UI &amp; Motion</span>
+        <span>API Design &amp; Systems</span>
+        <span>Performance &amp; Infrastructure</span>
       </div>
 
       <div class="sub-label">Previous</div>
       <div class="position-prev">
-        Agency Projects<br />
-        Startup Contracts<br />
-        Open Source
+        <span>Agency Projects</span>
+        <span>Startup Contracts</span>
+        <span>Open Source</span>
       </div>
     </div>
 

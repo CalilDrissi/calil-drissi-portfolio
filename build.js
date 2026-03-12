@@ -152,12 +152,12 @@ function render(template, data, lang, featuredPosts) {
 
       <div class="sub-label">${data.position.stackLabel}</div>
       <div class="position-cost">
-        ${data.position.stack.join('<br />\n        ')}
+        ${data.position.stack.map(s => `<span>${s}</span>`).join('\n        ')}
       </div>
 
       <div class="sub-label">${data.position.previousLabel}</div>
       <div class="position-prev">
-        ${data.position.previous.join('<br />\n        ')}
+        ${data.position.previous.map(s => `<span>${s}</span>`).join('\n        ')}
       </div>
     </div>
 `
