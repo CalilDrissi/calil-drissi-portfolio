@@ -728,14 +728,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: clamp(8px, 1.5vh, 16px) 0;
+      padding: clamp(4px, 1vh, 12px) 0;
       position: relative;
     }
     .gh-wrap {
       width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
-      gap: clamp(4px, 0.6vh, 8px);
+      gap: clamp(2px, 0.4vh, 6px);
     }
     .gh-header {
       display: flex;
@@ -745,6 +746,7 @@
       color: var(--fg-dim);
       text-transform: uppercase;
       letter-spacing: 0.06em;
+      flex-shrink: 0;
     }
     .gh-header a {
       color: var(--fg-faint);
@@ -758,20 +760,25 @@
       grid-auto-columns: 1fr;
       gap: clamp(1px, 0.2vw, 3px);
       width: 100%;
-      aspect-ratio: 53 / 7;
+      flex: 1 1 auto;
+      min-height: 0;
     }
     .gh-cell {
       border-radius: clamp(1px, 0.15vw, 2px);
       background: rgba(255,255,255,0.04);
+      min-height: 0;
     }
     .gh-cell[data-level="1"] { background: rgba(94,43,255,0.25); }
     .gh-cell[data-level="2"] { background: rgba(94,43,255,0.45); }
     .gh-cell[data-level="3"] { background: rgba(94,43,255,0.65); }
     .gh-cell[data-level="4"] { background: rgba(94,43,255,0.9); }
+    .gh-footer {
+      flex-shrink: 0;
+    }
     .gh-months {
       display: flex;
       justify-content: space-between;
-      font-size: calc(var(--label) - 2px);
+      font-size: calc(var(--label) - 1px);
       color: var(--fg-faint);
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -781,12 +788,12 @@
       display: flex;
       align-items: center;
       gap: clamp(3px, 0.3vw, 6px);
-      font-size: calc(var(--label) - 2px);
+      font-size: calc(var(--label) - 1px);
       color: var(--fg-faint);
     }
     .gh-legend-cell {
-      width: clamp(6px, 0.6vw, 10px);
-      height: clamp(6px, 0.6vw, 10px);
+      width: clamp(7px, 0.7vw, 11px);
+      height: clamp(7px, 0.7vw, 11px);
       border-radius: 1px;
     }
 
@@ -986,9 +993,9 @@
       /* Show all sections — reorganize into 2-col grid */
       .top-grid .col-section { display: block !important; }
       .middle { padding: 1.25rem 0; }
-      .github-graph { padding: 1rem 0; }
-      .gh-grid { aspect-ratio: 53 / 7; }
-      .gh-months { font-size: 9px; }
+      .github-graph { padding: 0.75rem 0; flex: 0 0 auto; }
+      .gh-wrap { height: auto; }
+      .gh-grid { aspect-ratio: 53 / 7; flex: none; }
       .statement { max-width: 100%; font-size: clamp(20px, 5vw, 28px); }
       .code-bg { display: none; }
       /* Windows go full-screen on tablet */
@@ -1021,9 +1028,10 @@
       .top-grid .col-section { display: block !important; }
       .col-header { padding: 0.5em 0; }
       .middle { padding: 1rem 0; min-height: auto; flex: 0 0 auto; }
-      .github-graph { padding: 0.75rem var(--edge); }
+      .github-graph { padding: 0.5rem var(--edge); flex: 0 0 auto; }
+      .gh-wrap { height: auto; }
+      .gh-grid { aspect-ratio: 53 / 7; flex: none; }
       .gh-legend { display: none; }
-      .gh-months { font-size: 8px; }
       .cta-btn { min-height: 44px; }
       .statement { font-size: clamp(18px, 6vw, 24px); padding: 0 var(--edge); }
       .connect-ctas { grid-template-columns: 1fr; max-width: 100%; }
