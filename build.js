@@ -258,7 +258,7 @@ function render(template, data, lang, featuredPosts) {
   );
 
   // Ribbon
-  const ribbonItems = [...data.ribbon, ...data.ribbon].map(r => `<span>${r}</span>`).join('\n    ');
+  const ribbonItems = [...data.ribbon, ...data.ribbon, ...data.ribbon, ...data.ribbon].map(r => `<span>${r}</span>`).join('\n    ');
   html = html.replace(
     /<div class="ribbon-track">[\s\S]*?<\/div>/,
     `<div class="ribbon-track">\n    ${ribbonItems}\n  </div>`
