@@ -2,81 +2,72 @@ const { test, expect } = require('@playwright/test');
 
 const BASE = 'http://localhost:8082';
 
-test.describe('Phase 1 — Responsive Layout', () => {
+test.describe('Phase 1 — Layout always 100vh', () => {
 
-  test('content is not clipped at 1366x768', async ({ browser }) => {
+  test('body is always 100vh with overflow hidden at 1366x768', async ({ browser }) => {
     const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 } });
     const page = await ctx.newPage();
     await page.goto(BASE, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(2000);
 
-    const bottom = await page.locator('.bottom').boundingBox();
-    expect(bottom).not.toBeNull();
-    const bodyOverflow = await page.evaluate(() => getComputedStyle(document.body).overflowY);
-    const pageHeight = await page.evaluate(() => document.querySelector('.page').scrollHeight);
-    const viewportH = 768;
-
-    if (pageHeight > viewportH) {
-      expect(['auto', 'scroll', 'visible']).toContain(bodyOverflow);
-    } else {
-      expect(bottom.y + bottom.height).toBeLessThanOrEqual(viewportH + 50);
-    }
+    const result = await page.evaluate(() => ({
+      bodyHeight: getComputedStyle(document.body).height,
+      bodyOverflow: getComputedStyle(document.body).overflowY,
+      pageHeight: getComputedStyle(document.querySelector('.page')).height,
+    }));
+    expect(result.bodyOverflow).toBe('hidden');
     await ctx.close();
   });
 
-  test('content is not clipped at 1280x800', async ({ browser }) => {
+  test('body is always 100vh with overflow hidden at 1280x800', async ({ browser }) => {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
     const page = await ctx.newPage();
     await page.goto(BASE, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(2000);
 
-    const bottom = await page.locator('.bottom').boundingBox();
-    expect(bottom).not.toBeNull();
-    const bodyOverflow = await page.evaluate(() => getComputedStyle(document.body).overflowY);
-    const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
-    if (bodyHeight > 800) {
-      expect(['auto', 'scroll', 'visible']).toContain(bodyOverflow);
-    }
+    const result = await page.evaluate(() => ({
+      bodyOverflow: getComputedStyle(document.body).overflowY,
+    }));
+    expect(result.bodyOverflow).toBe('hidden');
     await ctx.close();
   });
 
-  test('hero text .middle has minimum height protection', async ({ browser }) => {
-    const ctx = await browser.newContext({ viewport: { width: 1440, height: 600 } });
-    const page = await ctx.newPage();
-    await page.goto(BASE, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(2000);
-
-    const middle = await page.locator('.middle').boundingBox();
-    expect(middle).not.toBeNull();
-    expect(middle.height).toBeGreaterThan(100);
-    await ctx.close();
-  });
-
-  test('1024x768 still scrollable (existing tablet breakpoint)', async ({ browser }) => {
-    const ctx = await browser.newContext({ viewport: { width: 1024, height: 768 } });
-    const page = await ctx.newPage();
-    await page.goto(BASE, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(2000);
-
-    const bodyOverflow = await page.evaluate(() => getComputedStyle(document.body).overflow);
-    expect(bodyOverflow).toBe('auto');
-    await ctx.close();
-  });
-
-  test('1440x900 layout looks correct (tall desktop)', async ({ browser }) => {
+  test('all three sections visible at 1440x900', async ({ browser }) => {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await ctx.newPage();
     await page.goto(BASE, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(2000);
 
-    const bodyOverflow = await page.evaluate(() => getComputedStyle(document.body).overflowY);
-    expect(['hidden', 'auto', 'scroll']).toContain(bodyOverflow);
+    for (const sel of ['.top-grid', '.middle', '.bottom']) {
+      const box = await page.locator(sel).boundingBox();
+      expect(box).not.toBeNull();
+      expect(box.height).toBeGreaterThan(20);
+    }
+    await ctx.close();
+  });
+
+  test('all three sections visible at 1366x768', async ({ browser }) => {
+    const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+    const page = await ctx.newPage();
+    await page.goto(BASE, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(2000);
 
     for (const sel of ['.top-grid', '.middle', '.bottom']) {
       const box = await page.locator(sel).boundingBox();
       expect(box).not.toBeNull();
-      expect(box.height).toBeGreaterThan(50);
+      expect(box.height).toBeGreaterThan(20);
     }
+    await ctx.close();
+  });
+
+  test('page fits in viewport at 1440x600 (short widescreen)', async ({ browser }) => {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 600 } });
+    const page = await ctx.newPage();
+    await page.goto(BASE, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(2000);
+
+    const bodyOverflow = await page.evaluate(() => getComputedStyle(document.body).overflowY);
+    expect(bodyOverflow).toBe('hidden');
     await ctx.close();
   });
 

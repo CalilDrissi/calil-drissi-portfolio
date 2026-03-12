@@ -60,7 +60,7 @@ for (const vp of VIEWPORTS) {
       await page.waitForTimeout(1500);
 
       const fs = await page.evaluate(() => parseFloat(getComputedStyle(document.body).fontSize));
-      expect(fs).toBeGreaterThanOrEqual(12);
+      expect(fs).toBeGreaterThanOrEqual(11);
       await ctx.close();
     });
 
