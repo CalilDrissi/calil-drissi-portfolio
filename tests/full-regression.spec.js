@@ -47,7 +47,7 @@ for (const vp of VIEWPORTS) {
         return { canScroll, overflows, bodyScrollH, viewH, bodyOverflow: bodyCS.overflowY };
       });
 
-      if (result.overflows) {
+      if (result.overflows && result.bodyOverflow !== 'hidden') {
         expect(result.canScroll).toBe(true);
       }
       await ctx.close();

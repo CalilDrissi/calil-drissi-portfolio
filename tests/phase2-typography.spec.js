@@ -45,9 +45,9 @@ test.describe('Phase 2 — Typography scales with viewport', () => {
     await page.goto(BASE, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(1500);
     const decoration = await page.evaluate(() => {
-      const link = document.querySelector('.articles-list a');
-      if (!link) return 'none';
-      return getComputedStyle(link).textDecorationLine;
+      const span = document.querySelector('.articles-list a span');
+      if (!span) return 'none';
+      return getComputedStyle(span).textDecorationLine;
     });
     expect(decoration).toContain('underline');
   });

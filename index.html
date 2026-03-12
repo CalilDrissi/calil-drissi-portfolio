@@ -87,8 +87,12 @@
       --serif: 'Instrument Serif', 'Georgia', serif;
       --col-gap: clamp(16px, 2.5vw, 40px);
       --edge: clamp(12px, 1.4vw, 20px);
-      --label: clamp(9px, 0.7vw, 13px);
-      --body: clamp(11px, 0.8vw, 15px);
+      --label: clamp(0.65rem, 1.2vw, 0.75rem);
+      --body: clamp(0.8rem, 1.5vw, 0.9375rem);
+      --name: clamp(1rem, 2.5vw, 1.25rem);
+      --hero: clamp(1.1rem, 3vw, 1.75rem);
+      --article: clamp(0.78rem, 1.4vw, 0.875rem);
+      --ticker: clamp(0.55rem, 1vw, 0.7rem);
     }
 
     html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
@@ -136,18 +140,17 @@
       display: flex;
       align-items: center;
       gap: 0.4em;
-      margin-bottom: clamp(6px, 1.4vh, 14px);
+      margin-bottom: 0.5em;
       font-size: var(--label);
-      font-weight: 500;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.12em;
       color: #fff;
     }
     .col-header::before {
-      content: '';
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: var(--accent);
+      content: '●';
+      font-size: 0.5em;
+      color: var(--accent);
       flex-shrink: 0;
     }
 
@@ -206,16 +209,17 @@
       60% { clip-path: inset(0 0% 0 0); opacity: 0.55; }
       75%, 100% { clip-path: inset(0 0% 0 0); opacity: 0; }
     }
-    .intro-name { font-weight: 500; }
+    .intro-name { font-weight: 500; font-size: var(--name); }
     .intro-title {
       color: var(--fg-dim);
       display: inline-block;
       border: 1px solid var(--fg-faint);
       border-radius: 4px;
-      padding: 2px 8px;
-      margin-top: 4px;
-      font-size: calc(var(--body) - 1px);
+      padding: clamp(1px, 0.2vh, 3px) clamp(4px, 0.5vw, 10px);
+      margin-top: clamp(2px, 0.4vh, 6px);
+      font-size: clamp(0.6rem, 1vw, 0.8rem);
       letter-spacing: 0.02em;
+      white-space: nowrap;
     }
 
     /* Hover pill on identity */
@@ -314,8 +318,9 @@
       font-size: var(--label);
       color: var(--fg-dim);
       text-transform: uppercase;
-      letter-spacing: 0.03em;
-      margin-bottom: clamp(2px, 0.6vh, 6px);
+      letter-spacing: 0.12em;
+      font-weight: 600;
+      margin-bottom: 0.5em;
       margin-top: clamp(6px, 1.4vh, 14px);
       display: inline-block;
       border: 1px solid var(--fg-faint);
@@ -415,6 +420,7 @@
     }
     .articles-list a {
       color: var(--fg-dim);
+      font-size: var(--article);
       text-decoration: none;
       transition: color 0.15s;
       display: flex;
@@ -433,10 +439,12 @@
       text-underline-offset: 0.2em;
       transition: text-decoration-color 0.15s;
     }
-    .articles-list a:hover {
+    .articles-list a:hover,
+    .articles-list a:focus-visible {
       color: var(--accent);
     }
-    .articles-list a:hover span {
+    .articles-list a:hover span,
+    .articles-list a:focus-visible span {
       text-decoration-color: var(--accent);
     }
     .article-preview {
@@ -550,26 +558,28 @@
       color: var(--fg);
       text-decoration: none;
     }
-    .cta-btn-flair {
+    .cta-btn-primary {
+      background: var(--accent);
       border-color: var(--accent);
-      color: var(--accent);
+      color: #fff;
+      font-weight: 600;
       position: relative;
       overflow: hidden;
     }
-    .cta-btn-flair::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(94,43,255,0.12), transparent);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    .cta-btn-flair:hover {
-      border-color: var(--accent);
+    .cta-btn-primary:hover {
+      background: #7c3aed;
+      border-color: #7c3aed;
       color: #fff;
-      background: var(--accent);
     }
-    .cta-btn-flair:hover::before { opacity: 1; }
+    .cta-btn-secondary {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .cta-btn-secondary:hover {
+      background: rgba(94,43,255,0.1);
+      color: #fff;
+      border-color: var(--accent);
+    }
 
     /* ---- MIDDLE (statement) ---- */
     .middle {
@@ -652,7 +662,7 @@
 
     .statement {
       font-family: var(--mono);
-      font-size: clamp(12px, 1.6vw, 24px);
+      font-size: var(--hero);
       line-height: 1.45;
       max-width: 55%;
       font-weight: 400;
@@ -897,14 +907,14 @@
       }
       .top-grid {
         grid-template-columns: 1fr 1fr;
-        gap: 20px;
+        gap: 2rem;
         padding: 0;
         border: none;
       }
       /* Show all sections — reorganize into 2-col grid */
       .top-grid .col-section { display: block !important; }
-      .middle { padding: 20px 0; }
-      .statement { max-width: 100%; font-size: clamp(20px, 5vw, 28px); }
+      .middle { padding: 1.25rem 0; }
+      .statement { max-width: 100%; font-size: clamp(1.25rem, 5vw, 1.75rem); }
       .code-bg { display: none; }
       /* Windows go full-screen on tablet */
       .win.open {
@@ -923,24 +933,21 @@
       :root {
         --edge: 16px;
         --col-gap: 16px;
-        --label: 12px;
-        --body: 14px;
       }
-      .page { gap: 20px; padding-bottom: 36px; }
+      .page { gap: 20px; padding-bottom: 36px; padding-inline: 16px; }
       .top-grid {
         grid-template-columns: 1fr;
         gap: 16px;
       }
       .top-grid .col-section { display: block !important; }
-      .col-header { font-size: 12px; padding: 8px 0; }
-      .middle { padding: 16px 0; min-height: auto; flex: 0 0 auto; }
+      .col-header { padding: 0.5em 0; }
+      .middle { padding: 1rem 0; min-height: auto; flex: 0 0 auto; }
       .cta-btn { min-height: 44px; }
-      .statement { font-size: clamp(18px, 6vw, 24px); padding: 0 var(--edge); }
+      .statement { font-size: clamp(1.1rem, 6vw, 1.5rem); padding: 0 var(--edge); }
       .connect-ctas { grid-template-columns: 1fr; max-width: 100%; }
       .bottom-bar { padding: 0 var(--edge); }
       .project-strip { padding: 0 var(--edge); }
-      .ribbon { height: 28px; }
-      .ribbon-track span { font-size: 10px; padding: 0 16px; }
+      .ribbon-track span { padding: 0 clamp(8px, 3vw, 16px); }
       /* Windows full-screen on mobile */
       .win.open {
         width: 100vw !important;
@@ -1001,15 +1008,15 @@
     }
     .ribbon-track span {
       font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.06em;
+      font-size: var(--ticker);
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #fff;
-      padding: 0 24px;
+      padding: 0 clamp(12px, 2vw, 24px);
     }
     .ribbon-track span::after {
       content: '✦';
-      margin-left: 24px;
+      margin-left: clamp(12px, 2vw, 24px);
       opacity: 0.6;
     }
     @keyframes ribbonScroll {
@@ -2001,10 +2008,10 @@
       </div>
 
       <div class="connect-ctas">
-        <button class="cta-btn" id="openScheduleBtn">Schedule a Call &#8599;</button>
+        <button class="cta-btn cta-btn-primary cta-btn-terminal cursor-zone" id="terminalChallengeBtn">Win Free Consult &#9655;</button>
+        <button class="cta-btn cta-btn-secondary" id="openScheduleBtn">Schedule a Call &#8599;</button>
         <button class="cta-btn" id="openCollabBtn">Collaboration &#8599;</button>
         <button class="cta-btn" id="openMessageBtn">Leave a Message &#9993;</button>
-        <button class="cta-btn cta-btn-terminal cursor-zone" id="terminalChallengeBtn">Win Free Consult &#9655;</button>
       </div>
     </div>
 
