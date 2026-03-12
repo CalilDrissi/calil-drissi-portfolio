@@ -4506,7 +4506,14 @@
       WM.focus(repoWin);
       return;
     }
-    if (repoWin.minimized) { WM.restore(repoWin); return; }
+    if (repoWin.minimized) {
+      WM.restore(repoWin);
+      if (repoName) {
+        var r = REPOS.find(function(x) { return x.name === repoName; });
+        if (r) selectRepo(r);
+      }
+      return;
+    }
     repoPopup.classList.add('open');
     WM.focus(repoWin);
     // Auto-select repo if specified, or first repo if none active
