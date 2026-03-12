@@ -177,7 +177,7 @@ function render(template, data, lang, featuredPosts, ghData) {
         <div class="intro-hover-pill"><span class="pill-track">${data.intro.hoverPill}&nbsp;&nbsp;&nbsp;⬥&nbsp;&nbsp;&nbsp;${data.intro.hoverPill}&nbsp;&nbsp;&nbsp;⬥&nbsp;&nbsp;&nbsp;</span></div>
         <div class="cursor-video-preview" id="cursorVideoPreview">
           <video src="/video.mp4" muted playsinline loop></video>
-          <div class="cvp-label"><span class="cvp-dot"></span>Click to discover</div>
+          <div class="cvp-label"><span class="cvp-dot"></span>${lang === 'fr' ? 'Cliquer pour découvrir' : 'Click to discover'}</div>
         </div>
         <img class="intro-avatar" src="${data.intro.avatarUrl}" alt="CD" />
         <div>
@@ -363,7 +363,7 @@ function render(template, data, lang, featuredPosts, ghData) {
   );
   html = html.replace(
     /<div class="about-bio-text">[\s\S]*?<\/div>\s*\n\s*(?:<div class="about-video-section">[\s\S]*?<\/div>\s*\n\s*)?<div class="about-details-grid">/,
-    `<div class="about-bio-text">\n        ${data.about.bio.map(p => `<p>${p}</p>`).join('\n        ')}\n      </div>\n      <div class="about-video-section">\n        <video src="/video-ai-me.mp4" controls playsinline></video>\n        <div class="about-video-label"><span class="avl-icon"></span>Video Introduction</div>\n      </div>\n      <div class="about-details-grid">`
+    `<div class="about-bio-text">\n        ${data.about.bio.map(p => `<p>${p}</p>`).join('\n        ')}\n      </div>\n      <div class="about-video-section">\n        <video src="/video-ai-me.mp4" controls playsinline></video>\n        <div class="about-video-label"><span class="avl-icon"></span>${lang === 'fr' ? 'Présentation vidéo' : 'Video Introduction'}</div>\n      </div>\n      <div class="about-details-grid">`
   );
   html = html.replace(
     /<div class="about-details-grid">[\s\S]*?<\/div>\s*\n\s*<\/div>\s*\n\s*<\/div>\s*\n\s*<!-- Chat Panel -->/,

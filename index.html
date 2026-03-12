@@ -3653,6 +3653,16 @@
     ];
     var grid = document.getElementById('ghRepoGrid');
     if (!grid) return;
+    // i18n for repos header
+    if (LANG === 'fr') {
+      var hdr = document.querySelector('.gh-repos-header');
+      if (hdr) {
+        var sp = hdr.querySelector('span');
+        if (sp) sp.textContent = '· Dépôts';
+        var a = hdr.querySelector('a');
+        if (a) a.textContent = 'Voir sur GitHub ↗';
+      }
+    }
     REPOS.forEach(function(r) {
       var card = document.createElement('div');
       card.className = 'gh-repo-card';
