@@ -257,7 +257,7 @@ function render(template, data, lang, featuredPosts, ghData) {
 
   // CONNECT section
   html = html.replace(
-    /<!-- CONNECT -->[\s\S]*?<\/div>\s*\n\s*<\/div>\s*\n\s*<\/div>\s*\n\s*<!-- STATEMENT -->/,
+    /<!-- CONNECT -->[\s\S]*?<\/div>\s*\n\s*<\/div>\s*\n\s*<!-- GITHUB CONTRIBUTIONS/,
     `<!-- CONNECT -->
     <div class="col-section">
       <div class="col-header">${data.connect.header}</div>
@@ -280,7 +280,7 @@ function render(template, data, lang, featuredPosts, ghData) {
 
   </div>
 
-  <!-- STATEMENT -->`
+  <!-- GITHUB CONTRIBUTIONS`
   );
 
   // Statement text
