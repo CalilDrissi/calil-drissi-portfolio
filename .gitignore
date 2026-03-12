@@ -7,3 +7,4 @@ node_modules/
 !apple-touch-icon.png
 test-win.js
 .env
+test-results/

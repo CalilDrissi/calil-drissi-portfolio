@@ -79,16 +79,16 @@
     :root {
       --bg: #121212;
       --fg: #ffffff;
-      --fg-dim: rgba(255,255,255,0.8);
-      --fg-faint: rgba(255,255,255,0.22);
+      --fg-dim: rgba(255,255,255,0.85);
+      --fg-faint: rgba(255,255,255,0.25);
       --accent: #5e2bff;
       --border: rgba(255,255,255,0.08);
       --mono: 'DM Mono', 'Courier New', monospace;
       --serif: 'Instrument Serif', 'Georgia', serif;
       --col-gap: 40px;
       --edge: 20px;
-      --label: clamp(10px, 0.55vw, 12px);
-      --body: clamp(11px, 0.6vw, 13px);
+      --label: clamp(11px, 0.65vw, 13px);
+      --body: clamp(13px, 0.75vw, 15px);
     }
 
     html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
@@ -98,10 +98,25 @@
       color: var(--fg);
       font-family: var(--mono);
       font-size: var(--body);
-      line-height: 1.45;
-      letter-spacing: -0.02em;
+      line-height: 1.55;
+      letter-spacing: 0;
       overflow: hidden;
       height: 100vh;
+    }
+
+    /* Allow scrolling on short viewports where content gets clipped */
+    @media (max-height: 750px) {
+      body {
+        overflow-y: auto;
+        height: auto;
+      }
+      .page {
+        height: auto;
+        min-height: 100vh;
+      }
+      .bottom {
+        flex-shrink: 1;
+      }
     }
 
     ::selection { background: var(--accent); color: #fff; }
@@ -114,6 +129,7 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      min-height: 700px;
       padding: var(--edge);
       padding-bottom: 28px;
       gap: 0;
@@ -184,7 +200,7 @@
     }
     .heartbeat-svg .hb-text {
       font-family: 'Space Mono', monospace;
-      font-size: 5px;
+      font-size: 7px;
       letter-spacing: 0.08em;
       fill: rgba(255,255,255,0.35);
       clip-path: inset(0 100% 0 0);
@@ -229,7 +245,7 @@
       width: 120px;
       overflow: hidden;
       font-family: var(--mono);
-      font-size: 8px;
+      font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -330,7 +346,7 @@
     .ventures-list {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
       margin-bottom: 12px;
     }
     .venture-item {
@@ -346,8 +362,8 @@
       transition: color 0.2s;
     }
     .venture-status {
-      font-size: calc(var(--label) - 2px);
-      padding: 1px 6px;
+      font-size: calc(var(--label) - 1px);
+      padding: 2px 7px;
       border-radius: 2px;
       background: var(--fg-faint);
       color: var(--fg-dim);
@@ -388,19 +404,23 @@
     .articles-list {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
       color: var(--fg-dim);
       position: relative;
     }
     .articles-list a {
       color: var(--fg-dim);
       text-decoration: none;
-      transition: color 0.15s;
+      text-decoration-line: underline;
+      text-decoration-color: rgba(255,255,255,0.12);
+      text-underline-offset: 3px;
+      transition: color 0.15s, text-decoration-color 0.15s;
       display: block;
       padding: 4px 0;
     }
     .articles-list a:hover {
       color: var(--accent);
+      text-decoration-color: var(--accent);
     }
     .article-preview {
       position: fixed;
@@ -448,7 +468,7 @@
     .article-preview-meta {
       padding: 8px 14px;
       border-top: 1px solid rgba(255,255,255,0.06);
-      font-size: 9px;
+      font-size: 10px;
       color: var(--fg-faint);
       display: flex;
       gap: 12px;
@@ -458,7 +478,7 @@
     .connect-links {
       display: flex;
       flex-direction: column;
-      gap: 1px;
+      gap: 3px;
     }
     .connect-links a {
       color: var(--fg-dim);
@@ -484,11 +504,11 @@
       max-width: 340px;
     }
     .cta-btn {
-      padding: 5px 10px;
+      padding: 8px 12px;
       border: 1px solid var(--fg-faint);
       border-radius: 2px;
       font-family: var(--mono);
-      font-size: 9px;
+      font-size: 11px;
       color: var(--fg-dim);
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -496,6 +516,10 @@
       background: none;
       transition: border-color 0.2s, color 0.2s, background 0.2s;
       text-align: center;
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     .cta-btn:hover {
       border-color: var(--fg);
@@ -529,7 +553,7 @@
       display: flex;
       align-items: center;
       position: relative;
-      min-height: min-content;
+      min-height: 180px;
     }
     /* Code background */
     .code-bg {
@@ -604,10 +628,10 @@
     .statement {
       font-family: var(--mono);
       font-size: clamp(15px, 1.84vw, 24px);
-      line-height: 1.4;
+      line-height: 1.5;
       max-width: 55%;
-      font-weight: 300;
-      letter-spacing: -0.02em;
+      font-weight: 400;
+      letter-spacing: -0.01em;
       position: relative;
       z-index: 2;
     }
@@ -709,10 +733,10 @@
       gap: 6px;
     }
     .filter-tab {
-      padding: 5px 14px;
+      padding: 6px 16px;
       border-radius: 9999px;
       font-family: var(--mono);
-      font-size: calc(var(--label) - 1px);
+      font-size: var(--label);
       text-transform: uppercase;
       letter-spacing: 0.03em;
       cursor: pointer;
@@ -774,7 +798,7 @@
       align-items: center;
       justify-content: center;
       font-family: var(--mono);
-      font-size: 9px;
+      font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.1em;
       color: #fff;
@@ -808,10 +832,10 @@
       bottom: 0; left: 0; right: 0;
       padding: 6px 8px;
       background: linear-gradient(transparent, rgba(0,0,0,0.7));
-      font-size: 9px;
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      color: rgba(255,255,255,0.7);
+      color: rgba(255,255,255,0.8);
     }
     .os-stars {
       position: absolute;
@@ -832,7 +856,7 @@
       background: linear-gradient(transparent, rgba(0,0,0,0.8));
       font-size: 9px;
       font-family: var(--mono);
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.65);
       line-height: 1.4;
       z-index: 1;
     }
@@ -875,7 +899,7 @@
         --edge: 16px;
         --col-gap: 16px;
         --label: 12px;
-        --body: 13px;
+        --body: 14px;
       }
       .page { gap: 20px; padding-bottom: 36px; }
       .top-grid {
@@ -885,6 +909,11 @@
       .top-grid .col-section { display: block !important; }
       .col-header { font-size: 12px; padding: 8px 0; }
       .middle { padding: 16px 0; min-height: auto; flex: 0 0 auto; }
+      .cta-btn {
+        min-height: 44px;
+        font-size: 12px;
+        padding: 10px 14px;
+      }
       .statement { font-size: clamp(18px, 6vw, 24px); padding: 0 var(--edge); }
       .connect-ctas { grid-template-columns: 1fr; max-width: 100%; }
       .bottom-bar { padding: 0 var(--edge); }
@@ -998,6 +1027,11 @@
       opacity: 1;
       transform: scale(1);
       pointer-events: auto;
+      max-height: calc(100vh - 40px);
+      max-height: calc(100dvh - 40px);
+    }
+    .win .win-content {
+      overflow-y: auto;
     }
     .win.focused {
       box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08);
