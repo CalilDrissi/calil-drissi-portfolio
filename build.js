@@ -16,6 +16,8 @@ if (fs.existsSync(envPath)) {
 const WP_URL = process.env.WP_URL; // e.g. https://cms.drissi.xyz
 const WP_USER = process.env.WP_USER;
 const WP_APP_PASSWORD = process.env.WP_APP_PASSWORD;
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_USERNAME = 'CalilDrissi';
 
 // ---- Helpers ----
 function readJSON(file) {
@@ -55,6 +57,71 @@ function decodeEntities(str) {
             .replace(/&rdquo;/g, '\u201D').replace(/&ldquo;/g, '\u201C')
             .replace(/&mdash;/g, '\u2014').replace(/&ndash;/g, '\u2013')
             .replace(/&hellip;/g, '\u2026');
+}
+
+// ---- GitHub Contributions ----
+async function fetchGitHubContributions() {
+  if (!GITHUB_TOKEN) {
+    console.log('⚠ No GITHUB_TOKEN — skipping contribution graph');
+    return null;
+  }
+  try {
+    const query = `{ user(login: "${GITHUB_USERNAME}") { contributionsCollection { contributionCalendar { totalContributions weeks { contributionDays { contributionCount date } } } } } }`;
+    const res = await fetch('https://api.github.com/graphql', {
+      method: 'POST',
+      headers: {
+        'Authorization': `bearer ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query }),
+    });
+    if (!res.ok) throw new Error(`GitHub API: ${res.status}`);
+    const json = await res.json();
+    return json.data.user.contributionsCollection.contributionCalendar;
+  } catch (err) {
+    console.log('⚠ GitHub contributions fetch failed:', err.message);
+    return null;
+  }
+}
+
+function countToLevel(count) {
+  if (count === 0) return 0;
+  if (count <= 2) return 1;
+  if (count <= 5) return 2;
+  if (count <= 9) return 3;
+  return 4;
+}
+
+function renderGitHubGrid(calendar) {
+  if (!calendar) return { grid: '', months: '', total: 0 };
+
+  const weeks = calendar.weeks;
+  const cells = [];
+  for (const week of weeks) {
+    for (const day of week.contributionDays) {
+      const level = countToLevel(day.contributionCount);
+      const title = `${day.contributionCount} contribution${day.contributionCount !== 1 ? 's' : ''} on ${day.date}`;
+      cells.push(`<div class="gh-cell" data-level="${level}" title="${title}"></div>`);
+    }
+  }
+
+  // Month labels — find first occurrence of each month
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const seen = new Set();
+  const months = [];
+  let cellIndex = 0;
+  for (const week of weeks) {
+    const firstDay = week.contributionDays[0];
+    const m = new Date(firstDay.date).getMonth();
+    if (!seen.has(m)) {
+      seen.add(m);
+      months.push(monthNames[m]);
+    }
+    cellIndex += week.contributionDays.length;
+  }
+  const monthsHTML = months.map(m => `<span>${m}</span>`).join('');
+
+  return { grid: cells.join(''), months: monthsHTML, total: calendar.totalContributions };
 }
 
 async function fetchWPPosts(lang) {
@@ -110,7 +177,7 @@ async function fetchWPPosts(lang) {
 }
 
 // ---- Template engine (simple token replacement) ----
-function render(template, data, lang, featuredPosts) {
+function render(template, data, lang, featuredPosts, ghData) {
   let html = template;
 
   // INTRO section
@@ -231,6 +298,23 @@ function render(template, data, lang, featuredPosts) {
     /<p class="statement">[\s\S]*?<\/p>/,
     `<p class="statement">${statementHTML}</p>`
   );
+
+  // GitHub contribution graph
+  if (ghData) {
+    const { grid, months, total } = renderGitHubGrid(ghData);
+    html = html.replace(
+      /<div class="gh-grid" id="ghGrid"><\/div>/,
+      `<div class="gh-grid" id="ghGrid">${grid}</div>`
+    );
+    html = html.replace(
+      /<div class="gh-months" id="ghMonths"><\/div>/,
+      `<div class="gh-months" id="ghMonths">${months}</div>`
+    );
+    html = html.replace(
+      /· Contributions/,
+      `· ${total} Contributions`
+    );
+  }
 
   // Project thumbs
   const thumbsHTML = data.projects.map(p =>
@@ -2157,6 +2241,11 @@ async function build() {
   let wpPostsEN = null;
   let wpPostsFR = null;
 
+  // Fetch GitHub contributions
+  console.log('  Fetching GitHub contributions...');
+  const ghData = await fetchGitHubContributions();
+  if (ghData) console.log(`  ✓ ${ghData.totalContributions} contributions in the last year`);
+
   if (WP_URL) {
     console.log(`  Fetching posts from ${WP_URL}...`);
     [wpPostsEN, wpPostsFR] = await Promise.all([
@@ -2191,7 +2280,7 @@ async function build() {
     // Portfolio page — filter featured posts (tagged "Featured")
     const featuredPosts = posts.filter(p => p.tags.some(t => t.toLowerCase() === 'featured'));
     mkdirp(lang.outDir);
-    const portfolioHTML = render(template, data, lang.code, featuredPosts);
+    const portfolioHTML = render(template, data, lang.code, featuredPosts, ghData);
     fs.writeFileSync(path.join(lang.outDir, 'index.html'), portfolioHTML);
     console.log(`  ✓ ${lang.code === 'en' ? '/' : '/fr/'}index.html`);
 

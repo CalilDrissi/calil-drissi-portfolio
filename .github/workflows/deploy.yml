@@ -26,6 +26,7 @@ jobs:
           WP_URL: ${{ secrets.WP_URL }}
           WP_USER: ${{ secrets.WP_USER }}
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
