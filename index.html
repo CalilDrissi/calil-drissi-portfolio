@@ -4142,59 +4142,10 @@
 })();
 </script>
 
-<!-- REPO BROWSER WINDOW -->
-<div class="win" id="repoPopup" data-win-id="repos" data-win-title="Source Code" style="width:860px;height:560px;top:calc(50% - 280px);left:calc(50% - 430px);">
-  <div class="win-resize win-resize-e"></div>
-  <div class="win-resize win-resize-w"></div>
-  <div class="win-resize win-resize-s"></div>
-  <div class="win-resize win-resize-n"></div>
-  <div class="win-resize win-resize-se"></div>
-  <div class="win-resize win-resize-sw"></div>
-  <div class="win-resize win-resize-ne"></div>
-  <div class="win-resize win-resize-nw"></div>
-  <div class="win-titlebar">
-    <div class="win-dots">
-      <span class="win-dot-close"></span>
-      <span class="win-dot-min"></span>
-      <span class="win-dot-max"></span>
-    </div>
-    <div class="win-titlebar-text">source code — browser</div>
-    <div class="win-titlebar-actions">
-      <a class="win-action-btn" id="rbGithubLink" href="https://github.com/CalilDrissi" target="_blank">GitHub ↗</a>
-    </div>
-  </div>
-  <div class="win-body" style="overflow:hidden;">
-    <div class="rb-layout">
-      <div class="rb-breadcrumb" id="rbBreadcrumb">
-        <span class="rb-breadcrumb-item rb-active">Select a repository</span>
-      </div>
-      <div class="rb-pane">
-        <div class="rb-sidebar">
-          <div class="rb-sidebar-label" id="rbSidebarLabel">Explorer</div>
-          <div class="rb-tree" id="rbTree">
-            <ul class="rb-tree-list" id="rbTreeList"></ul>
-          </div>
-        </div>
-        <div class="rb-viewer" id="rbViewer">
-          <div class="rb-viewer-empty">Select a file to view source code</div>
-        </div>
-      </div>
-      <div class="rb-statusbar">
-        <div class="rb-statusbar-left" id="rbStatus">Ready</div>
-        <div class="rb-statusbar-right" id="rbLang"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
+<!-- REPO BROWSER — dynamically created per-repo windows -->
 <script>
-// ======== REPO BROWSER (VS Code style) ========
+// ======== REPO BROWSER (VS Code style, multi-window) ========
 (function() {
-  var repoPopup = document.getElementById('repoPopup');
-  if (!repoPopup) return;
-  var repoWin = WM.register(repoPopup, 'Source Code');
-  repoWin.persistent = true;
-
   var REPOS = [
     { name: 'virtus', desc: 'AI Model Marketplace', lang: 'Python', branch: 'main' },
     { name: 'calil-drissi-portfolio', desc: 'Portfolio Website', lang: 'JavaScript', branch: 'main' },
@@ -4202,18 +4153,19 @@
     { name: 'transfers-ma', desc: 'Booking Platform', lang: 'HTML', branch: 'main' },
   ];
   var OWNER = 'CalilDrissi';
+  var globalTreeCache = {};
 
-  var treeList = document.getElementById('rbTreeList');
-  var viewer = document.getElementById('rbViewer');
-  var breadcrumb = document.getElementById('rbBreadcrumb');
-  var statusEl = document.getElementById('rbStatus');
-  var langEl = document.getElementById('rbLang');
-  var ghLink = document.getElementById('rbGithubLink');
-  var sidebarLabel = document.getElementById('rbSidebarLabel');
-  var activeRepo = null;
-  var treeCache = {};
-  var currentPath = ''; // tracks current folder path in explorer
-  var currentFile = null; // tracks currently viewed file
+  var IMAGE_EXTS = ['png','jpg','jpeg','gif','webp','svg','ico','bmp','tiff'];
+  var PDF_EXTS = ['pdf'];
+  var BINARY_EXTS = ['woff','woff2','ttf','otf','eot','zip','tar','gz','bz2','7z','rar','mp4','mp3','wav','ogg','webm','avi','mov','exe','dll','so','dylib','class','pyc','o','a','DS_Store'];
+
+  function getFileType(filename) {
+    var ext = filename.split('.').pop().toLowerCase();
+    if (IMAGE_EXTS.indexOf(ext) !== -1) return 'image';
+    if (PDF_EXTS.indexOf(ext) !== -1) return 'pdf';
+    if (BINARY_EXTS.indexOf(ext) !== -1) return 'binary';
+    return 'text';
+  }
 
   function getFileIcon(name) {
     var ext = name.split('.').pop().toLowerCase();
@@ -4224,6 +4176,9 @@
       json: ['◆', 'rb-file-json'], md: ['◆', 'rb-file-md'],
       toml: ['◆', 'rb-file-json'], yml: ['◆', 'rb-file-json'], yaml: ['◆', 'rb-file-json'],
       sh: ['◆', ''], txt: ['◆', ''], lock: ['◆', ''],
+      png: ['◆', 'rb-file-img'], jpg: ['◆', 'rb-file-img'], jpeg: ['◆', 'rb-file-img'],
+      gif: ['◆', 'rb-file-img'], svg: ['◆', 'rb-file-img'], webp: ['◆', 'rb-file-img'],
+      pdf: ['◆', 'rb-file-pdf'],
     };
     return map[ext] || ['◇', ''];
   }
@@ -4240,7 +4195,6 @@
     return e;
   }
 
-  // Build structured tree from flat file list
   function buildTree(files) {
     var root = { children: {}, files: [] };
     files.forEach(function(f) {
@@ -4255,7 +4209,6 @@
     return root;
   }
 
-  // Get items at a specific path in the tree
   function getItemsAtPath(tree, path) {
     var node = tree;
     if (path) {
@@ -4270,258 +4223,319 @@
     return { folders: folders, files: files };
   }
 
-  // Update breadcrumb
-  function updateBreadcrumb(repo, path, isFile) {
-    var html = '<span class="rb-breadcrumb-item" data-nav="root">' + repo.name + '</span>';
-    if (path) {
-      var parts = path.split('/');
-      var limit = isFile ? parts.length : parts.length;
-      for (var i = 0; i < limit; i++) {
-        var partial = parts.slice(0, i + 1).join('/');
-        var cls = (i === parts.length - 1) ? 'rb-breadcrumb-item rb-active' : 'rb-breadcrumb-item';
-        html += '<span class="rb-breadcrumb-sep">›</span>';
-        html += '<span class="' + cls + '" data-nav="' + partial + '">' + parts[i] + '</span>';
-      }
-    }
-    if (isFile) {
-      html += '<button class="rb-download" id="rbDownloadBtn" title="Download file">↓ Download</button>';
-    }
-    breadcrumb.innerHTML = html;
+  // Create a new repo browser window for a specific repo
+  function createRepoWindow(repoName) {
+    var repo = REPOS.find(function(x) { return x.name === repoName; });
+    if (!repo) return null;
 
-    // Attach click handlers to breadcrumb items
-    breadcrumb.querySelectorAll('.rb-breadcrumb-item').forEach(function(el) {
-      el.addEventListener('click', function() {
-        var nav = el.getAttribute('data-nav');
-        currentFile = null;
-        if (nav === 'root') {
-          currentPath = '';
-        } else {
-          currentPath = nav;
+    var winTitle = repo.name + ' — source';
+
+    // Check if window already exists
+    var existing = WM.windows.find(function(w) { return w.title === winTitle && !w.closed; });
+    if (existing) {
+      if (existing.minimized) { WM.restore(existing); }
+      else { WM.focus(existing); }
+      return existing;
+    }
+
+    var offset = WM.spawnOffset * 30;
+    WM.spawnOffset = (WM.spawnOffset + 1) % 8;
+    var x = Math.min(window.innerWidth - 500, 80 + offset);
+    var y = Math.min(window.innerHeight - 400, 40 + offset);
+
+    var el = document.createElement('div');
+    el.className = 'win';
+    el.style.cssText = 'width:860px;height:560px;top:' + y + 'px;left:' + x + 'px;';
+    el.innerHTML =
+      '<div class="win-resize win-resize-e"></div>' +
+      '<div class="win-resize win-resize-w"></div>' +
+      '<div class="win-resize win-resize-s"></div>' +
+      '<div class="win-resize win-resize-n"></div>' +
+      '<div class="win-resize win-resize-se"></div>' +
+      '<div class="win-resize win-resize-sw"></div>' +
+      '<div class="win-resize win-resize-ne"></div>' +
+      '<div class="win-resize win-resize-nw"></div>' +
+      '<div class="win-titlebar">' +
+        '<div class="win-dots">' +
+          '<span class="win-dot-close"></span>' +
+          '<span class="win-dot-min"></span>' +
+          '<span class="win-dot-max"></span>' +
+        '</div>' +
+        '<div class="win-titlebar-text">' + repo.name + ' — source</div>' +
+        '<div class="win-titlebar-actions">' +
+          '<a class="win-action-btn" href="https://github.com/' + OWNER + '/' + repo.name + '" target="_blank">GitHub ↗</a>' +
+        '</div>' +
+      '</div>' +
+      '<div class="win-body" style="overflow:hidden;">' +
+        '<div class="rb-layout">' +
+          '<div class="rb-breadcrumb"><span class="rb-breadcrumb-item rb-active">Loading...</span></div>' +
+          '<div class="rb-pane">' +
+            '<div class="rb-sidebar">' +
+              '<div class="rb-sidebar-label">' + repo.name + '</div>' +
+              '<div class="rb-tree"><ul class="rb-tree-list"></ul></div>' +
+            '</div>' +
+            '<div class="rb-viewer"><div class="rb-viewer-empty">Loading file tree...</div></div>' +
+          '</div>' +
+          '<div class="rb-statusbar">' +
+            '<div class="rb-statusbar-left">Fetching...</div>' +
+            '<div class="rb-statusbar-right">' + repo.lang + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    WM.container.appendChild(el);
+    el.classList.add('open');
+    var win = WM.register(el, winTitle);
+
+    // Scoped DOM refs
+    var treeList = el.querySelector('.rb-tree-list');
+    var viewer = el.querySelector('.rb-viewer');
+    var breadcrumb = el.querySelector('.rb-breadcrumb');
+    var statusEl = el.querySelector('.rb-statusbar-left');
+    var langEl = el.querySelector('.rb-statusbar-right');
+    var currentPath = '';
+    var currentFile = null;
+
+    function updateBreadcrumb(path, isFile) {
+      var html = '<span class="rb-breadcrumb-item" data-nav="root">' + repo.name + '</span>';
+      if (path) {
+        var parts = path.split('/');
+        for (var i = 0; i < parts.length; i++) {
+          var partial = parts.slice(0, i + 1).join('/');
+          var cls = (i === parts.length - 1) ? 'rb-breadcrumb-item rb-active' : 'rb-breadcrumb-item';
+          html += '<span class="rb-breadcrumb-sep">›</span>';
+          html += '<span class="' + cls + '" data-nav="' + partial + '">' + parts[i] + '</span>';
         }
-        renderExplorer(repo);
-      });
-    });
-
-    // Download handler
-    if (isFile) {
-      document.getElementById('rbDownloadBtn').addEventListener('click', function() {
-        downloadFile(repo, path, parts[parts.length - 1]);
-      });
-    }
-  }
-
-  // Render sidebar tree for the repo
-  function renderSidebarTree(files, repo) {
-    treeList.innerHTML = '';
-    sidebarLabel.textContent = repo.name;
-    var allItems = [];
-    files.forEach(function(f) {
-      var parts = f.split('/');
-      for (var i = 1; i < parts.length; i++) {
-        var folderPath = parts.slice(0, i).join('/');
-        if (!allItems.find(function(x) { return x.path === folderPath; })) {
-          allItems.push({ path: folderPath, isFolder: true, depth: i - 1, name: parts[i - 1] });
-        }
       }
-      allItems.push({ path: f, isFolder: false, depth: parts.length - 1, name: parts[parts.length - 1] });
-    });
-
-    allItems.sort(function(a, b) {
-      var ap = a.path.split('/'), bp = b.path.split('/');
-      for (var i = 0; i < Math.max(ap.length, bp.length); i++) {
-        if (i >= ap.length) return -1;
-        if (i >= bp.length) return 1;
-        var aIsLast = (i === ap.length - 1), bIsLast = (i === bp.length - 1);
-        if (!aIsLast && bIsLast) return -1;
-        if (aIsLast && !bIsLast) return 1;
-        var cmp = ap[i].localeCompare(bp[i]);
-        if (cmp !== 0) return cmp;
+      if (isFile) {
+        html += '<button class="rb-download" title="Download file">↓ Download</button>';
       }
-      return 0;
-    });
+      breadcrumb.innerHTML = html;
 
-    var limited = allItems.slice(0, 300);
-    limited.forEach(function(item) {
-      var li = document.createElement('li');
-      li.className = 'rb-tree-item';
-      li.setAttribute('data-depth', Math.min(item.depth, 4));
-      li.setAttribute('data-path', item.path);
-      if (item.isFolder) {
-        li.innerHTML = '<span class="rb-tree-icon rb-folder">▸</span><span class="rb-tree-name">' + item.name + '</span>';
-        li.addEventListener('click', function() {
+      breadcrumb.querySelectorAll('.rb-breadcrumb-item').forEach(function(bcEl) {
+        bcEl.addEventListener('click', function() {
+          var nav = bcEl.getAttribute('data-nav');
           currentFile = null;
-          currentPath = item.path;
-          renderExplorer(repo);
-          highlightSidebarItem(item.path);
+          currentPath = (nav === 'root') ? '' : nav;
+          renderExplorer();
         });
-      } else {
-        var ic = getFileIcon(item.name);
-        li.innerHTML = '<span class="rb-tree-icon ' + ic[1] + '">' + ic[0] + '</span><span class="rb-tree-name">' + item.name + '</span>';
-        li.addEventListener('click', function() {
-          loadFile(repo, item.path, item.name);
-          highlightSidebarItem(item.path);
+      });
+
+      if (isFile) {
+        breadcrumb.querySelector('.rb-download').addEventListener('click', function() {
+          downloadFile(path, path.split('/').pop());
         });
       }
-      treeList.appendChild(li);
-    });
-  }
+    }
 
-  function highlightSidebarItem(path) {
-    treeList.querySelectorAll('.rb-tree-item').forEach(function(el) {
-      el.classList.toggle('rb-active', el.getAttribute('data-path') === path);
-    });
-  }
-
-  // Render file explorer in main area
-  function renderExplorer(repo) {
-    var tree = buildTree(treeCache[repo.name]);
-    var items = getItemsAtPath(tree, currentPath);
-    updateBreadcrumb(repo, currentPath, false);
-
-    var html = '<div class="rb-explorer"><div class="rb-explorer-grid">';
-    items.folders.forEach(function(folder) {
-      var folderPath = currentPath ? currentPath + '/' + folder : folder;
-      html += '<div class="rb-explorer-item rb-is-folder" data-path="' + folderPath + '">';
-      html += '<span class="rb-explorer-icon">▸</span>';
-      html += '<span class="rb-explorer-name">' + folder + '</span>';
-      html += '</div>';
-    });
-    items.files.forEach(function(file) {
-      var ic = getFileIcon(file.name);
-      html += '<div class="rb-explorer-item rb-is-file" data-path="' + file.path + '" data-name="' + file.name + '">';
-      html += '<span class="rb-explorer-icon ' + ic[1] + '">' + ic[0] + '</span>';
-      html += '<span class="rb-explorer-name">' + file.name + '</span>';
-      html += '</div>';
-    });
-    html += '</div></div>';
-    viewer.innerHTML = html;
-
-    var count = items.folders.length + items.files.length;
-    statusEl.textContent = count + ' items' + (currentPath ? ' in /' + currentPath : '');
-    langEl.textContent = repo.lang;
-
-    // Attach click handlers
-    viewer.querySelectorAll('.rb-explorer-item').forEach(function(el) {
-      el.addEventListener('click', function() {
-        if (el.classList.contains('rb-is-folder')) {
-          currentPath = el.getAttribute('data-path');
-          currentFile = null;
-          renderExplorer(repo);
-          highlightSidebarItem(currentPath);
-        } else {
-          var fp = el.getAttribute('data-path');
-          var fn = el.getAttribute('data-name');
-          loadFile(repo, fp, fn);
-          highlightSidebarItem(fp);
+    function renderSidebarTree(files) {
+      treeList.innerHTML = '';
+      var allItems = [];
+      files.forEach(function(f) {
+        var parts = f.split('/');
+        for (var i = 1; i < parts.length; i++) {
+          var folderPath = parts.slice(0, i).join('/');
+          if (!allItems.find(function(x) { return x.path === folderPath; })) {
+            allItems.push({ path: folderPath, isFolder: true, depth: i - 1, name: parts[i - 1] });
+          }
         }
+        allItems.push({ path: f, isFolder: false, depth: parts.length - 1, name: parts[parts.length - 1] });
       });
-    });
-  }
 
-  // Load and display file content
-  function loadFile(repo, filepath, filename) {
-    currentFile = { path: filepath, name: filename };
-    updateBreadcrumb(repo, filepath, true);
-    viewer.innerHTML = '<div class="rb-viewer-empty">Loading...</div>';
-    statusEl.textContent = 'Fetching ' + filename + '...';
+      allItems.sort(function(a, b) {
+        var ap = a.path.split('/'), bp = b.path.split('/');
+        for (var i = 0; i < Math.max(ap.length, bp.length); i++) {
+          if (i >= ap.length) return -1;
+          if (i >= bp.length) return 1;
+          var aIsLast = (i === ap.length - 1), bIsLast = (i === bp.length - 1);
+          if (!aIsLast && bIsLast) return -1;
+          if (aIsLast && !bIsLast) return 1;
+          var cmp = ap[i].localeCompare(bp[i]);
+          if (cmp !== 0) return cmp;
+        }
+        return 0;
+      });
 
-    fetch('https://api.github.com/repos/' + OWNER + '/' + repo.name + '/contents/' + filepath + '?ref=' + repo.branch, {
-      headers: { 'Accept': 'application/vnd.github.v3.raw' }
-    })
-      .then(function(r) { if (!r.ok) throw new Error(r.status); return r.text(); })
-      .then(function(text) {
-        var lines = text.split('\n');
-        var rows = lines.map(function(line, i) {
-          return '<div class="rb-code-row"><div class="rb-ln">' + (i + 1) + '</div><div class="rb-lc">' + highlightLine(line) + '</div></div>';
-        }).join('');
-        viewer.innerHTML = '<div class="rb-code-wrap"><div class="rb-code-table">' + rows + '</div></div>';
-        statusEl.textContent = filename + ' · ' + lines.length + ' lines';
+      allItems.slice(0, 300).forEach(function(item) {
+        var li = document.createElement('li');
+        li.className = 'rb-tree-item';
+        li.setAttribute('data-depth', Math.min(item.depth, 4));
+        li.setAttribute('data-path', item.path);
+        if (item.isFolder) {
+          li.innerHTML = '<span class="rb-tree-icon rb-folder">▸</span><span class="rb-tree-name">' + item.name + '</span>';
+          li.addEventListener('click', function() {
+            currentFile = null;
+            currentPath = item.path;
+            renderExplorer();
+            highlightSidebarItem(item.path);
+          });
+        } else {
+          var ic = getFileIcon(item.name);
+          li.innerHTML = '<span class="rb-tree-icon ' + ic[1] + '">' + ic[0] + '</span><span class="rb-tree-name">' + item.name + '</span>';
+          li.addEventListener('click', function() {
+            loadFile(item.path, item.name);
+            highlightSidebarItem(item.path);
+          });
+        }
+        treeList.appendChild(li);
+      });
+    }
+
+    function highlightSidebarItem(path) {
+      treeList.querySelectorAll('.rb-tree-item').forEach(function(el) {
+        el.classList.toggle('rb-active', el.getAttribute('data-path') === path);
+      });
+    }
+
+    function renderExplorer() {
+      var tree = buildTree(globalTreeCache[repo.name]);
+      var items = getItemsAtPath(tree, currentPath);
+      updateBreadcrumb(currentPath, false);
+
+      var html = '<div class="rb-explorer"><div class="rb-explorer-grid">';
+      items.folders.forEach(function(folder) {
+        var folderPath = currentPath ? currentPath + '/' + folder : folder;
+        html += '<div class="rb-explorer-item rb-is-folder" data-path="' + folderPath + '">';
+        html += '<span class="rb-explorer-icon">▸</span>';
+        html += '<span class="rb-explorer-name">' + folder + '</span>';
+        html += '</div>';
+      });
+      items.files.forEach(function(file) {
+        var ic = getFileIcon(file.name);
+        html += '<div class="rb-explorer-item rb-is-file" data-path="' + file.path + '" data-name="' + file.name + '">';
+        html += '<span class="rb-explorer-icon ' + ic[1] + '">' + ic[0] + '</span>';
+        html += '<span class="rb-explorer-name">' + file.name + '</span>';
+        html += '</div>';
+      });
+      html += '</div></div>';
+      viewer.innerHTML = html;
+
+      var count = items.folders.length + items.files.length;
+      statusEl.textContent = count + ' items' + (currentPath ? ' in /' + currentPath : '');
+      langEl.textContent = repo.lang;
+
+      viewer.querySelectorAll('.rb-explorer-item').forEach(function(exEl) {
+        exEl.addEventListener('click', function() {
+          if (exEl.classList.contains('rb-is-folder')) {
+            currentPath = exEl.getAttribute('data-path');
+            currentFile = null;
+            renderExplorer();
+            highlightSidebarItem(currentPath);
+          } else {
+            loadFile(exEl.getAttribute('data-path'), exEl.getAttribute('data-name'));
+            highlightSidebarItem(exEl.getAttribute('data-path'));
+          }
+        });
+      });
+    }
+
+    function loadFile(filepath, filename) {
+      currentFile = { path: filepath, name: filename };
+      updateBreadcrumb(filepath, true);
+      viewer.innerHTML = '<div class="rb-viewer-empty">Loading...</div>';
+      statusEl.textContent = 'Fetching ' + filename + '...';
+
+      var fileType = getFileType(filename);
+      var rawUrl = 'https://raw.githubusercontent.com/' + OWNER + '/' + repo.name + '/' + repo.branch + '/' + filepath;
+      var apiUrl = 'https://api.github.com/repos/' + OWNER + '/' + repo.name + '/contents/' + filepath + '?ref=' + repo.branch;
+
+      if (fileType === 'image') {
+        viewer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#0d0d0d;padding:20px;">' +
+          '<img src="' + rawUrl + '" alt="' + escapeHtml(filename) + '" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:4px;" />' +
+          '</div>';
+        statusEl.textContent = filename + ' · image';
         langEl.textContent = filename.split('.').pop().toUpperCase();
-      })
-      .catch(function() {
-        viewer.innerHTML = '<div class="rb-viewer-empty">Failed to load file</div>';
-        statusEl.textContent = 'Error';
-      });
-  }
+        return;
+      }
 
-  // Download a single file
-  function downloadFile(repo, filepath, filename) {
-    statusEl.textContent = 'Downloading ' + filename + '...';
-    fetch('https://api.github.com/repos/' + OWNER + '/' + repo.name + '/contents/' + filepath + '?ref=' + repo.branch, {
-      headers: { 'Accept': 'application/vnd.github.v3.raw' }
-    })
-      .then(function(r) { if (!r.ok) throw new Error(r.status); return r.blob(); })
-      .then(function(blob) {
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        statusEl.textContent = 'Downloaded ' + filename;
-      })
-      .catch(function() {
-        statusEl.textContent = 'Download failed';
-      });
-  }
+      if (fileType === 'pdf') {
+        viewer.innerHTML = '<iframe src="' + rawUrl + '" style="width:100%;height:100%;border:none;background:#fff;"></iframe>';
+        statusEl.textContent = filename + ' · PDF document';
+        langEl.textContent = 'PDF';
+        return;
+      }
 
-  // Select repo — called from outside (repo cards) or openRepoBrowser
-  function selectRepo(repo) {
-    activeRepo = repo;
-    currentPath = '';
-    currentFile = null;
-    ghLink.href = 'https://github.com/' + OWNER + '/' + repo.name;
-    viewer.innerHTML = '<div class="rb-viewer-empty">Loading file tree...</div>';
-    statusEl.textContent = 'Fetching...';
-    langEl.textContent = repo.lang;
+      if (fileType === 'binary') {
+        viewer.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;color:rgba(255,255,255,0.5);">' +
+          '<div style="font-size:48px;">◇</div>' +
+          '<div style="font-size:14px;">' + escapeHtml(filename) + '</div>' +
+          '<div style="font-size:12px;color:rgba(255,255,255,0.3);">Binary file — cannot display as text</div>' +
+          '<button class="rb-download" style="margin-top:8px;" onclick="this.disabled=true;this.textContent=\'Downloading...\'">↓ Download file</button>' +
+          '</div>';
+        viewer.querySelector('.rb-download').addEventListener('click', function() {
+          downloadFile(filepath, filename);
+        });
+        statusEl.textContent = filename + ' · binary';
+        langEl.textContent = filename.split('.').pop().toUpperCase();
+        return;
+      }
 
-    if (treeCache[repo.name]) {
-      renderSidebarTree(treeCache[repo.name], repo);
-      renderExplorer(repo);
-      return;
+      // Text file
+      fetch(apiUrl, { headers: { 'Accept': 'application/vnd.github.v3.raw' } })
+        .then(function(r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+        .then(function(text) {
+          var lines = text.split('\n');
+          var rows = lines.map(function(line, i) {
+            return '<div class="rb-code-row"><div class="rb-ln">' + (i + 1) + '</div><div class="rb-lc">' + highlightLine(line) + '</div></div>';
+          }).join('');
+          viewer.innerHTML = '<div class="rb-code-wrap"><div class="rb-code-table">' + rows + '</div></div>';
+          statusEl.textContent = filename + ' · ' + lines.length + ' lines';
+          langEl.textContent = filename.split('.').pop().toUpperCase();
+        })
+        .catch(function() {
+          viewer.innerHTML = '<div class="rb-viewer-empty">Failed to load file</div>';
+          statusEl.textContent = 'Error';
+        });
     }
-    fetch('https://api.github.com/repos/' + OWNER + '/' + repo.name + '/git/trees/' + repo.branch + '?recursive=1')
-      .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function(data) {
-        var files = data.tree.filter(function(f) { return f.type === 'blob'; }).map(function(f) { return f.path; });
-        treeCache[repo.name] = files;
-        renderSidebarTree(files, repo);
-        renderExplorer(repo);
+
+    function downloadFile(filepath, filename) {
+      statusEl.textContent = 'Downloading ' + filename + '...';
+      fetch('https://api.github.com/repos/' + OWNER + '/' + repo.name + '/contents/' + filepath + '?ref=' + repo.branch, {
+        headers: { 'Accept': 'application/vnd.github.v3.raw' }
       })
-      .catch(function(err) {
-        viewer.innerHTML = '<div class="rb-viewer-empty">Failed to load: ' + err.message + '</div>';
-        statusEl.textContent = 'Error';
-      });
+        .then(function(r) { if (!r.ok) throw new Error(r.status); return r.blob(); })
+        .then(function(blob) {
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url; a.download = filename;
+          document.body.appendChild(a); a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          statusEl.textContent = 'Downloaded ' + filename;
+        })
+        .catch(function() { statusEl.textContent = 'Download failed'; });
+    }
+
+    // Load the repo tree
+    if (globalTreeCache[repo.name]) {
+      renderSidebarTree(globalTreeCache[repo.name]);
+      renderExplorer();
+    } else {
+      fetch('https://api.github.com/repos/' + OWNER + '/' + repo.name + '/git/trees/' + repo.branch + '?recursive=1')
+        .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(data) {
+          var files = data.tree.filter(function(f) { return f.type === 'blob'; }).map(function(f) { return f.path; });
+          globalTreeCache[repo.name] = files;
+          renderSidebarTree(files);
+          renderExplorer();
+        })
+        .catch(function(err) {
+          viewer.innerHTML = '<div class="rb-viewer-empty">Failed to load: ' + err.message + '</div>';
+          statusEl.textContent = 'Error';
+        });
+    }
+
+    // Animate in
+    gsap.fromTo(el, { scale: 0.92, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: 'power2.out' });
+    WM.focus(win);
+    return win;
   }
 
   window.openRepoBrowser = function(repoName) {
-    if (repoPopup.classList.contains('open') && !repoWin.minimized) {
-      // If a specific repo requested, switch to it
-      if (repoName && (!activeRepo || activeRepo.name !== repoName)) {
-        var r = REPOS.find(function(x) { return x.name === repoName; });
-        if (r) selectRepo(r);
-      }
-      WM.focus(repoWin);
-      return;
-    }
-    if (repoWin.minimized) {
-      WM.restore(repoWin);
-      if (repoName) {
-        var r = REPOS.find(function(x) { return x.name === repoName; });
-        if (r) selectRepo(r);
-      }
-      return;
-    }
-    repoPopup.classList.add('open');
-    WM.focus(repoWin);
-    // Auto-select repo if specified, or first repo if none active
-    var target = repoName ? REPOS.find(function(x) { return x.name === repoName; }) : null;
-    if (target) {
-      selectRepo(target);
-    } else if (!activeRepo) {
-      selectRepo(REPOS[0]);
+    if (repoName) {
+      createRepoWindow(repoName);
+    } else {
+      createRepoWindow(REPOS[0].name);
     }
   };
 
