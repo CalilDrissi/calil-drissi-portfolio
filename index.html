@@ -728,9 +728,27 @@
       display: flex;
       flex-direction: column;
       padding: clamp(4px, 0.8vh, 10px) 0;
+      position: relative;
+    }
+    .gh-username {
+      position: absolute;
+      top: 0;
+      right: 0;
+      font-size: var(--label);
+      color: var(--fg-faint);
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      transition: color 0.15s;
+    }
+    .gh-username:hover { color: var(--fg-dim); }
+    .gh-body {
+      display: flex;
+      gap: clamp(10px, 1.5vw, 20px);
+      align-items: stretch;
     }
     .gh-wrap {
-      width: 100%;
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
       gap: clamp(3px, 0.4vh, 6px);
@@ -745,12 +763,54 @@
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
-    .gh-header > a { margin-left: auto; }
-    .gh-header a {
-      color: var(--fg-faint);
-      text-decoration: none;
+    /* Code typing area next to graph */
+    .gh-code-area {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      position: relative;
+      border-left: 1px solid var(--border);
+      padding-left: clamp(8px, 1vw, 16px);
     }
-    .gh-header a:hover { color: var(--fg-dim); }
+    .gh-code-lines {
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 18px;
+      color: rgba(255,255,255,0.5);
+      white-space: pre;
+      overflow: hidden;
+      height: 100%;
+    }
+    .gh-code-lines .kw { color: #c792ea; }
+    .gh-code-lines .fn { color: #82aaff; }
+    .gh-code-lines .str { color: #c3e88d; }
+    .gh-code-lines .tp { color: #89ddff; }
+    .gh-code-lines .num { color: #f78c6c; }
+    .gh-code-lines .op { color: #89ddff; }
+    .gh-code-lines .pp { color: #ffcb6b; }
+    .gh-code-line {
+      display: block;
+      height: 18px;
+      overflow: hidden;
+    }
+    .gh-code-line::before {
+      content: attr(data-ln);
+      display: inline-block;
+      width: 22px;
+      text-align: right;
+      margin-right: 12px;
+      color: rgba(255,255,255,0.1);
+      user-select: none;
+    }
+    .gh-code-cursor {
+      display: inline-block;
+      width: 6px;
+      height: 13px;
+      background: var(--accent);
+      vertical-align: text-bottom;
+      animation: cursorBlink 1s step-end infinite;
+    }
+    @keyframes cursorBlink { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
     .gh-month-tabs {
       display: flex;
       gap: 2px;
@@ -1305,6 +1365,7 @@
       .top-grid .col-section { display: block !important; }
       .middle { padding: 0.75rem 0; }
       .github-section { padding: 0.75rem 0; }
+      .gh-code-area { display: none; }
       .gh-wrap { width: 100%; max-width: none; }
       .gh-repo-grid { grid-template-columns: 1fr 1fr; }
       .statement { max-width: 100%; font-size: var(--body); }
@@ -2429,16 +2490,21 @@
     </p>
   </div>
 
-  <!-- GITHUB CONTRIBUTIONS (full-width line) -->
+  <!-- GITHUB CONTRIBUTIONS (grid + code typing) -->
   <div class="github-section" id="githubGraph">
-    <div class="gh-wrap">
-      <div class="gh-header">
-        <span>· Contributions</span>
-        <div class="gh-month-tabs" id="ghMonthTabs"></div>
-        <a href="https://github.com/CalilDrissi" target="_blank" rel="noopener">@CalilDrissi</a>
+    <a class="gh-username" href="https://github.com/CalilDrissi" target="_blank" rel="noopener">@CalilDrissi</a>
+    <div class="gh-header">
+      <span>· Contributions</span>
+      <div class="gh-month-tabs" id="ghMonthTabs"></div>
+    </div>
+    <div class="gh-body">
+      <div class="gh-wrap">
+        <div class="gh-grid" id="ghGrid"></div>
+        <div class="gh-month-stats" id="ghMonthStats"></div>
       </div>
-      <div class="gh-grid" id="ghGrid"></div>
-      <div class="gh-month-stats" id="ghMonthStats"></div>
+      <div class="gh-code-area">
+        <div class="gh-code-lines" id="ghCodeLines"></div>
+      </div>
     </div>
   </div>
 
@@ -3803,6 +3869,156 @@
 
     renderTabs();
     renderGrid();
+  })();
+
+  // ======== GH CODE TYPING ANIMATION ========
+  (function() {
+    var container = document.getElementById('ghCodeLines');
+    if (!container) return;
+    // Code blocks — no comments, real syntax coloring
+    var blocks = [
+      [
+        { t: 'template <std::floating_point T, std::size_t N>', c: ['kw','','tp','','tp','','tp'] },
+        { t: 'struct Vec {', c: ['kw'] },
+        { t: '    std::array<T, N> data{};', c: ['','tp'] },
+        { t: '' },
+        { t: '    constexpr T& operator[](std::size_t i) noexcept {', c: ['kw','tp','','','tp','','kw'] },
+        { t: '        return data[i];', c: ['kw'] },
+        { t: '    }', c: [] },
+        { t: '' },
+        { t: '    constexpr Vec operator+(const Vec& rhs) const {', c: ['kw','','','','kw','','kw'] },
+        { t: '        Vec result{};', c: [''] },
+        { t: '        for (std::size_t i = 0; i < N; ++i)', c: ['kw','','tp','','num'] },
+        { t: '            result[i] = data[i] + rhs[i];', c: [] },
+        { t: '        return result;', c: ['kw'] },
+        { t: '    }', c: [] },
+        { t: '' },
+        { t: '    constexpr T dot(const Vec& other) const {', c: ['kw','tp','','kw','','kw'] },
+        { t: '        T sum{};', c: ['tp'] },
+        { t: '        for (std::size_t i = 0; i < N; ++i)', c: ['kw','','tp','','num'] },
+        { t: '            sum += data[i] * other[i];', c: [] },
+        { t: '        return sum;', c: ['kw'] },
+        { t: '    }', c: [] },
+        { t: '};', c: [] },
+      ],
+      [
+        { t: 'async fn serve(listener: TcpListener) -> Result<()> {', c: ['kw','kw','fn','','tp','','tp'] },
+        { t: '    loop {', c: ['kw'] },
+        { t: '        let (stream, addr) = listener.accept().await?;', c: ['kw','','','','','','kw'] },
+        { t: '        tokio::spawn(async move {', c: ['','kw','kw'] },
+        { t: '            if let Err(e) = handle(stream).await {', c: ['kw','kw','tp','','fn','','kw'] },
+        { t: '                eprintln!("Connection {addr}: {e}");', c: ['','str'] },
+        { t: '            }', c: [] },
+        { t: '        });', c: [] },
+        { t: '    }', c: [] },
+        { t: '}', c: [] },
+        { t: '' },
+        { t: 'async fn handle(mut stream: TcpStream) -> Result<()> {', c: ['kw','kw','fn','kw','','tp','','tp'] },
+        { t: '    let mut buf = vec![0u8; 4096];', c: ['kw','kw','','','num'] },
+        { t: '    let n = stream.read(&mut buf).await?;', c: ['kw','','','','kw','','kw'] },
+        { t: '    let request = String::from_utf8_lossy(&buf[..n]);', c: ['kw','','tp'] },
+        { t: '    let response = process_request(&request);', c: ['kw','','fn'] },
+        { t: '    stream.write_all(response.as_bytes()).await?;', c: ['','','','kw'] },
+        { t: '    Ok(())', c: ['tp'] },
+        { t: '}', c: [] },
+      ],
+      [
+        { t: 'interface Config<T extends Record<string, unknown>> {', c: ['kw','','tp','kw','tp'] },
+        { t: '    readonly name: string;', c: ['kw','','tp'] },
+        { t: '    readonly version: number;', c: ['kw','','tp'] },
+        { t: '    validate(input: T): boolean;', c: ['fn','','tp','','tp'] },
+        { t: '    transform(data: T): Promise<T>;', c: ['fn','','tp','','tp'] },
+        { t: '}', c: [] },
+        { t: '' },
+        { t: 'function createPipeline<T extends Config<any>>(', c: ['kw','fn','tp','kw','tp'] },
+        { t: '    ...stages: T[]', c: ['','','tp'] },
+        { t: '): Pipeline<T> {', c: ['','tp'] },
+        { t: '    const validated = stages.filter(s => s.validate(s));', c: ['kw','','','','kw'] },
+        { t: '    const sorted = validated.sort((a, b) =>', c: ['kw','','','','kw'] },
+        { t: '        a.version - b.version', c: [] },
+        { t: '    );', c: [] },
+        { t: '    return { stages: sorted, run: execute };', c: ['kw'] },
+        { t: '}', c: [] },
+      ],
+    ];
+
+    var maxLines = Math.floor(container.offsetHeight / 18) || 6;
+    var blockIdx = 0, lineIdx = 0, charIdx = 0, lineNum = 1;
+
+    function createLine() {
+      var el = document.createElement('span');
+      el.className = 'gh-code-line';
+      el.setAttribute('data-ln', String(lineNum++).padStart(2, ' '));
+      container.appendChild(el);
+      // Trim old lines
+      while (container.children.length > maxLines) container.removeChild(container.firstChild);
+      return el;
+    }
+
+    function colorize(text, hints) {
+      if (!hints || !hints.length) return text;
+      // Simple word-level coloring based on hints array
+      var words = text.match(/(\s+|\S+)/g) || [];
+      var html = '';
+      var wi = 0;
+      for (var i = 0; i < words.length; i++) {
+        if (/^\s+$/.test(words[i])) { html += words[i]; continue; }
+        var cls = hints[wi] || '';
+        wi++;
+        html += cls ? '<span class="' + cls + '">' + words[i] + '</span>' : words[i];
+      }
+      return html;
+    }
+
+    function typeChar() {
+      var block = blocks[blockIdx];
+      if (lineIdx >= block.length) {
+        blockIdx = (blockIdx + 1) % blocks.length;
+        lineIdx = 0; charIdx = 0;
+        var sep = createLine(); sep.innerHTML = '\u00a0';
+        setTimeout(typeChar, 400);
+        return;
+      }
+      var line = block[lineIdx];
+      if (!line.t) { var el = createLine(); el.innerHTML = '\u00a0'; lineIdx++; charIdx = 0; setTimeout(typeChar, 180); return; }
+
+      var lineEl = container.querySelector('.gh-typing');
+      if (!lineEl) { lineEl = createLine(); lineEl.classList.add('gh-typing'); }
+
+      if (charIdx < line.t.length) {
+        // Build the full colored HTML up to charIdx+1
+        var partial = line.t.substring(0, charIdx + 1);
+        lineEl.innerHTML = lineEl.getAttribute('data-ln') ? '' : '';
+        // Re-render with coloring
+        var fullColored = colorize(line.t, line.c);
+        // Truncate the colored version to charIdx+1 visible chars
+        var count = 0, output = '', inTag = false;
+        for (var ci = 0; ci < fullColored.length && count <= charIdx; ci++) {
+          if (fullColored[ci] === '<') inTag = true;
+          if (!inTag) count++;
+          output += fullColored[ci];
+          if (fullColored[ci] === '>') inTag = false;
+        }
+        // Close any open tags
+        var openTags = (output.match(/<span[^>]*>/g) || []);
+        var closeTags = (output.match(/<\/span>/g) || []);
+        if (openTags.length > closeTags.length) output += '</span>';
+        lineEl.innerHTML = output + '<span class="gh-code-cursor"></span>';
+        charIdx++;
+        var ch = line.t[charIdx - 1];
+        var delay = ch === ' ' ? 35 : 45;
+        setTimeout(typeChar, delay + Math.random() * 25);
+      } else {
+        lineEl.classList.remove('gh-typing');
+        // Remove cursor from finished line
+        var cur = lineEl.querySelector('.gh-code-cursor');
+        if (cur) cur.remove();
+        lineIdx++; charIdx = 0;
+        setTimeout(typeChar, 200 + Math.random() * 120);
+      }
+    }
+
+    setTimeout(typeChar, 2000);
   })();
 
   // ======== REPO GRID (inline) ========
