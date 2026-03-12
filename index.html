@@ -530,13 +530,6 @@
       text-decoration-color: rgba(255,255,255,0.12);
       text-underline-offset: 0.2em;
       transition: text-decoration-color 0.15s;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 100%;
-    }
-    .articles-list a {
-      overflow: hidden;
     }
     .articles-list a:hover,
     .articles-list a:focus-visible {
@@ -2548,7 +2541,7 @@
         <div class="gh-month-stats" id="ghMonthStats"></div>
       </div>
       <p class="statement">
-        An experienced software developer with a focus on&nbsp;<em id="rotateSlot">quality</em>&nbsp;and&nbsp;<em>craft</em>. A reliable partner for startups, agencies, and brands building&nbsp;<em>across platforms</em><span class="superscript">15</span>.
+        An experienced software developer with a focus on&nbsp;<span class="rotate-slot" id="rotateSlot1"><em>quality</em></span>&nbsp;and&nbsp;<span class="rotate-slot" id="rotateSlot2"><em>craft</em></span>. A reliable partner for startups, agencies, and brands building&nbsp;<span class="rotate-slot" id="rotateSlot3"><em>across platforms</em></span><span class="superscript">15</span>.
       </p>
     </div>
   </div>
@@ -3523,21 +3516,28 @@
   }
 
   // ======== ROTATING WORDS ========
-  const rotateWords = ['performance', 'scalability', 'precision', 'elegance', 'innovation', 'quality'];
-  const rotateSlot = document.getElementById('rotateSlot');
-  let rotateIdx = 0;
+  const rotate1Words = ['performance', 'scalability', 'precision', 'elegance', 'innovation', 'quality'];
+  const rotate2Words = ['craft', 'purpose', 'clarity', 'detail', 'vision', 'impact'];
+  const rotate3Words = ['across platforms', 'for the web', 'at scale', 'with intent', 'from scratch', 'what matters'];
 
-  function rotateWord() {
-    rotateIdx = (rotateIdx + 1) % rotateWords.length;
-    gsap.to(rotateSlot, {
-      opacity: 0, duration: 0.3, ease: 'power2.in',
-      onComplete: () => {
-        rotateSlot.innerHTML = rotateWords[rotateIdx];
-        gsap.to(rotateSlot, { opacity: 1, duration: 0.3, ease: 'power2.out' });
-      }
-    });
+  function createRotator(slotId, words, interval) {
+    var slot = document.getElementById(slotId);
+    if (!slot) return;
+    var idx = 0;
+    setInterval(function() {
+      idx = (idx + 1) % words.length;
+      gsap.to(slot, {
+        y: -8, opacity: 0, duration: 0.25, ease: 'power2.in',
+        onComplete: function() {
+          slot.innerHTML = '<em>' + words[idx] + '</em>';
+          gsap.fromTo(slot, { y: 8, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: 'power2.out' });
+        }
+      });
+    }, interval);
   }
-  setInterval(rotateWord, 2500);
+  createRotator('rotateSlot1', rotate1Words, 2500);
+  createRotator('rotateSlot2', rotate2Words, 3200);
+  createRotator('rotateSlot3', rotate3Words, 3800);
 
   // ======== GSAP ENTRANCE ANIMATIONS ========
   function playEntrance() {

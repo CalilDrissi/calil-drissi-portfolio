@@ -240,8 +240,9 @@ function render(template, data, lang, featuredPosts, ghData) {
 
   // ARTICLES section — from WP posts tagged "Featured"
   const prefix = lang === 'fr' ? '/fr' : '';
+  const truncate = (s, n) => s.length > n ? s.slice(0, n).trimEnd() + '...' : s;
   const articleLinks = (featuredPosts || []).map(p =>
-    `<a href="${prefix}/blog/${p.slug}/" data-img="${p.coverImage || ''}" data-title="${p.title}" data-excerpt="${p.excerpt || ''}" data-tags="${p.tags.join(', ')}" data-date="${p.date}"><span>${p.title}</span></a>`
+    `<a href="${prefix}/blog/${p.slug}/" data-img="${p.coverImage || ''}" data-title="${p.title}" data-excerpt="${p.excerpt || ''}" data-tags="${p.tags.join(', ')}" data-date="${p.date}"><span>${truncate(p.title, 40)}</span></a>`
   ).join('\n        ');
   html = html.replace(
     /<!-- ARTICLES -->[\s\S]*?(?=\n\s*<!-- CONNECT -->)/,
@@ -284,7 +285,10 @@ function render(template, data, lang, featuredPosts, ghData) {
   );
 
   // Statement text
-  const statementHTML = data.statement.text.replace('{rotate}', '<span class="rotate-slot" id="rotateSlot"><em>' + data.statement.rotateWords[0] + '</em></span>');
+  let statementHTML = data.statement.text
+    .replace('{rotate1}', '<span class="rotate-slot" id="rotateSlot1"><em>' + data.statement.rotate1Words[0] + '</em></span>')
+    .replace('{rotate2}', '<span class="rotate-slot" id="rotateSlot2"><em>' + data.statement.rotate2Words[0] + '</em></span>')
+    .replace('{rotate3}', '<span class="rotate-slot" id="rotateSlot3"><em>' + data.statement.rotate3Words[0] + '</em></span>');
   html = html.replace(
     /<p class="statement">[\s\S]*?<\/p>/,
     `<p class="statement">${statementHTML}</p>`
@@ -412,8 +416,8 @@ function render(template, data, lang, featuredPosts, ghData) {
     `const chatResponses = ${JSON.stringify(data.chat.responses)};$1`
   );
   html = html.replace(
-    /const rotateWords = \[.*?\];/,
-    `const rotateWords = ${JSON.stringify(data.statement.rotateWords)};`
+    /const rotate1Words = \[.*?\];\s*const rotate2Words = \[.*?\];\s*const rotate3Words = \[.*?\];/,
+    `const rotate1Words = ${JSON.stringify(data.statement.rotate1Words)};\n  const rotate2Words = ${JSON.stringify(data.statement.rotate2Words)};\n  const rotate3Words = ${JSON.stringify(data.statement.rotate3Words)};`
   );
 
   // Add language toggle + blog link to the page

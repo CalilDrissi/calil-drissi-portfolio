@@ -182,15 +182,10 @@
     ]
   },
   "statement": {
-    "text": "An experienced software developer with a focus on&nbsp;{rotate}&nbsp;and&nbsp;<em>craft</em>. A reliable partner for startups, agencies, and brands building&nbsp;<em>across&nbsp;platforms</em><span class=\"superscript\">15</span>.",
-    "rotateWords": [
-      "performance",
-      "scalability",
-      "precision",
-      "elegance",
-      "innovation",
-      "quality"
-    ]
+    "text": "An experienced software developer with a focus on&nbsp;{rotate1}&nbsp;and&nbsp;{rotate2}. A reliable partner for startups, agencies, and brands building&nbsp;{rotate3}<span class=\"superscript\">15</span>.",
+    "rotate1Words": ["performance", "scalability", "precision", "elegance", "innovation", "quality"],
+    "rotate2Words": ["craft", "purpose", "clarity", "detail", "vision", "impact"],
+    "rotate3Words": ["across platforms", "for the web", "at scale", "with intent", "from scratch", "what matters"]
   },
   "ribbon": [
     "Khalil Drissi",
