@@ -140,11 +140,11 @@
       display: flex;
       align-items: center;
       gap: 0.4em;
-      margin-bottom: 0.5em;
+      margin-bottom: clamp(6px, 1.4vh, 14px);
       font-size: var(--label);
-      font-weight: 600;
+      font-weight: 500;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.06em;
       color: #fff;
     }
     .col-header::before {
@@ -318,9 +318,8 @@
       font-size: var(--label);
       color: var(--fg-dim);
       text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-weight: 600;
-      margin-bottom: 0.5em;
+      letter-spacing: 0.03em;
+      margin-bottom: clamp(2px, 0.6vh, 6px);
       margin-top: clamp(6px, 1.4vh, 14px);
       display: inline-block;
       border: 1px solid var(--fg-faint);
