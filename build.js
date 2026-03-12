@@ -213,7 +213,7 @@ function render(template, data, lang, featuredPosts) {
       </div>
 
       <div class="connect-ctas">
-        <button class="cta-btn cta-btn-primary cta-btn-terminal cursor-zone" id="terminalChallengeBtn">${lang === 'fr' ? 'Consultation Gratuite' : 'Win Free Consult'} &#9655;</button>
+        <button class="cta-btn cta-btn-primary cta-btn-terminal" id="terminalChallengeBtn">${lang === 'fr' ? 'Consultation Gratuite' : 'Win Free Consult'} &#9655;</button>
         <button class="cta-btn cta-btn-secondary" id="openScheduleBtn">${lang === 'fr' ? 'Planifier un appel' : 'Schedule a Call'} &#8599;</button>
         <button class="cta-btn" id="openCollabBtn">${lang === 'fr' ? 'Collaboration' : 'Collaboration'} &#8599;</button>
         <button class="cta-btn" id="openMessageBtn">${lang === 'fr' ? 'Laisser un message' : 'Leave a Message'} &#9993;</button>
