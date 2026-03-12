@@ -790,6 +790,195 @@
       border-radius: 1px;
     }
 
+    /* ---- REPO BROWSER (inside .win) ---- */
+    .rb-layout {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--fg-dim);
+    }
+    .rb-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 14px;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--fg-faint);
+      flex-shrink: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      user-select: none;
+    }
+    .rb-breadcrumb-sep { color: rgba(255,255,255,0.14); font-size: 10px; }
+    .rb-breadcrumb-item { color: var(--fg-faint); cursor: pointer; transition: color 0.15s; }
+    .rb-breadcrumb-item:hover { color: var(--fg-dim); }
+    .rb-breadcrumb-item.rb-active { color: rgba(255,255,255,0.75); }
+    .rb-pane { display: flex; flex: 1; overflow: hidden; }
+
+    .rb-sidebar {
+      width: 200px;
+      background: rgba(0,0,0,0.18);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .rb-sidebar-section { padding: 8px 0 4px; border-bottom: 1px solid var(--border); }
+    .rb-sidebar-label {
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--fg-faint);
+      padding: 0 14px 6px;
+      user-select: none;
+    }
+    .rb-repo-list { list-style: none; margin: 0; padding: 0; }
+    .rb-repo-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 14px;
+      cursor: pointer;
+      color: var(--fg-dim);
+      font-size: 11px;
+      border-left: 2px solid transparent;
+      transition: background 0.12s, color 0.12s;
+      user-select: none;
+    }
+    .rb-repo-item::before { content: '⬡'; font-size: 9px; color: var(--fg-faint); flex-shrink: 0; }
+    .rb-repo-item:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.85); }
+    .rb-repo-item.rb-active { background: rgba(94,43,255,0.12); border-left-color: var(--accent); color: #fff; }
+    .rb-repo-item.rb-active::before { color: var(--accent); }
+
+    .rb-tree {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 6px 0 12px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
+    }
+    .rb-tree::-webkit-scrollbar { width: 4px; }
+    .rb-tree::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    .rb-tree-list { list-style: none; margin: 0; padding: 0; }
+    .rb-tree-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 14px;
+      cursor: pointer;
+      color: var(--fg-dim);
+      font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: background 0.1s;
+      user-select: none;
+    }
+    .rb-tree-item:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.85); }
+    .rb-tree-item.rb-active { background: rgba(94,43,255,0.15); color: #fff; }
+    .rb-tree-item[data-depth="1"] { padding-left: 26px; }
+    .rb-tree-item[data-depth="2"] { padding-left: 38px; }
+    .rb-tree-item[data-depth="3"] { padding-left: 50px; }
+    .rb-tree-item[data-depth="4"] { padding-left: 62px; }
+    .rb-tree-icon { flex-shrink: 0; font-size: 10px; color: var(--fg-faint); }
+    .rb-tree-icon.rb-folder { color: #c9a94f; }
+    .rb-tree-icon.rb-file-js { color: #f0db4f; }
+    .rb-tree-icon.rb-file-ts { color: #3178c6; }
+    .rb-tree-icon.rb-file-py { color: #4584b6; }
+    .rb-tree-icon.rb-file-rs { color: #dea584; }
+    .rb-tree-icon.rb-file-css { color: #4fc3f7; }
+    .rb-tree-icon.rb-file-html { color: #e44d26; }
+    .rb-tree-icon.rb-file-json { color: #8bc34a; }
+    .rb-tree-icon.rb-file-md { color: rgba(255,255,255,0.35); }
+    .rb-tree-name { overflow: hidden; text-overflow: ellipsis; }
+
+    .rb-viewer {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #0d0d0d;
+    }
+    .rb-viewer-empty {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-faint);
+      font-size: 12px;
+      user-select: none;
+    }
+    .rb-code-wrap {
+      flex: 1;
+      overflow: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
+    }
+    .rb-code-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
+    .rb-code-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    .rb-code-table { display: table; min-width: 100%; border-collapse: collapse; }
+    .rb-code-row { display: table-row; }
+    .rb-code-row:hover .rb-ln,
+    .rb-code-row:hover .rb-lc { background: rgba(255,255,255,0.03); }
+    .rb-ln {
+      display: table-cell;
+      width: 1%;
+      min-width: 40px;
+      padding: 0 12px 0 14px;
+      text-align: right;
+      color: rgba(255,255,255,0.18);
+      font-size: 11px;
+      line-height: 20px;
+      background: #0d0d0d;
+      border-right: 1px solid var(--border);
+      user-select: none;
+      white-space: nowrap;
+      position: sticky;
+      left: 0;
+    }
+    .rb-lc {
+      display: table-cell;
+      padding: 0 20px 0 14px;
+      line-height: 20px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.8);
+      white-space: pre;
+    }
+    .rb-t-kw { color: #c792ea; }
+    .rb-t-fn { color: #82aaff; }
+    .rb-t-str { color: #c3e88d; }
+    .rb-t-num { color: #f78c6c; }
+    .rb-t-cmt { color: rgba(255,255,255,0.28); font-style: italic; }
+    .rb-t-op { color: #89ddff; }
+    .rb-t-cls { color: #ffcb6b; }
+
+    .rb-statusbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 3px 14px;
+      background: rgba(94,43,255,0.18);
+      border-top: 1px solid rgba(94,43,255,0.3);
+      font-size: 10px;
+      color: rgba(255,255,255,0.45);
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    @media (max-width: 640px) {
+      .rb-sidebar { width: 140px; }
+      .rb-repo-item, .rb-tree-item { font-size: 10px; padding: 4px 10px; }
+      .rb-lc { font-size: 10px; line-height: 18px; }
+      .rb-ln { font-size: 10px; line-height: 18px; min-width: 32px; padding: 0 8px; }
+    }
+
     /* ---- BOTTOM (projects) ---- */
     .bottom {
       flex-shrink: 0;
@@ -3877,6 +4066,231 @@
       }
     });
   });
+})();
+</script>
+
+<!-- REPO BROWSER WINDOW -->
+<div class="win" id="repoPopup" data-win-id="repos" data-win-title="Source Code" style="width:860px;height:560px;top:calc(50% - 280px);left:calc(50% - 430px);">
+  <div class="win-resize win-resize-e"></div>
+  <div class="win-resize win-resize-w"></div>
+  <div class="win-resize win-resize-s"></div>
+  <div class="win-resize win-resize-n"></div>
+  <div class="win-resize win-resize-se"></div>
+  <div class="win-resize win-resize-sw"></div>
+  <div class="win-resize win-resize-ne"></div>
+  <div class="win-resize win-resize-nw"></div>
+  <div class="win-titlebar">
+    <div class="win-dots">
+      <span class="win-dot-close"></span>
+      <span class="win-dot-min"></span>
+      <span class="win-dot-max"></span>
+    </div>
+    <div class="win-titlebar-text">source code — browser</div>
+    <div class="win-titlebar-actions">
+      <a class="win-action-btn" id="rbGithubLink" href="https://github.com/CalilDrissi" target="_blank">GitHub ↗</a>
+    </div>
+  </div>
+  <div class="win-body" style="overflow:hidden;">
+    <div class="rb-layout">
+      <div class="rb-breadcrumb" id="rbBreadcrumb">
+        <span class="rb-breadcrumb-item rb-active">Select a repository</span>
+      </div>
+      <div class="rb-pane">
+        <div class="rb-sidebar">
+          <div class="rb-sidebar-section">
+            <div class="rb-sidebar-label">Repositories</div>
+            <ul class="rb-repo-list" id="rbRepoList"></ul>
+          </div>
+          <div class="rb-tree" id="rbTree">
+            <ul class="rb-tree-list" id="rbTreeList"></ul>
+          </div>
+        </div>
+        <div class="rb-viewer" id="rbViewer">
+          <div class="rb-viewer-empty">Select a file to view source code</div>
+        </div>
+      </div>
+      <div class="rb-statusbar">
+        <div class="rb-statusbar-left" id="rbStatus">Ready</div>
+        <div class="rb-statusbar-right" id="rbLang"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ======== REPO BROWSER ========
+(function() {
+  var repoPopup = document.getElementById('repoPopup');
+  if (!repoPopup) return;
+  var repoWin = WM.register(repoPopup, 'Source Code');
+  repoWin.persistent = true;
+
+  var REPOS = [
+    { name: 'virtus', desc: 'AI Model Marketplace', lang: 'Python', branch: 'main' },
+    { name: 'calil-drissi-portfolio', desc: 'Portfolio Website', lang: 'JavaScript', branch: 'main' },
+    { name: 'yoony-admin-desktop', desc: 'Desktop Admin App', lang: 'Rust', branch: 'main' },
+    { name: 'transfers-ma', desc: 'Booking Platform', lang: 'HTML', branch: 'main' },
+  ];
+  var OWNER = 'CalilDrissi';
+
+  var repoList = document.getElementById('rbRepoList');
+  var treeList = document.getElementById('rbTreeList');
+  var viewer = document.getElementById('rbViewer');
+  var breadcrumb = document.getElementById('rbBreadcrumb');
+  var statusEl = document.getElementById('rbStatus');
+  var langEl = document.getElementById('rbLang');
+  var ghLink = document.getElementById('rbGithubLink');
+  var activeRepo = null;
+  var treeCache = {};
+
+  REPOS.forEach(function(repo) {
+    var li = document.createElement('li');
+    li.className = 'rb-repo-item';
+    li.textContent = repo.name;
+    li.title = repo.desc;
+    li.addEventListener('click', function() { selectRepo(repo); });
+    repoList.appendChild(li);
+  });
+
+  function selectRepo(repo) {
+    activeRepo = repo;
+    repoList.querySelectorAll('.rb-repo-item').forEach(function(el, i) {
+      el.classList.toggle('rb-active', REPOS[i].name === repo.name);
+    });
+    ghLink.href = 'https://github.com/' + OWNER + '/' + repo.name;
+    breadcrumb.innerHTML = '<span class="rb-breadcrumb-item rb-active">' + repo.name + '</span>';
+    viewer.innerHTML = '<div class="rb-viewer-empty">Loading file tree...</div>';
+    statusEl.textContent = 'Fetching...';
+    langEl.textContent = repo.lang;
+
+    if (treeCache[repo.name]) { renderTree(treeCache[repo.name], repo); return; }
+    fetch('https://api.github.com/repos/' + OWNER + '/' + repo.name + '/git/trees/' + repo.branch + '?recursive=1')
+      .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function(data) {
+        var files = data.tree.filter(function(f) { return f.type === 'blob'; }).map(function(f) { return f.path; });
+        treeCache[repo.name] = files;
+        renderTree(files, repo);
+      })
+      .catch(function(err) {
+        viewer.innerHTML = '<div class="rb-viewer-empty">Failed to load: ' + err.message + '</div>';
+        statusEl.textContent = 'Error';
+      });
+  }
+
+  function getFileIcon(name) {
+    var ext = name.split('.').pop().toLowerCase();
+    var map = {
+      js: ['◆', 'rb-file-js'], ts: ['◆', 'rb-file-ts'], tsx: ['◆', 'rb-file-ts'],
+      py: ['◆', 'rb-file-py'], rs: ['◆', 'rb-file-rs'],
+      css: ['◆', 'rb-file-css'], html: ['◆', 'rb-file-html'], htm: ['◆', 'rb-file-html'],
+      json: ['◆', 'rb-file-json'], md: ['◆', 'rb-file-md'],
+    };
+    return map[ext] || ['◇', ''];
+  }
+
+  function renderTree(files, repo) {
+    treeList.innerHTML = '';
+    var allItems = [];
+    files.forEach(function(f) {
+      var parts = f.split('/');
+      for (var i = 1; i < parts.length; i++) {
+        var folderPath = parts.slice(0, i).join('/');
+        if (!allItems.find(function(x) { return x.path === folderPath; })) {
+          allItems.push({ path: folderPath, isFolder: true, depth: i - 1, name: parts[i - 1] });
+        }
+      }
+      allItems.push({ path: f, isFolder: false, depth: parts.length - 1, name: parts[parts.length - 1] });
+    });
+
+    allItems.sort(function(a, b) {
+      var ap = a.path.split('/'), bp = b.path.split('/');
+      for (var i = 0; i < Math.max(ap.length, bp.length); i++) {
+        if (i >= ap.length) return -1;
+        if (i >= bp.length) return 1;
+        var aIsLast = (i === ap.length - 1), bIsLast = (i === bp.length - 1);
+        if (!aIsLast && bIsLast) return -1;
+        if (aIsLast && !bIsLast) return 1;
+        var cmp = ap[i].localeCompare(bp[i]);
+        if (cmp !== 0) return cmp;
+      }
+      return 0;
+    });
+
+    var limited = allItems.slice(0, 200);
+    limited.forEach(function(item) {
+      var li = document.createElement('li');
+      li.className = 'rb-tree-item';
+      li.setAttribute('data-depth', Math.min(item.depth, 4));
+      if (item.isFolder) {
+        li.innerHTML = '<span class="rb-tree-icon rb-folder">▸</span><span class="rb-tree-name">' + item.name + '</span>';
+      } else {
+        var ic = getFileIcon(item.name);
+        li.innerHTML = '<span class="rb-tree-icon ' + ic[1] + '">' + ic[0] + '</span><span class="rb-tree-name">' + item.name + '</span>';
+        li.addEventListener('click', function() { loadFile(repo, item.path, item.name, this); });
+      }
+      treeList.appendChild(li);
+    });
+    statusEl.textContent = files.length + ' files';
+    viewer.innerHTML = '<div class="rb-viewer-empty">Select a file to view source code</div>';
+  }
+
+  function loadFile(repo, filepath, filename, el) {
+    treeList.querySelectorAll('.rb-tree-item').forEach(function(e) { e.classList.remove('rb-active'); });
+    if (el) el.classList.add('rb-active');
+    var parts = filepath.split('/');
+    breadcrumb.innerHTML = parts.map(function(p, i) {
+      var cls = i === parts.length - 1 ? 'rb-breadcrumb-item rb-active' : 'rb-breadcrumb-item';
+      return '<span class="' + cls + '">' + p + '</span>';
+    }).join('<span class="rb-breadcrumb-sep">›</span>');
+    viewer.innerHTML = '<div class="rb-viewer-empty">Loading...</div>';
+    statusEl.textContent = 'Fetching ' + filename + '...';
+
+    fetch('https://api.github.com/repos/' + OWNER + '/' + repo.name + '/contents/' + filepath + '?ref=' + repo.branch, {
+      headers: { 'Accept': 'application/vnd.github.v3.raw' }
+    })
+      .then(function(r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(function(text) {
+        renderCode(text);
+        statusEl.textContent = filename + ' · ' + text.split('\n').length + ' lines';
+        langEl.textContent = filename.split('.').pop().toUpperCase();
+      })
+      .catch(function() {
+        viewer.innerHTML = '<div class="rb-viewer-empty">Failed to load file</div>';
+        statusEl.textContent = 'Error';
+      });
+  }
+
+  function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function highlightLine(line) {
+    var e = escapeHtml(line);
+    e = e.replace(/^(\s*)(\/\/.*)$/, '$1<span class="rb-t-cmt">$2</span>');
+    e = e.replace(/^(\s*)(#.*)$/, '$1<span class="rb-t-cmt">$2</span>');
+    e = e.replace(/(["'])(?:(?=(\\?))\2.)*?\1/g, '<span class="rb-t-str">$&</span>');
+    e = e.replace(/\b(const|let|var|function|return|if|else|for|while|import|from|export|default|class|async|await|try|catch|def|self|fn|pub|use|mod|struct|impl|trait|enum|match)\b/g, '<span class="rb-t-kw">$&</span>');
+    e = e.replace(/\b(\d+\.?\d*)\b/g, '<span class="rb-t-num">$&</span>');
+    return e;
+  }
+
+  function renderCode(text) {
+    var lines = text.split('\n');
+    var rows = lines.map(function(line, i) {
+      return '<div class="rb-code-row"><div class="rb-ln">' + (i + 1) + '</div><div class="rb-lc">' + highlightLine(line) + '</div></div>';
+    }).join('');
+    viewer.innerHTML = '<div class="rb-code-wrap"><div class="rb-code-table">' + rows + '</div></div>';
+  }
+
+  window.openRepoBrowser = function() {
+    if (repoPopup.classList.contains('open') && !repoWin.minimized) { WM.focus(repoWin); return; }
+    if (repoWin.minimized) { WM.restore(repoWin); return; }
+    repoPopup.classList.add('open');
+    WM.focus(repoWin);
+  };
+
+  var ghHeader = document.querySelector('.gh-header a');
+  if (ghHeader) {
+    ghHeader.addEventListener('click', function(e) { e.preventDefault(); openRepoBrowser(); });
+  }
 })();
 </script>
 
