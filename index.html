@@ -722,20 +722,18 @@
     }
 
 
-    /* ---- GITHUB GRAPH ---- */
+    /* ---- GITHUB GRAPH (monthly view) ---- */
     .github-graph {
-      flex: 1 0 auto;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: clamp(8px, 1.5vh, 16px) 0;
-      position: relative;
+      align-items: flex-start;
+      padding: clamp(4px, 0.8vh, 10px) 0;
+      border-top: 1px solid var(--border);
     }
     .gh-wrap {
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: clamp(4px, 0.6vh, 8px);
+      gap: clamp(3px, 0.4vh, 6px);
     }
     .gh-header {
       display: flex;
@@ -751,44 +749,52 @@
       text-decoration: none;
     }
     .gh-header a:hover { color: var(--fg-dim); }
+    .gh-month-tabs {
+      display: flex;
+      gap: 2px;
+      flex-wrap: wrap;
+    }
+    .gh-month-tab {
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-family: var(--mono);
+      font-size: calc(var(--label) - 2px);
+      color: var(--fg-faint);
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .gh-month-tab:hover { color: var(--fg-dim); border-color: var(--fg-faint); }
+    .gh-month-tab.active {
+      color: #fff;
+      border-color: var(--accent);
+      background: rgba(94,43,255,0.15);
+    }
     .gh-grid {
       display: grid;
-      grid-template-rows: repeat(7, 1fr);
+      grid-template-rows: repeat(7, clamp(6px, 0.7vh, 12px));
       grid-auto-flow: column;
-      grid-auto-columns: 1fr;
-      gap: clamp(1px, 0.2vw, 3px);
-      width: 100%;
-      aspect-ratio: 53 / 7;
+      grid-auto-columns: clamp(6px, 0.7vh, 12px);
+      gap: clamp(1px, 0.15vw, 2px);
+      width: fit-content;
     }
     .gh-cell {
-      border-radius: clamp(1px, 0.15vw, 2px);
+      border-radius: 1px;
       background: rgba(255,255,255,0.04);
     }
     .gh-cell[data-level="1"] { background: rgba(94,43,255,0.25); }
     .gh-cell[data-level="2"] { background: rgba(94,43,255,0.45); }
     .gh-cell[data-level="3"] { background: rgba(94,43,255,0.65); }
     .gh-cell[data-level="4"] { background: rgba(94,43,255,0.9); }
-    .gh-months {
-      display: flex;
-      justify-content: space-between;
-      font-size: calc(var(--label) - 2px);
+    .gh-month-stats {
+      font-size: calc(var(--label) - 1px);
       color: var(--fg-faint);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      padding: 0 1px;
+      letter-spacing: 0.03em;
     }
-    .gh-legend {
-      display: flex;
-      align-items: center;
-      gap: clamp(3px, 0.3vw, 6px);
-      font-size: calc(var(--label) - 2px);
-      color: var(--fg-faint);
-    }
-    .gh-legend-cell {
-      width: clamp(6px, 0.6vw, 10px);
-      height: clamp(6px, 0.6vw, 10px);
-      border-radius: 1px;
-    }
+    .gh-month-stats strong { color: var(--fg-dim); font-weight: 500; }
 
     /* ---- REPO BROWSER (inside .win) ---- */
     .rb-layout {
@@ -1175,9 +1181,8 @@
       /* Show all sections — reorganize into 2-col grid */
       .top-grid .col-section { display: block !important; }
       .middle { padding: 1.25rem 0; }
-      .github-graph { padding: 1rem 0; }
-      .gh-grid { aspect-ratio: 53 / 7; }
-      .gh-months { font-size: 9px; }
+      .github-graph { padding: 0.75rem 0; }
+      .gh-wrap { width: 100%; max-width: none; }
       .statement { max-width: 100%; font-size: clamp(20px, 5vw, 28px); }
       .code-bg { display: none; }
       /* Windows go full-screen on tablet */
@@ -1210,9 +1215,8 @@
       .top-grid .col-section { display: block !important; }
       .col-header { padding: 0.5em 0; }
       .middle { padding: 1rem 0; min-height: auto; flex: 0 0 auto; }
-      .github-graph { padding: 0.75rem var(--edge); }
-      .gh-legend { display: none; }
-      .gh-months { font-size: 8px; }
+      .github-graph { padding: 0.5rem var(--edge); }
+      .gh-wrap { width: 100%; max-width: none; }
       .cta-btn { min-height: 44px; }
       .statement { font-size: clamp(18px, 6vw, 24px); padding: 0 var(--edge); }
       .connect-ctas { grid-template-columns: 1fr; max-width: 100%; }
@@ -2306,19 +2310,9 @@
         <span>· Contributions</span>
         <a href="https://github.com/CalilDrissi" target="_blank" rel="noopener">@CalilDrissi</a>
       </div>
+      <div class="gh-month-tabs" id="ghMonthTabs"></div>
       <div class="gh-grid" id="ghGrid"></div>
-      <div class="gh-footer" style="display:flex;justify-content:space-between;align-items:center;">
-        <div class="gh-months" id="ghMonths"></div>
-        <div class="gh-legend">
-          <span>Less</span>
-          <div class="gh-legend-cell" style="background:rgba(255,255,255,0.04)"></div>
-          <div class="gh-legend-cell" style="background:rgba(94,43,255,0.25)"></div>
-          <div class="gh-legend-cell" style="background:rgba(94,43,255,0.45)"></div>
-          <div class="gh-legend-cell" style="background:rgba(94,43,255,0.65)"></div>
-          <div class="gh-legend-cell" style="background:rgba(94,43,255,0.9)"></div>
-          <span>More</span>
-        </div>
-      </div>
+      <div class="gh-month-stats" id="ghMonthStats"></div>
     </div>
   </div>
 
@@ -3593,6 +3587,70 @@
       delay: Math.random() * 2,
     });
   });
+
+  // ======== GITHUB MONTH GRAPH ========
+  (function() {
+    if (typeof GH_MONTH_DATA === 'undefined') return;
+    var tabs = document.getElementById('ghMonthTabs');
+    var grid = document.getElementById('ghGrid');
+    var stats = document.getElementById('ghMonthStats');
+    if (!tabs || !grid) return;
+
+    var keys = Object.keys(GH_MONTH_DATA);
+    var currentKey = keys[keys.length - 1]; // default to latest month
+
+    function renderTabs() {
+      tabs.innerHTML = '';
+      keys.forEach(function(k) {
+        var btn = document.createElement('button');
+        btn.className = 'gh-month-tab' + (k === currentKey ? ' active' : '');
+        btn.textContent = GH_MONTH_DATA[k].shortLabel;
+        btn.addEventListener('click', function() { currentKey = k; renderTabs(); renderGrid(); });
+        tabs.appendChild(btn);
+      });
+    }
+
+    function renderGrid() {
+      var m = GH_MONTH_DATA[currentKey];
+      if (!m) return;
+      // Build a 7-row grid for the weeks of this month
+      // First, group days into weeks (Sun=0 start)
+      var weeks = [];
+      var week = [];
+      // Pad first week with empty cells
+      var firstDow = m.days[0].dow;
+      for (var p = 0; p < firstDow; p++) week.push(null);
+      m.days.forEach(function(d) {
+        week.push(d);
+        if (week.length === 7) { weeks.push(week); week = []; }
+      });
+      if (week.length > 0) {
+        while (week.length < 7) week.push(null);
+        weeks.push(week);
+      }
+      // Render: 7 rows x N columns
+      grid.innerHTML = '';
+      grid.style.gridAutoColumns = '1fr';
+      // aspect ratio based on number of weeks
+      // cells are fixed-size via CSS, no aspect-ratio needed
+      for (var row = 0; row < 7; row++) {
+        for (var col = 0; col < weeks.length; col++) {
+          var cell = document.createElement('div');
+          cell.className = 'gh-cell';
+          var day = weeks[col][row];
+          if (day) {
+            cell.setAttribute('data-level', day.level);
+            cell.title = day.count + ' contribution' + (day.count !== 1 ? 's' : '') + ' on ' + day.date;
+          }
+          grid.appendChild(cell);
+        }
+      }
+      stats.innerHTML = '<strong>' + m.total + '</strong> contributions in ' + m.label;
+    }
+
+    renderTabs();
+    renderGrid();
+  })();
 </script>
 
 <script>

@@ -93,35 +93,22 @@ function countToLevel(count) {
 }
 
 function renderGitHubGrid(calendar) {
-  if (!calendar) return { grid: '', months: '', total: 0 };
+  if (!calendar) return { json: '{}', total: 0 };
 
-  const weeks = calendar.weeks;
-  const cells = [];
-  for (const week of weeks) {
-    for (const day of week.contributionDays) {
-      const level = countToLevel(day.contributionCount);
-      const title = `${day.contributionCount} contribution${day.contributionCount !== 1 ? 's' : ''} on ${day.date}`;
-      cells.push(`<div class="gh-cell" data-level="${level}" title="${title}"></div>`);
-    }
-  }
-
-  // Month labels — find first occurrence of each month
   const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const seen = new Set();
-  const months = [];
-  let cellIndex = 0;
-  for (const week of weeks) {
-    const firstDay = week.contributionDays[0];
-    const m = new Date(firstDay.date).getMonth();
-    if (!seen.has(m)) {
-      seen.add(m);
-      months.push(monthNames[m]);
+  // Group days by month
+  const monthMap = {};
+  for (const week of calendar.weeks) {
+    for (const day of week.contributionDays) {
+      const d = new Date(day.date);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label = monthNames[d.getMonth()] + ' ' + d.getFullYear();
+      if (!monthMap[key]) monthMap[key] = { label, shortLabel: monthNames[d.getMonth()], days: [], total: 0 };
+      monthMap[key].days.push({ date: day.date, count: day.contributionCount, level: countToLevel(day.contributionCount), dow: d.getDay() });
+      monthMap[key].total += day.contributionCount;
     }
-    cellIndex += week.contributionDays.length;
   }
-  const monthsHTML = months.map(m => `<span>${m}</span>`).join('');
-
-  return { grid: cells.join(''), months: monthsHTML, total: calendar.totalContributions };
+  return { json: JSON.stringify(monthMap), total: calendar.totalContributions };
 }
 
 async function fetchWPPosts(lang) {
@@ -299,20 +286,17 @@ function render(template, data, lang, featuredPosts, ghData) {
     `<p class="statement">${statementHTML}</p>`
   );
 
-  // GitHub contribution graph
+  // GitHub contribution graph — inject month data as JSON for client-side rendering
   if (ghData) {
-    const { grid, months, total } = renderGitHubGrid(ghData);
-    html = html.replace(
-      /<div class="gh-grid" id="ghGrid"><\/div>/,
-      `<div class="gh-grid" id="ghGrid">${grid}</div>`
-    );
-    html = html.replace(
-      /<div class="gh-months" id="ghMonths"><\/div>/,
-      `<div class="gh-months" id="ghMonths">${months}</div>`
-    );
+    const { json, total } = renderGitHubGrid(ghData);
     html = html.replace(
       /· Contributions/,
       `· ${total} Contributions`
+    );
+    // Inject data as a script variable right before the grid
+    html = html.replace(
+      /<div class="gh-month-tabs" id="ghMonthTabs"><\/div>/,
+      `<script>var GH_MONTH_DATA = ${json};<\/script>\n      <div class="gh-month-tabs" id="ghMonthTabs"></div>`
     );
   }
 
