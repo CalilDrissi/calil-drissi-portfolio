@@ -722,18 +722,19 @@
     }
 
 
-    /* ---- GITHUB GRAPH (monthly view) ---- */
-    .github-graph {
+    /* ---- GITHUB SECTION (calendar + repos) ---- */
+    .github-section {
       display: flex;
-      align-items: flex-start;
+      gap: clamp(12px, 2vw, 24px);
       padding: clamp(4px, 0.8vh, 10px) 0;
-      border-top: 1px solid var(--border);
+      align-items: flex-start;
     }
     .gh-wrap {
-      width: 100%;
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
       gap: clamp(3px, 0.4vh, 6px);
+      min-width: 0;
     }
     .gh-header {
       display: flex;
@@ -795,6 +796,78 @@
       letter-spacing: 0.03em;
     }
     .gh-month-stats strong { color: var(--fg-dim); font-weight: 500; }
+
+    /* ---- REPO LIST (inline) ---- */
+    .gh-repos {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(3px, 0.4vh, 6px);
+    }
+    .gh-repos-header {
+      font-size: var(--label);
+      color: var(--fg-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .gh-repo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(4px, 0.5vh, 8px);
+    }
+    .gh-repo-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: clamp(6px, 0.8vh, 12px) clamp(8px, 1vw, 14px);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+    .gh-repo-card:hover {
+      background: rgba(94,43,255,0.08);
+      border-color: rgba(94,43,255,0.3);
+    }
+    .gh-repo-name {
+      font-family: var(--mono);
+      font-size: calc(var(--label) - 0px);
+      color: rgba(255,255,255,0.85);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .gh-repo-name::before {
+      content: '⬡';
+      font-size: 8px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .gh-repo-desc {
+      font-size: calc(var(--label) - 2px);
+      color: var(--fg-faint);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .gh-repo-lang {
+      font-size: calc(var(--label) - 2px);
+      color: var(--fg-faint);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .gh-repo-lang-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
 
     /* ---- REPO BROWSER (inside .win) ---- */
     .rb-layout {
@@ -994,7 +1067,6 @@
       align-items: center;
       justify-content: space-between;
       padding: clamp(4px, 1vh, 12px) 0;
-      border-top: 1px solid var(--border);
     }
     .scroll-indicator {
       display: flex;
@@ -1181,8 +1253,9 @@
       /* Show all sections — reorganize into 2-col grid */
       .top-grid .col-section { display: block !important; }
       .middle { padding: 1.25rem 0; }
-      .github-graph { padding: 0.75rem 0; }
+      .github-section { padding: 0.75rem 0; flex-direction: column; }
       .gh-wrap { width: 100%; max-width: none; }
+      .gh-repo-grid { grid-template-columns: 1fr 1fr; }
       .statement { max-width: 100%; font-size: clamp(20px, 5vw, 28px); }
       .code-bg { display: none; }
       /* Windows go full-screen on tablet */
@@ -1215,8 +1288,9 @@
       .top-grid .col-section { display: block !important; }
       .col-header { padding: 0.5em 0; }
       .middle { padding: 1rem 0; min-height: auto; flex: 0 0 auto; }
-      .github-graph { padding: 0.5rem var(--edge); }
+      .github-section { padding: 0.5rem var(--edge); flex-direction: column; }
       .gh-wrap { width: 100%; max-width: none; }
+      .gh-repo-grid { grid-template-columns: 1fr; }
       .cta-btn { min-height: 44px; }
       .statement { font-size: clamp(18px, 6vw, 24px); padding: 0 var(--edge); }
       .connect-ctas { grid-template-columns: 1fr; max-width: 100%; }
@@ -1255,7 +1329,7 @@
     /* Initial hidden state — GSAP animates in */
     .col-section { opacity: 0; transform: translateY(12px); }
     .statement { opacity: 0; transform: translateY(20px); }
-    .github-graph { opacity: 0; transform: translateY(10px); }
+    .github-section { opacity: 0; transform: translateY(10px); }
     .bottom { opacity: 0; transform: translateY(10px); }
 
     /* Statement word animation */
@@ -2303,8 +2377,8 @@
     </p>
   </div>
 
-  <!-- GITHUB CONTRIBUTION GRAPH -->
-  <div class="github-graph" id="githubGraph">
+  <!-- GITHUB SECTION (calendar + repos) -->
+  <div class="github-section" id="githubGraph">
     <div class="gh-wrap">
       <div class="gh-header">
         <span>· Contributions</span>
@@ -2313,6 +2387,10 @@
       <div class="gh-month-tabs" id="ghMonthTabs"></div>
       <div class="gh-grid" id="ghGrid"></div>
       <div class="gh-month-stats" id="ghMonthStats"></div>
+    </div>
+    <div class="gh-repos">
+      <div class="gh-repos-header">· Repositories</div>
+      <div class="gh-repo-grid" id="ghRepoGrid"></div>
     </div>
   </div>
 
@@ -3557,7 +3635,7 @@
     tl.to('.statement', { opacity: 1, y: 0, duration: 0.8 }, 0.7);
 
     // 2.5. GitHub graph
-    tl.to('.github-graph', { opacity: 1, y: 0, duration: 0.6 }, 0.9);
+    tl.to('.github-section', { opacity: 1, y: 0, duration: 0.6 }, 0.9);
 
     // 3. Bottom strip
     tl.to('.bottom', { opacity: 1, y: 0, duration: 0.6 }, 1.0);
@@ -3650,6 +3728,35 @@
 
     renderTabs();
     renderGrid();
+  })();
+
+  // ======== REPO GRID (inline) ========
+  (function() {
+    var LANG_COLORS = {
+      Python: '#3572A5', JavaScript: '#f1e05a', Rust: '#dea584',
+      HTML: '#e34c26', TypeScript: '#3178c6', Go: '#00ADD8',
+      CSS: '#563d7c', Shell: '#89e051'
+    };
+    var REPOS = [
+      { name: 'virtus', desc: 'AI Model Marketplace', lang: 'Python' },
+      { name: 'calil-drissi-portfolio', desc: 'Portfolio Website', lang: 'JavaScript' },
+      { name: 'yoony-admin-desktop', desc: 'Desktop Admin App', lang: 'Rust' },
+      { name: 'transfers-ma', desc: 'Booking Platform', lang: 'HTML' },
+    ];
+    var grid = document.getElementById('ghRepoGrid');
+    if (!grid) return;
+    REPOS.forEach(function(r) {
+      var card = document.createElement('div');
+      card.className = 'gh-repo-card';
+      card.innerHTML =
+        '<div class="gh-repo-name">' + r.name + '</div>' +
+        '<div class="gh-repo-desc">' + r.desc + '</div>' +
+        '<div class="gh-repo-lang"><span class="gh-repo-lang-dot" style="background:' + (LANG_COLORS[r.lang] || '#888') + '"></span>' + r.lang + '</div>';
+      card.addEventListener('click', function() {
+        if (typeof openRepoBrowser === 'function') openRepoBrowser();
+      });
+      grid.appendChild(card);
+    });
   })();
 </script>
 
