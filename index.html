@@ -723,15 +723,14 @@
     }
 
 
-    /* ---- GITHUB SECTION (calendar + repos) ---- */
+    /* ---- GITHUB CONTRIBUTION LINE ---- */
     .github-section {
       display: flex;
-      gap: clamp(12px, 2vw, 24px);
+      flex-direction: column;
       padding: clamp(4px, 0.8vh, 10px) 0;
-      align-items: flex-start;
     }
     .gh-wrap {
-      flex: 0 0 auto;
+      width: 100%;
       display: flex;
       flex-direction: column;
       gap: clamp(3px, 0.4vh, 6px);
@@ -740,12 +739,13 @@
     .gh-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: clamp(6px, 1vw, 12px);
       font-size: var(--label);
       color: var(--fg-dim);
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
+    .gh-header > a { margin-left: auto; }
     .gh-header a {
       color: var(--fg-faint);
       text-decoration: none;
@@ -754,8 +754,11 @@
     .gh-month-tabs {
       display: flex;
       gap: 2px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
     }
+    .gh-month-tabs::-webkit-scrollbar { display: none; }
     .gh-month-tab {
       background: none;
       border: 1px solid transparent;
@@ -777,17 +780,16 @@
     }
     .gh-grid {
       display: grid;
-      grid-template-rows: repeat(7, 10px);
+      grid-template-rows: repeat(7, 1fr);
       grid-auto-flow: column;
-      grid-auto-columns: 10px;
+      grid-auto-columns: 1fr;
       gap: 2px;
-      width: fit-content;
+      width: 100%;
     }
     .gh-cell {
       border-radius: 2px;
       background: rgba(255,255,255,0.08);
-      width: 10px;
-      height: 10px;
+      aspect-ratio: 1;
     }
     .gh-cell[data-level="1"] { background: rgba(94,43,255,0.25); }
     .gh-cell[data-level="2"] { background: rgba(94,43,255,0.45); }
@@ -800,35 +802,44 @@
     }
     .gh-month-stats strong { color: var(--fg-dim); font-weight: 500; }
 
-    /* ---- REPO LIST (inline) ---- */
+    /* ---- REPO LIST (full width, below carousel) ---- */
     .gh-repos {
       flex: 1;
       min-width: 0;
       display: flex;
       flex-direction: column;
-      gap: clamp(3px, 0.4vh, 6px);
+      gap: clamp(4px, 0.6vh, 8px);
     }
     .gh-repos-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       font-size: var(--label);
       color: var(--fg-dim);
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
+    .gh-repos-header a {
+      color: var(--fg-faint);
+      text-decoration: none;
+      font-size: var(--label);
+    }
+    .gh-repos-header a:hover { color: var(--fg-dim); }
     .gh-repo-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: clamp(4px, 0.5vh, 8px);
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(6px, 0.8vh, 10px);
     }
     .gh-repo-card {
       background: rgba(255,255,255,0.03);
       border: 1px solid var(--border);
       border-radius: 4px;
-      padding: clamp(6px, 0.8vh, 12px) clamp(8px, 1vw, 14px);
+      padding: clamp(8px, 1vh, 14px) clamp(10px, 1.2vw, 16px);
       cursor: pointer;
       transition: background 0.15s, border-color 0.15s;
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 4px;
       min-width: 0;
     }
     .gh-repo-card:hover {
@@ -837,7 +848,7 @@
     }
     .gh-repo-name {
       font-family: var(--mono);
-      font-size: calc(var(--label) - 0px);
+      font-size: var(--label);
       color: rgba(255,255,255,0.85);
       white-space: nowrap;
       overflow: hidden;
@@ -853,14 +864,14 @@
       flex-shrink: 0;
     }
     .gh-repo-desc {
-      font-size: calc(var(--label) - 2px);
+      font-size: calc(var(--label) - 1px);
       color: var(--fg-faint);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .gh-repo-lang {
-      font-size: calc(var(--label) - 2px);
+      font-size: calc(var(--label) - 1px);
       color: var(--fg-faint);
       display: flex;
       align-items: center;
@@ -1289,10 +1300,8 @@
       /* Show all sections — reorganize into 2-col grid */
       .top-grid .col-section { display: block !important; }
       .middle { padding: 0.75rem 0; }
-      .github-section { padding: 0.75rem 0; flex-direction: column; }
+      .github-section { padding: 0.75rem 0; }
       .gh-wrap { width: 100%; max-width: none; }
-      .gh-grid { grid-template-rows: repeat(7, 9px); grid-auto-columns: 9px; }
-      .gh-cell { width: 9px; height: 9px; }
       .gh-repo-grid { grid-template-columns: 1fr 1fr; }
       .statement { max-width: 100%; font-size: var(--body); }
       .code-bg { display: none; }
@@ -1326,10 +1335,9 @@
       .top-grid .col-section { display: block !important; }
       .col-header { padding: 0.5em 0; }
       .middle { padding: 0.5rem 0; min-height: auto; flex: 0 0 auto; }
-      .github-section { padding: 0.5rem var(--edge); flex-direction: column; }
+      .github-section { padding: 0.5rem var(--edge); }
       .gh-wrap { width: 100%; max-width: none; }
-      .gh-grid { grid-template-rows: repeat(7, 8px); grid-auto-columns: 8px; gap: 2px; }
-      .gh-cell { width: 8px; height: 8px; }
+      .gh-grid { gap: 1px; }
       .gh-repo-grid { grid-template-columns: 1fr; }
       .cta-btn { min-height: 44px; }
       .statement { font-size: clamp(18px, 6vw, 24px); padding: 0 var(--edge); }
@@ -1371,6 +1379,7 @@
     .statement { opacity: 0; transform: translateY(20px); }
     .github-section { opacity: 0; transform: translateY(10px); }
     .bottom { opacity: 0; transform: translateY(10px); }
+    .gh-repos { opacity: 0; transform: translateY(10px); }
 
     /* Statement word animation */
     .statement .word {
@@ -2417,20 +2426,16 @@
     </p>
   </div>
 
-  <!-- GITHUB SECTION (calendar + repos) -->
+  <!-- GITHUB CONTRIBUTIONS (full-width line) -->
   <div class="github-section" id="githubGraph">
     <div class="gh-wrap">
       <div class="gh-header">
         <span>· Contributions</span>
+        <div class="gh-month-tabs" id="ghMonthTabs"></div>
         <a href="https://github.com/CalilDrissi" target="_blank" rel="noopener">@CalilDrissi</a>
       </div>
-      <div class="gh-month-tabs" id="ghMonthTabs"></div>
       <div class="gh-grid" id="ghGrid"></div>
       <div class="gh-month-stats" id="ghMonthStats"></div>
-    </div>
-    <div class="gh-repos">
-      <div class="gh-repos-header">· Repositories</div>
-      <div class="gh-repo-grid" id="ghRepoGrid"></div>
     </div>
   </div>
 
@@ -2496,6 +2501,15 @@
         <div class="project-label">Open Source</div>
       </div>
     </div>
+  </div>
+
+  <!-- REPOSITORIES (full width, below carousel) -->
+  <div class="gh-repos" id="ghReposSection">
+    <div class="gh-repos-header">
+      <span>· Repositories</span>
+      <a href="https://github.com/CalilDrissi" target="_blank" rel="noopener">View on GitHub ↗</a>
+    </div>
+    <div class="gh-repo-grid" id="ghRepoGrid"></div>
   </div>
 
 </div>
@@ -3680,6 +3694,9 @@
     // 3. Bottom strip
     tl.to('.bottom', { opacity: 1, y: 0, duration: 0.6 }, 1.0);
 
+    // 3.5. Repos section
+    tl.to('.gh-repos', { opacity: 1, y: 0, duration: 0.6 }, 1.1);
+
     // 4. Footer ribbon
     gsap.from('.footer-ribbon', { y: 30, opacity: 0, duration: 0.6, delay: 1.2, ease: 'power2.out' });
 
@@ -3715,10 +3732,24 @@
     if (!tabs || !grid) return;
 
     var keys = Object.keys(GH_MONTH_DATA);
-    var currentKey = keys[keys.length - 1]; // default to latest month
+    var currentKey = 'all'; // default to full year
+
+    // Collect all days for "All" view
+    var allDays = [];
+    var totalAll = 0;
+    keys.forEach(function(k) {
+      allDays = allDays.concat(GH_MONTH_DATA[k].days);
+      totalAll += GH_MONTH_DATA[k].total;
+    });
 
     function renderTabs() {
       tabs.innerHTML = '';
+      // "All" tab first
+      var allBtn = document.createElement('button');
+      allBtn.className = 'gh-month-tab' + (currentKey === 'all' ? ' active' : '');
+      allBtn.textContent = 'All';
+      allBtn.addEventListener('click', function() { currentKey = 'all'; renderTabs(); renderGrid(); });
+      tabs.appendChild(allBtn);
       keys.forEach(function(k) {
         var btn = document.createElement('button');
         btn.className = 'gh-month-tab' + (k === currentKey ? ' active' : '');
@@ -3728,17 +3759,21 @@
       });
     }
 
-    function renderGrid() {
+    function getDays() {
+      if (currentKey === 'all') return allDays;
       var m = GH_MONTH_DATA[currentKey];
-      if (!m) return;
-      // Build a 7-row grid for the weeks of this month
-      // First, group days into weeks (Sun=0 start)
+      return m ? m.days : [];
+    }
+
+    function renderGrid() {
+      var days = getDays();
+      if (!days.length) return;
+      // Build weeks (7-row columns)
       var weeks = [];
       var week = [];
-      // Pad first week with empty cells
-      var firstDow = m.days[0].dow;
+      var firstDow = days[0].dow;
       for (var p = 0; p < firstDow; p++) week.push(null);
-      m.days.forEach(function(d) {
+      days.forEach(function(d) {
         week.push(d);
         if (week.length === 7) { weeks.push(week); week = []; }
       });
@@ -3746,11 +3781,7 @@
         while (week.length < 7) week.push(null);
         weeks.push(week);
       }
-      // Render: 7 rows x N columns
       grid.innerHTML = '';
-      grid.style.gridAutoColumns = '1fr';
-      // aspect ratio based on number of weeks
-      // cells are fixed-size via CSS, no aspect-ratio needed
       for (var row = 0; row < 7; row++) {
         for (var col = 0; col < weeks.length; col++) {
           var cell = document.createElement('div');
@@ -3763,7 +3794,12 @@
           grid.appendChild(cell);
         }
       }
-      stats.innerHTML = '<strong>' + m.total + '</strong> contributions in ' + m.label;
+      if (currentKey === 'all') {
+        stats.innerHTML = '<strong>' + totalAll + '</strong> contributions in the last year';
+      } else {
+        var m = GH_MONTH_DATA[currentKey];
+        stats.innerHTML = '<strong>' + m.total + '</strong> contributions in ' + m.label;
+      }
     }
 
     renderTabs();
