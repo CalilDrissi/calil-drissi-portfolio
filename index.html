@@ -268,6 +268,98 @@
       opacity: 0.3;
       transition: opacity 0.25s;
     }
+
+    /* Cursor video preview */
+    .cursor-video-preview {
+      position: fixed;
+      pointer-events: none;
+      z-index: 998;
+      width: 200px;
+      border-radius: 12px;
+      overflow: hidden;
+      opacity: 0;
+      transform: translate(16px, -50%) scale(0.85);
+      transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.16,1,0.3,1);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
+    }
+    .cursor-video-preview.visible {
+      opacity: 1;
+      transform: translate(16px, -50%) scale(1);
+    }
+    .cursor-video-preview video {
+      display: block;
+      width: 100%;
+      border-radius: 12px;
+    }
+    .cursor-video-preview .cvp-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 6px 10px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      font-family: var(--mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.8);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .cursor-video-preview .cvp-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: cvpPulse 1.5s ease-in-out infinite;
+    }
+    @keyframes cvpPulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    /* About Me video section */
+    .about-video-section {
+      margin: 16px 0 8px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: #0a0a0a;
+    }
+    .about-video-section video {
+      display: block;
+      width: 100%;
+      border-radius: 0;
+    }
+    .about-video-label {
+      padding: 8px 12px;
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .about-video-label .avl-icon {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .about-video-label .avl-icon::after {
+      content: '';
+      display: block;
+      width: 0; height: 0;
+      border-left: 5px solid var(--accent);
+      border-top: 3px solid transparent;
+      border-bottom: 3px solid transparent;
+      margin-left: 1px;
+    }
     .intro-meta {
       color: var(--fg-dim);
       margin: clamp(4px, 1vh, 10px) 0;
@@ -581,93 +673,12 @@
     }
 
     /* ---- MIDDLE (statement) ---- */
-    .middle {
-      flex: 0 0 auto;
-      display: flex;
-      align-items: center;
-      position: relative;
-      min-height: 0;
-      padding: clamp(4px, 0.8vh, 10px) 0;
-    }
-    /* Code background */
-    .code-bg {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-    .code-bg-lines {
-      position: absolute;
-      right: -120px; top: 10px; bottom: 30px;
-      width: 55%;
-      font-family: var(--mono);
-      font-size: var(--body);
-      line-height: 2;
-      color: rgba(255,255,255,0.18);
-      white-space: pre;
-      overflow: hidden;
-      padding: clamp(12px, 2vh, 24px) clamp(10px, 1.2vw, 20px);
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-    }
-    .code-bg-line {
-      display: block;
-    }
-    .code-bg-line .kw { color: rgba(94,43,255,0.55); }
-    .code-bg-line .fn { color: rgba(40,200,64,0.45); }
-    .code-bg-line .str { color: rgba(254,188,46,0.4); }
-    .code-bg-line .cm { color: rgba(255,255,255,0.1); font-style: italic; }
-    .code-bg-line .tp { color: rgba(80,180,255,0.35); }
-    .code-bg-line .num { color: rgba(255,120,80,0.3); }
-    .code-bg-line .op { color: rgba(255,255,255,0.15); }
-    .code-bg-line .pp { color: rgba(200,140,255,0.35); }
-    /* Gradient overlay — strong left fade for text readability */
-    .code-bg::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, var(--bg) 35%, rgba(18,18,18,0.7) 45%, rgba(18,18,18,0.4) 58%, rgba(18,18,18,0.15) 72%, rgba(18,18,18,0.4) 88%, var(--bg) 100%);
-      z-index: 1;
-    }
-    .code-bg::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, var(--bg) 0%, rgba(18,18,18,0.4) 3%, transparent 8%, transparent 92%, rgba(18,18,18,0.4) 97%, var(--bg) 100%);
-      z-index: 1;
-    }
-    /* Blinking cursor at end of code */
-    .code-cursor {
-      display: inline-block;
-      width: 7px; height: 14px;
-      background: var(--accent);
-      animation: cursorBlink 1s step-end infinite;
-      vertical-align: middle;
-      margin-left: 2px;
-    }
-    @keyframes cursorBlink { 50% { opacity: 0; } }
-    /* Line numbers */
-    .code-bg-line::before {
-      content: attr(data-ln);
-      display: inline-block;
-      width: 28px;
-      text-align: right;
-      margin-right: 16px;
-      color: rgba(255,255,255,0.06);
-      user-select: none;
-    }
-
     .statement {
       font-family: var(--mono);
-      font-size: var(--body);
-      line-height: 1.6;
-      max-width: 100%;
+      font-size: var(--hero);
+      line-height: 1.45;
       font-weight: 400;
       letter-spacing: -0.01em;
-      position: relative;
-      z-index: 2;
       color: var(--fg-dim);
     }
     .statement em {
@@ -768,73 +779,41 @@
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
-    /* Code typing area — overlaps right side, faded edges */
-    .gh-code-area {
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      width: 55%;
-      overflow: hidden;
-      pointer-events: none;
-    }
-    /* Gradient fade from left + subtle overlay */
-    .gh-code-area::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to right, var(--bg) 0%, transparent 30%, transparent 85%, var(--bg) 100%);
-      z-index: 1;
-    }
-    .gh-code-area::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--bg);
-      opacity: 0.5;
-      z-index: 0;
-    }
-    .gh-code-lines {
+    /* Statement (right of contribution grid) */
+    .gh-body .statement {
+      flex: 1;
+      min-width: 0;
       font-family: var(--mono);
-      font-size: 11px;
-      line-height: 18px;
-      color: rgba(255,255,255,0.5);
-      white-space: pre;
-      overflow: hidden;
-      height: 100%;
-      position: relative;
-      z-index: 0;
+      font-size: clamp(11px, 1vw, 14px);
+      line-height: 1.55;
+      font-weight: 400;
+      letter-spacing: -0.005em;
+      color: var(--fg-dim);
+      margin: 0;
+      padding-left: clamp(10px, 1.2vw, 20px);
+      display: flex;
+      align-items: center;
+      word-spacing: 0.05em;
     }
-    .gh-code-lines .kw { color: #c792ea; }
-    .gh-code-lines .fn { color: #82aaff; }
-    .gh-code-lines .str { color: #c3e88d; }
-    .gh-code-lines .tp { color: #89ddff; }
-    .gh-code-lines .num { color: #f78c6c; }
-    .gh-code-lines .op { color: #89ddff; }
-    .gh-code-lines .pp { color: #ffcb6b; }
-    .gh-code-line {
-      display: block;
-      height: 18px;
-      overflow: hidden;
+    .gh-body .statement em {
+      font-family: var(--mono);
+      font-size: inherit;
+      font-weight: 600;
+      font-style: normal;
+      color: #fff;
     }
-    .gh-code-line::before {
-      content: attr(data-ln);
-      display: inline-block;
-      width: 22px;
-      text-align: right;
-      margin-right: 12px;
-      color: rgba(255,255,255,0.1);
-      user-select: none;
+    .gh-body .statement .rotate-slot {
+      display: inline;
+      overflow: visible;
+      height: auto;
+      min-width: 0;
     }
-    .gh-code-cursor {
-      display: inline-block;
-      width: 6px;
-      height: 13px;
-      background: var(--accent);
-      vertical-align: text-bottom;
-      animation: cursorBlink 1s step-end infinite;
+    .gh-body .statement .rotate-slot em {
+      display: inline;
     }
-    @keyframes cursorBlink { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
+    .gh-body .statement .superscript {
+      font-size: 0.6em;
+    }
     .gh-month-tabs {
       display: flex;
       gap: 2px;
@@ -1391,13 +1370,15 @@
       }
       /* Show all sections — reorganize into 2-col grid */
       .top-grid .col-section { display: block !important; }
-      .middle { padding: 0.75rem 0; }
+
       .github-section { padding: 0.75rem 0; }
-      .gh-code-area { display: none; }
+
       .gh-wrap { width: 100%; max-width: none; }
       .gh-repo-grid { grid-template-columns: 1fr 1fr; }
-      .statement { max-width: 100%; font-size: var(--body); }
-      .code-bg { display: none; }
+      .gh-body { flex-direction: column; }
+      .gh-body .statement { font-size: clamp(14px, 3vw, 18px); }
+      .statement { max-width: 100%; }
+
       /* Windows go full-screen on tablet */
       .win.open {
         width: calc(100vw - 20px) !important;
@@ -1427,13 +1408,13 @@
       }
       .top-grid .col-section { display: block !important; }
       .col-header { padding: 0.5em 0; }
-      .middle { padding: 0.5rem 0; min-height: auto; flex: 0 0 auto; }
+
       .github-section { padding: 0.5rem var(--edge); }
       .gh-wrap { width: 100%; max-width: none; }
       .gh-grid { gap: 1px; }
       .gh-repo-grid { grid-template-columns: 1fr; }
       .cta-btn { min-height: 44px; }
-      .statement { font-size: clamp(18px, 6vw, 24px); padding: 0 var(--edge); }
+      .statement { font-size: clamp(14px, 4.5vw, 18px); padding: 0 var(--edge); }
       .connect-ctas { grid-template-columns: 1fr; max-width: 100%; }
       .bottom-bar { padding: 0 var(--edge); }
       .project-strip { padding: 0 var(--edge); }
@@ -1469,7 +1450,6 @@
 
     /* Initial hidden state — GSAP animates in */
     .col-section { opacity: 0; transform: translateY(12px); }
-    .statement { opacity: 0; transform: translateY(20px); }
     .github-section { opacity: 0; transform: translateY(10px); }
     .bottom { opacity: 0; transform: translateY(10px); }
 
@@ -2410,6 +2390,10 @@
       <div class="col-header">Intro</div>
       <div class="intro-identity" id="introIdentity">
         <div class="intro-hover-pill"><span class="pill-track">Play — Click to discover&nbsp;&nbsp;&nbsp;⬥&nbsp;&nbsp;&nbsp;Play — Click to discover&nbsp;&nbsp;&nbsp;⬥&nbsp;&nbsp;&nbsp;</span></div>
+        <div class="cursor-video-preview" id="cursorVideoPreview">
+          <video src="/video.mp4" muted playsinline loop></video>
+          <div class="cvp-label"><span class="cvp-dot"></span>Click to discover</div>
+        </div>
         <img class="intro-avatar" src="/profile.png" alt="CD" />
         <div>
           <div class="intro-name">Khalil Drissi<svg class="heartbeat-svg" viewBox="0 0 90 12"><polyline class="hb-line" points="0,6 8,6 11,6 14,1.5 17,10.5 20,4 23,8 26,6 34,6"/><text class="hb-text" x="34.5" y="7.2">memento mori</text></svg></div>
@@ -2508,17 +2492,7 @@
 
   </div>
 
-  <!-- STATEMENT -->
-  <div class="middle">
-    <div class="code-bg">
-      <div class="code-bg-lines" id="codeBg"></div>
-    </div>
-    <p class="statement">
-      An experienced software developer with a focus on <span class="rotate-slot" id="rotateSlot"><em>performance</em></span> and <em>craft</em>. A reliable partner for startups, agencies, and brands building <em>across&nbsp;platforms</em><span class="superscript">15</span>.
-    </p>
-  </div>
-
-  <!-- GITHUB CONTRIBUTIONS (grid + code typing) -->
+  <!-- GITHUB CONTRIBUTIONS + STATEMENT -->
   <div class="github-section" id="githubGraph">
     <div class="gh-top-row">
       <div class="gh-header">
@@ -2532,9 +2506,9 @@
         <div class="gh-grid" id="ghGrid"></div>
         <div class="gh-month-stats" id="ghMonthStats"></div>
       </div>
-      <div class="gh-code-area">
-        <div class="gh-code-lines" id="ghCodeLines"></div>
-      </div>
+      <p class="statement">
+        An experienced software developer with a focus on <em id="rotateSlot">quality</em> and <em>craft</em>. A reliable partner for startups, agencies, and brands building <em>across platforms</em><span class="superscript">15</span>.
+      </p>
     </div>
   </div>
 
@@ -2677,6 +2651,10 @@
         <p>I'm a software developer with 4+ years of experience building products across web, mobile, desktop, and systems for startups, agencies, and brands worldwide.</p>
         <p>My work spans the full stack — from pixel-perfect frontends with React and Next.js to robust backend systems with Node.js and Python. I'm passionate about animation, interaction design, and pushing the boundaries of what's possible on the web.</p>
         <p>When I'm not coding, you'll find me exploring new tools, contributing to open source, or mentoring aspiring developers in the Moroccan tech community.</p>
+      </div>
+      <div class="about-video-section">
+        <video src="/video-ai-me.mp4" controls playsinline></video>
+        <div class="about-video-label"><span class="avl-icon"></span>Video Introduction</div>
       </div>
       <div class="about-details-grid">
         <div class="about-detail-card">
@@ -3316,15 +3294,28 @@
   const aboutWin = WM.register(aboutPopup, LANG === 'fr' ? 'À propos' : 'About Me');
   aboutWin.persistent = true;
 
-  // Pill follows cursor
+  // Pill + video preview follows cursor
   const introId = document.getElementById('introIdentity');
   const hoverPill = introId.querySelector('.intro-hover-pill');
+  const cursorVideo = document.getElementById('cursorVideoPreview');
+  const cursorVid = cursorVideo.querySelector('video');
   introId.addEventListener('mousemove', (e) => {
     hoverPill.style.left = e.clientX + 'px';
     hoverPill.style.top = e.clientY + 'px';
+    cursorVideo.style.left = e.clientX + 'px';
+    cursorVideo.style.top = e.clientY + 'px';
   });
-  introId.addEventListener('mouseenter', () => { hoverPill.style.opacity = '1'; });
-  introId.addEventListener('mouseleave', () => { hoverPill.style.opacity = '0'; });
+  introId.addEventListener('mouseenter', () => {
+    hoverPill.style.opacity = '1';
+    cursorVideo.classList.add('visible');
+    cursorVid.currentTime = 0;
+    cursorVid.play().catch(() => {});
+  });
+  introId.addEventListener('mouseleave', () => {
+    hoverPill.style.opacity = '0';
+    cursorVideo.classList.remove('visible');
+    cursorVid.pause();
+  });
 
   document.getElementById('introIdentity').addEventListener('click', () => {
     if (aboutPopup.classList.contains('open') && !aboutWin.minimized) {
@@ -3408,272 +3399,10 @@
     if (e.key === 'Enter') sendMessage();
   });
 
-  // ======== CODE TYPING BACKGROUND ========
-  // Multiple code blocks that cycle through
-  const codeBlocks = [
-    [
-      { text: '// Thread-safe concurrent memory pool with lock-free fast path allocation and automatic block expansion', cm: true },
-      { text: 'template <typename T, std::size_t BlockSize = 4096, typename Allocator = std::allocator<T>>', kw: [0,8], tp: [10,18,20,21,23,34,37,41,43,52,55,74,76,77] },
-      { text: 'class PoolAllocator final : private Allocator {', kw: [0,5,21,26,29,36] },
-      { text: 'public:', kw: [0,7] },
-      { text: '    using value_type = T;', kw: [4,9], tp: [22,23] },
-      { text: '    using pointer = typename std::allocator_traits<Allocator>::pointer;', kw: [4,9,18,26], tp: [27,49,50,63] },
-      { text: '    using size_type = std::size_t;', kw: [4,9], tp: [22,34] },
-      { text: '    using difference_type = typename std::allocator_traits<Allocator>::difference_type;', kw: [4,9,26,34], tp: [35,57,58,74] },
-      { text: '' },
-      { text: '    [[nodiscard]] constexpr pointer allocate(size_type count, const void* hint = nullptr) {', kw: [4,18,19,28], tp: [29,36,46,55,62,67,70,77] },
-      { text: '        if (count == 1 && !free_list_.empty()) [[likely]] {', kw: [8,10,49,57] },
-      { text: '            std::lock_guard<std::mutex> guard(mutex_);', tp: [12,27,28,39] },
-      { text: '            pointer result = free_list_.back();', tp: [12,19] },
-      { text: '            free_list_.pop_back();' },
-      { text: '            return result;', kw: [12,18] },
-      { text: '        }' },
-      { text: '        return std::allocator_traits<Allocator>::allocate(underlying_allocator(), count, hint);', kw: [8,14], tp: [15,37,38,47] },
-      { text: '    }' },
-      { text: '' },
-      { text: '    constexpr void deallocate(pointer ptr, size_type count) noexcept {', kw: [4,13,14,18,55,63], tp: [19,26,27,34,36,45] },
-      { text: '        if (count == 1) [[likely]] {', kw: [8,10,23,31] },
-      { text: '            std::lock_guard<std::mutex> guard(mutex_);', tp: [12,27,28,39] },
-      { text: '            free_list_.emplace_back(ptr);' },
-      { text: '        } else {', kw: [10,14] },
-      { text: '            std::allocator_traits<Allocator>::deallocate(underlying_allocator(), ptr, count);', tp: [12,34,35,44] },
-      { text: '        }' },
-      { text: '    }' },
-      { text: '' },
-      { text: '    [[nodiscard]] constexpr size_type max_size() const noexcept {', kw: [4,18,19,28,49,54,55,63], tp: [29,38] },
-      { text: '        return std::allocator_traits<Allocator>::max_size(underlying_allocator());', kw: [8,14], tp: [15,37,38,47] },
-      { text: '    }' },
-      { text: '' },
-      { text: 'private:', kw: [0,8] },
-      { text: '    std::vector<pointer> free_list_;', tp: [4,16,17,24] },
-      { text: '    mutable std::mutex mutex_;', kw: [4,11], tp: [12,23] },
-      { text: '    std::vector<std::unique_ptr<std::byte[]>> blocks_;', tp: [4,16,17,32,33,43] },
-      { text: '' },
-      { text: '    constexpr Allocator& underlying_allocator() noexcept { return static_cast<Allocator&>(*this); }', kw: [4,13,46,54], tp: [14,24,63,74,75,84] },
-      { text: '' },
-      { text: '    void expand_pool(std::size_t num_elements = BlockSize / sizeof(T)) {', kw: [4,8], tp: [9,20], num: [60,69] },
-      { text: '        auto block = std::make_unique<std::byte[]>(num_elements * sizeof(T));', kw: [8,12], tp: [24,39,40,50] },
-      { text: '        for (std::size_t idx = 0; idx < num_elements; ++idx) {', kw: [8,11], tp: [13,24], num: [31,32] },
-      { text: '            free_list_.push_back(reinterpret_cast<pointer>(block.get() + idx * sizeof(T)));', kw: [12,28], tp: [29,36] },
-      { text: '        }' },
-      { text: '        blocks_.emplace_back(std::move(block));' },
-      { text: '    }' },
-      { text: '};' },
-    ],
-    [
-      { text: '// Lazy coroutine-based async task with exception propagation, continuations, and RAII handle management', cm: true },
-      { text: 'template <typename T>', kw: [0,8], tp: [10,18,19,20] },
-      { text: 'class [[nodiscard]] Task {', kw: [0,5,22,26] },
-      { text: '    using Handle = std::coroutine_handle<promise_type>;', kw: [4,9], tp: [12,18,21,43,44,56] },
-      { text: '' },
-      { text: 'public:', kw: [0,7] },
-      { text: '    struct promise_type {', kw: [4,10] },
-      { text: '        std::optional<T> result_;', tp: [8,23,24,25] },
-      { text: '        std::exception_ptr exception_ = nullptr;', tp: [8,28], kw: [42,49] },
-      { text: '        std::coroutine_handle<> continuation_ = std::noop_coroutine();', tp: [8,31] },
-      { text: '' },
-      { text: '        Task get_return_object() noexcept { return Task{Handle::from_promise(*this)}; }', kw: [13,19,38,46,49,55], tp: [8,12] },
-      { text: '' },
-      { text: '        constexpr std::suspend_always initial_suspend() const noexcept { return {}; }', kw: [8,17], tp: [18,38], kw: [57,62,63,71] },
-      { text: '' },
-      { text: '        auto final_suspend() const noexcept {', kw: [8,12,31,36,37,45] },
-      { text: '            struct FinalAwaiter {', kw: [12,18] },
-      { text: '                constexpr bool await_ready() const noexcept { return false; }', kw: [16,25,26,30,47,52,53,61,71,76], tp: [31,35] },
-      { text: '                std::coroutine_handle<> await_suspend(std::coroutine_handle<promise_type> handle) noexcept {', tp: [16,39,56,91], kw: [99,107] },
-      { text: '                    if (auto continuation = handle.promise().continuation_; continuation && !continuation.done())', kw: [20,22,27,31] },
-      { text: '                        return continuation;', kw: [24,30] },
-      { text: '                    return std::noop_coroutine();', kw: [20,26] },
-      { text: '                }' },
-      { text: '                constexpr void await_resume() const noexcept {}', kw: [16,25,26,30,47,52,53,61] },
-      { text: '            };' },
-      { text: '            return FinalAwaiter{};', kw: [12,18] },
-      { text: '        }' },
-      { text: '' },
-      { text: '        template <typename U> void return_value(U&& value) requires std::is_convertible_v<U, T> {', kw: [8,16,18,26,27,31,56,64], tp: [17,25,32,33,35,36,65,86,87,88,90,91] },
-      { text: '            result_.emplace(std::forward<U>(std::move(value)));' },
-      { text: '        }' },
-      { text: '' },
-      { text: '        void unhandled_exception() noexcept { exception_ = std::current_exception(); }', kw: [8,12,37,45] },
-      { text: '    };' },
-      { text: '' },
-      { text: '    explicit Task(Handle handle) noexcept : handle_(handle) {}', kw: [4,12,30,38], tp: [13,17,18,24] },
-      { text: '    ~Task() { if (handle_) handle_.destroy(); }', kw: [8,10] },
-      { text: '    Task(Task&& other) noexcept : handle_(std::exchange(other.handle_, nullptr)) {}', kw: [4,8,22,30], tp: [9,13,14,15] },
-      { text: '    Task& operator=(Task&& other) noexcept { std::swap(handle_, other.handle_); return *this; }', kw: [4,8,13,24,36,44], tp: [9,13,25,29,30,31] },
-      { text: '' },
-      { text: '    [[nodiscard]] bool await_ready() const noexcept { return handle_.done(); }', kw: [4,18,35,40,41,49], tp: [19,23] },
-      { text: '    std::coroutine_handle<> await_suspend(std::coroutine_handle<> caller) noexcept {', tp: [4,27,44,67], kw: [76,84] },
-      { text: '        handle_.promise().continuation_ = caller;', },
-      { text: '        return handle_;', kw: [8,14] },
-      { text: '    }' },
-      { text: '' },
-      { text: '    T await_resume() { if (handle_.promise().exception_) std::rethrow_exception(handle_.promise().exception_); return std::move(*handle_.promise().result_); }', tp: [4,5], kw: [22,24] },
-      { text: '' },
-      { text: 'private:', kw: [0,8] },
-      { text: '    Handle handle_ = nullptr;', tp: [4,10], kw: [22,29] },
-      { text: '};' },
-    ],
-    [
-      { text: '// Compile-time constexpr matrix with full arithmetic, decomposition, and static dimension checking', cm: true },
-      { text: 'template <std::floating_point T, std::size_t Rows, std::size_t Cols>', kw: [0,8], tp: [10,31,33,34,36,47,49,60] },
-      { text: 'class Matrix {', kw: [0,5] },
-      { text: '    std::array<T, Rows * Cols> data_{};', tp: [4,15,16,17] },
-      { text: '' },
-      { text: 'public:', kw: [0,7] },
-      { text: '    constexpr T& operator()(std::size_t row, std::size_t col) noexcept {', kw: [4,13,60,68], tp: [14,15,27,39,45,56] },
-      { text: '        return data_[row * Cols + col];', kw: [8,14] },
-      { text: '    }' },
-      { text: '' },
-      { text: '    constexpr const T& operator()(std::size_t row, std::size_t col) const noexcept {', kw: [4,13,14,19,66,71,72,80], tp: [20,21,33,45,51,62] },
-      { text: '        return data_[row * Cols + col];', kw: [8,14] },
-      { text: '    }' },
-      { text: '' },
-      { text: '    [[nodiscard]] constexpr auto fill(T value) noexcept -> Matrix& {', kw: [4,18,19,28,29,33,46,54], tp: [34,35,57,63] },
-      { text: '        std::ranges::fill(data_, value);', },
-      { text: '        return *this;', kw: [8,14] },
-      { text: '    }' },
-      { text: '' },
-      { text: '    template <std::size_t OtherCols>', kw: [4,12], tp: [14,25] },
-      { text: '    [[nodiscard]] constexpr auto operator*(const Matrix<T, Cols, OtherCols>& rhs) const -> Matrix<T, Rows, OtherCols> {', kw: [4,18,19,28,29,33,85,90], tp: [34,40,41,42,48,57,93,99,100,101,107,116] },
-      { text: '        Matrix<T, Rows, OtherCols> result{};', tp: [8,14,15,16,22,31] },
-      { text: '        for (std::size_t i = 0; i < Rows; ++i)', kw: [8,11], tp: [13,24], num: [29,30] },
-      { text: '            for (std::size_t j = 0; j < OtherCols; ++j)', kw: [12,15], tp: [17,28], num: [33,34] },
-      { text: '                for (std::size_t k = 0; k < Cols; ++k)', kw: [16,19], tp: [21,32], num: [37,38] },
-      { text: '                    result(i, j) += (*this)(i, k) * rhs(k, j);' },
-      { text: '        return result;', kw: [8,14] },
-      { text: '    }' },
-      { text: '' },
-      { text: '    [[nodiscard]] constexpr auto transpose() const noexcept -> Matrix<T, Cols, Rows> {', kw: [4,18,19,28,29,33,48,53,54,62], tp: [65,71,72,73,79,83] },
-      { text: '        Matrix<T, Cols, Rows> result{};', tp: [8,14,15,16,22,26] },
-      { text: '        for (std::size_t i = 0; i < Rows; ++i)', kw: [8,11], tp: [13,24], num: [29,30] },
-      { text: '            for (std::size_t j = 0; j < Cols; ++j)', kw: [12,15], tp: [17,28], num: [33,34] },
-      { text: '                result(j, i) = (*this)(i, j);' },
-      { text: '        return result;', kw: [8,14] },
-      { text: '    }' },
-      { text: '' },
-      { text: '    [[nodiscard]] constexpr T determinant() const requires (Rows == Cols) {', kw: [4,18,19,28,44,49,50,58], tp: [29,30] },
-      { text: '        static_assert(Rows == Cols, "determinant requires a square matrix");', kw: [8,21], str: [34,70], num: [22,26,30,34] },
-      { text: '        if constexpr (Rows == 1) return data_[0];', kw: [8,10,19,28,33], num: [29,30,42,43] },
-      { text: '        if constexpr (Rows == 2) return data_[0] * data_[3] - data_[1] * data_[2];', kw: [8,10,19,28,33], num: [29,30,44,45,55,56,66,67,77,78] },
-      { text: '        T det = T{};', tp: [8,9,14,15] },
-      { text: '        for (std::size_t col = 0; col < Cols; ++col) {', kw: [8,11], tp: [13,24], num: [31,32] },
-      { text: '            const T sign = (col % 2 == 0) ? T{1} : T{-1};', kw: [12,17], tp: [18,19,48,49,55,56], num: [34,35,50,51,57,59] },
-      { text: '            det += sign * data_[col] * minor(0, col).determinant();', num: [48,49] },
-      { text: '        }' },
-      { text: '        return det;', kw: [8,14] },
-      { text: '    }' },
-      { text: '};' },
-    ]
-  ];
-
-  const codeBg = document.getElementById('codeBg');
-  let currentBlock = 0;
-  let charIdx = 0;
-  let lineIdx = 0;
-  let lineNum = 1;
-  const MAX_VISIBLE_LINES = Math.floor(codeBg.getBoundingClientRect().height / 24) - 1;
-
-  function trimTopLines() {
-    const lines = codeBg.querySelectorAll('.code-bg-line');
-    while (lines.length > MAX_VISIBLE_LINES) {
-      const first = codeBg.querySelector('.code-bg-line');
-      if (first) first.remove();
-      else break;
-      // re-query since we removed one
-      if (codeBg.querySelectorAll('.code-bg-line').length <= MAX_VISIBLE_LINES) break;
-    }
-  }
-
-  function createLine() {
-    const span = document.createElement('span');
-    span.className = 'code-bg-line';
-    span.setAttribute('data-ln', String(lineNum++).padStart(2, ' '));
-    span.style.opacity = '1';
-    codeBg.appendChild(span);
-    trimTopLines();
-    return span;
-  }
-
-  function moveCursor(lineEl) {
-    const existing = codeBg.querySelector('.code-cursor');
-    if (existing) existing.remove();
-    const cursor = document.createElement('span');
-    cursor.className = 'code-cursor';
-    lineEl.appendChild(cursor);
-  }
-
-  function typeNextChar() {
-    const block = codeBlocks[currentBlock];
-    if (lineIdx >= block.length) {
-      // Block done — seamlessly continue with next block
-      currentBlock = (currentBlock + 1) % codeBlocks.length;
-      lineIdx = 0;
-      charIdx = 0;
-      // Add a blank separator line, then keep typing
-      const sep = createLine();
-      sep.innerHTML = '&nbsp;';
-      setTimeout(typeNextChar, 475);
-      return;
-    }
-
-    const line = block[lineIdx];
-    const text = line.text;
-
-    if (!text) {
-      const el = createLine();
-      el.innerHTML = '&nbsp;';
-      lineIdx++;
-      charIdx = 0;
-      setTimeout(typeNextChar, 200);
-      return;
-    }
-
-    let lineEl = codeBg.querySelector('.typing-line');
-    if (!lineEl) {
-      lineEl = createLine();
-      lineEl.classList.add('typing-line');
-    }
-
-    if (charIdx < text.length) {
-      const ch = text[charIdx];
-      const charSpan = document.createElement('span');
-
-      if (line.cm) {
-        charSpan.className = 'cm';
-      } else {
-        const classes = ['kw','str','tp','num','op','pp'];
-        for (const cls of classes) {
-          if (line[cls]) {
-            for (let k = 0; k < line[cls].length; k += 2) {
-              if (charIdx >= line[cls][k] && charIdx < line[cls][k+1]) { charSpan.className = cls; break; }
-            }
-            if (charSpan.className) break;
-          }
-        }
-      }
-
-      charSpan.textContent = ch;
-      lineEl.appendChild(charSpan);
-      moveCursor(lineEl);
-      charIdx++;
-
-      const delay = ch === ' ' ? 43 : (charSpan.className ? 62 : 52);
-      setTimeout(typeNextChar, delay + Math.random() * 33);
-    } else {
-      lineEl.classList.remove('typing-line');
-      lineIdx++;
-      charIdx = 0;
-      const pause = block[lineIdx] && !block[lineIdx].text ? 333 : 238;
-      setTimeout(typeNextChar, pause + Math.random() * 143);
-    }
-
-    // No auto-scroll needed — typing starts from top
-  }
-
-  // Start typing after page loads
+  // Reveal statement underlines after page load
   setTimeout(() => {
-    typeNextChar();
-    document.querySelector('.statement').classList.add('revealed');
+    const stmt = document.querySelector(".statement");
+    if (stmt) stmt.classList.add("revealed");
   }, 1000);
 
   // ======== ARTICLE PREVIEW ON HOVER ========
@@ -3757,22 +3486,13 @@
 
   function rotateWord() {
     rotateIdx = (rotateIdx + 1) % rotateWords.length;
-    const current = rotateSlot.querySelector('em:not(.leaving)');
-    if (!current) return;
-
-    // Mark current as leaving and make it absolute so new word takes flow
-    current.classList.add('leaving');
-    gsap.to(current, {
-      y: '-110%', opacity: 0, duration: 0.4, ease: 'power2.in',
-      onComplete: () => current.remove(),
+    gsap.to(rotateSlot, {
+      opacity: 0, duration: 0.3, ease: 'power2.in',
+      onComplete: () => {
+        rotateSlot.textContent = rotateWords[rotateIdx];
+        gsap.to(rotateSlot, { opacity: 1, duration: 0.3, ease: 'power2.out' });
+      }
     });
-
-    // Create new word
-    const newEm = document.createElement('em');
-    newEm.textContent = rotateWords[rotateIdx];
-    gsap.set(newEm, { y: '110%', opacity: 0 });
-    rotateSlot.appendChild(newEm);
-    gsap.to(newEm, { y: '0%', opacity: 1, duration: 0.4, ease: 'power2.out', delay: 0.1 });
   }
   setInterval(rotateWord, 2500);
 
@@ -3784,7 +3504,7 @@
     tl.to('.col-section', { opacity: 1, y: 0, duration: 0.7, stagger: 0.1 }, 0.2);
 
     // 2. Statement fade in
-    tl.to('.statement', { opacity: 1, y: 0, duration: 0.8 }, 0.7);
+
 
     // 2.5. GitHub graph
     tl.to('.github-section', { opacity: 1, y: 0, duration: 0.6 }, 0.9);
@@ -3899,156 +3619,6 @@
 
     renderTabs();
     renderGrid();
-  })();
-
-  // ======== GH CODE TYPING ANIMATION ========
-  (function() {
-    var container = document.getElementById('ghCodeLines');
-    if (!container) return;
-    // Code blocks — no comments, real syntax coloring
-    var blocks = [
-      [
-        { t: 'template <std::floating_point T, std::size_t N>', c: ['kw','','tp','','tp','','tp'] },
-        { t: 'struct Vec {', c: ['kw'] },
-        { t: '    std::array<T, N> data{};', c: ['','tp'] },
-        { t: '' },
-        { t: '    constexpr T& operator[](std::size_t i) noexcept {', c: ['kw','tp','','','tp','','kw'] },
-        { t: '        return data[i];', c: ['kw'] },
-        { t: '    }', c: [] },
-        { t: '' },
-        { t: '    constexpr Vec operator+(const Vec& rhs) const {', c: ['kw','','','','kw','','kw'] },
-        { t: '        Vec result{};', c: [''] },
-        { t: '        for (std::size_t i = 0; i < N; ++i)', c: ['kw','','tp','','num'] },
-        { t: '            result[i] = data[i] + rhs[i];', c: [] },
-        { t: '        return result;', c: ['kw'] },
-        { t: '    }', c: [] },
-        { t: '' },
-        { t: '    constexpr T dot(const Vec& other) const {', c: ['kw','tp','','kw','','kw'] },
-        { t: '        T sum{};', c: ['tp'] },
-        { t: '        for (std::size_t i = 0; i < N; ++i)', c: ['kw','','tp','','num'] },
-        { t: '            sum += data[i] * other[i];', c: [] },
-        { t: '        return sum;', c: ['kw'] },
-        { t: '    }', c: [] },
-        { t: '};', c: [] },
-      ],
-      [
-        { t: 'async fn serve(listener: TcpListener) -> Result<()> {', c: ['kw','kw','fn','','tp','','tp'] },
-        { t: '    loop {', c: ['kw'] },
-        { t: '        let (stream, addr) = listener.accept().await?;', c: ['kw','','','','','','kw'] },
-        { t: '        tokio::spawn(async move {', c: ['','kw','kw'] },
-        { t: '            if let Err(e) = handle(stream).await {', c: ['kw','kw','tp','','fn','','kw'] },
-        { t: '                eprintln!("Connection {addr}: {e}");', c: ['','str'] },
-        { t: '            }', c: [] },
-        { t: '        });', c: [] },
-        { t: '    }', c: [] },
-        { t: '}', c: [] },
-        { t: '' },
-        { t: 'async fn handle(mut stream: TcpStream) -> Result<()> {', c: ['kw','kw','fn','kw','','tp','','tp'] },
-        { t: '    let mut buf = vec![0u8; 4096];', c: ['kw','kw','','','num'] },
-        { t: '    let n = stream.read(&mut buf).await?;', c: ['kw','','','','kw','','kw'] },
-        { t: '    let request = String::from_utf8_lossy(&buf[..n]);', c: ['kw','','tp'] },
-        { t: '    let response = process_request(&request);', c: ['kw','','fn'] },
-        { t: '    stream.write_all(response.as_bytes()).await?;', c: ['','','','kw'] },
-        { t: '    Ok(())', c: ['tp'] },
-        { t: '}', c: [] },
-      ],
-      [
-        { t: 'interface Config<T extends Record<string, unknown>> {', c: ['kw','','tp','kw','tp'] },
-        { t: '    readonly name: string;', c: ['kw','','tp'] },
-        { t: '    readonly version: number;', c: ['kw','','tp'] },
-        { t: '    validate(input: T): boolean;', c: ['fn','','tp','','tp'] },
-        { t: '    transform(data: T): Promise<T>;', c: ['fn','','tp','','tp'] },
-        { t: '}', c: [] },
-        { t: '' },
-        { t: 'function createPipeline<T extends Config<any>>(', c: ['kw','fn','tp','kw','tp'] },
-        { t: '    ...stages: T[]', c: ['','','tp'] },
-        { t: '): Pipeline<T> {', c: ['','tp'] },
-        { t: '    const validated = stages.filter(s => s.validate(s));', c: ['kw','','','','kw'] },
-        { t: '    const sorted = validated.sort((a, b) =>', c: ['kw','','','','kw'] },
-        { t: '        a.version - b.version', c: [] },
-        { t: '    );', c: [] },
-        { t: '    return { stages: sorted, run: execute };', c: ['kw'] },
-        { t: '}', c: [] },
-      ],
-    ];
-
-    var maxLines = Math.floor(container.offsetHeight / 18) || 6;
-    var blockIdx = 0, lineIdx = 0, charIdx = 0, lineNum = 1;
-
-    function createLine() {
-      var el = document.createElement('span');
-      el.className = 'gh-code-line';
-      el.setAttribute('data-ln', String(lineNum++).padStart(2, ' '));
-      container.appendChild(el);
-      // Trim old lines
-      while (container.children.length > maxLines) container.removeChild(container.firstChild);
-      return el;
-    }
-
-    function colorize(text, hints) {
-      if (!hints || !hints.length) return text;
-      // Simple word-level coloring based on hints array
-      var words = text.match(/(\s+|\S+)/g) || [];
-      var html = '';
-      var wi = 0;
-      for (var i = 0; i < words.length; i++) {
-        if (/^\s+$/.test(words[i])) { html += words[i]; continue; }
-        var cls = hints[wi] || '';
-        wi++;
-        html += cls ? '<span class="' + cls + '">' + words[i] + '</span>' : words[i];
-      }
-      return html;
-    }
-
-    function typeChar() {
-      var block = blocks[blockIdx];
-      if (lineIdx >= block.length) {
-        blockIdx = (blockIdx + 1) % blocks.length;
-        lineIdx = 0; charIdx = 0;
-        var sep = createLine(); sep.innerHTML = '\u00a0';
-        setTimeout(typeChar, 400);
-        return;
-      }
-      var line = block[lineIdx];
-      if (!line.t) { var el = createLine(); el.innerHTML = '\u00a0'; lineIdx++; charIdx = 0; setTimeout(typeChar, 180); return; }
-
-      var lineEl = container.querySelector('.gh-typing');
-      if (!lineEl) { lineEl = createLine(); lineEl.classList.add('gh-typing'); }
-
-      if (charIdx < line.t.length) {
-        // Build the full colored HTML up to charIdx+1
-        var partial = line.t.substring(0, charIdx + 1);
-        lineEl.innerHTML = lineEl.getAttribute('data-ln') ? '' : '';
-        // Re-render with coloring
-        var fullColored = colorize(line.t, line.c);
-        // Truncate the colored version to charIdx+1 visible chars
-        var count = 0, output = '', inTag = false;
-        for (var ci = 0; ci < fullColored.length && count <= charIdx; ci++) {
-          if (fullColored[ci] === '<') inTag = true;
-          if (!inTag) count++;
-          output += fullColored[ci];
-          if (fullColored[ci] === '>') inTag = false;
-        }
-        // Close any open tags
-        var openTags = (output.match(/<span[^>]*>/g) || []);
-        var closeTags = (output.match(/<\/span>/g) || []);
-        if (openTags.length > closeTags.length) output += '</span>';
-        lineEl.innerHTML = output + '<span class="gh-code-cursor"></span>';
-        charIdx++;
-        var ch = line.t[charIdx - 1];
-        var delay = ch === ' ' ? 35 : 45;
-        setTimeout(typeChar, delay + Math.random() * 25);
-      } else {
-        lineEl.classList.remove('gh-typing');
-        // Remove cursor from finished line
-        var cur = lineEl.querySelector('.gh-code-cursor');
-        if (cur) cur.remove();
-        lineIdx++; charIdx = 0;
-        setTimeout(typeChar, 200 + Math.random() * 120);
-      }
-    }
-
-    setTimeout(typeChar, 2000);
   })();
 
   // ======== REPO GRID (inline) ========

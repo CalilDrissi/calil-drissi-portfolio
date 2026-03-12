@@ -175,6 +175,10 @@ function render(template, data, lang, featuredPosts, ghData) {
       <div class="col-header">${data.intro.header}</div>
       <div class="intro-identity" id="introIdentity">
         <div class="intro-hover-pill"><span class="pill-track">${data.intro.hoverPill}&nbsp;&nbsp;&nbsp;⬥&nbsp;&nbsp;&nbsp;${data.intro.hoverPill}&nbsp;&nbsp;&nbsp;⬥&nbsp;&nbsp;&nbsp;</span></div>
+        <div class="cursor-video-preview" id="cursorVideoPreview">
+          <video src="/video.mp4" muted playsinline loop></video>
+          <div class="cvp-label"><span class="cvp-dot"></span>Click to discover</div>
+        </div>
         <img class="intro-avatar" src="${data.intro.avatarUrl}" alt="CD" />
         <div>
           <div class="intro-name">${data.intro.name}<svg class="heartbeat-svg" viewBox="0 0 90 12"><polyline class="hb-line" points="0,6 8,6 11,6 14,1.5 17,10.5 20,4 23,8 26,6 34,6"/><text class="hb-text" x="34.5" y="7.2">memento mori</text></svg></div>
@@ -358,8 +362,8 @@ function render(template, data, lang, featuredPosts, ghData) {
     `class="about-bio-role">${data.about.role}</div>`
   );
   html = html.replace(
-    /<div class="about-bio-text">[\s\S]*?<\/div>\s*\n\s*<div class="about-details-grid">/,
-    `<div class="about-bio-text">\n        ${data.about.bio.map(p => `<p>${p}</p>`).join('\n        ')}\n      </div>\n      <div class="about-details-grid">`
+    /<div class="about-bio-text">[\s\S]*?<\/div>\s*\n\s*(?:<div class="about-video-section">[\s\S]*?<\/div>\s*\n\s*)?<div class="about-details-grid">/,
+    `<div class="about-bio-text">\n        ${data.about.bio.map(p => `<p>${p}</p>`).join('\n        ')}\n      </div>\n      <div class="about-video-section">\n        <video src="/video-ai-me.mp4" controls playsinline></video>\n        <div class="about-video-label"><span class="avl-icon"></span>Video Introduction</div>\n      </div>\n      <div class="about-details-grid">`
   );
   html = html.replace(
     /<div class="about-details-grid">[\s\S]*?<\/div>\s*\n\s*<\/div>\s*\n\s*<\/div>\s*\n\s*<!-- Chat Panel -->/,
@@ -2303,7 +2307,7 @@ async function build() {
   }
 
   // Copy static assets (images, favicon)
-  const staticFiles = ['profile.png', 'favicon.png', 'apple-touch-icon.png'];
+  const staticFiles = ['profile.png', 'favicon.png', 'apple-touch-icon.png', 'video.mp4', 'video-ai-me.mp4'];
   for (const f of staticFiles) {
     const src = path.join(__dirname, f);
     if (fs.existsSync(src)) {
