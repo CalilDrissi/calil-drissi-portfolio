@@ -909,32 +909,15 @@
       overflow: hidden;
       flex-shrink: 0;
     }
-    .rb-sidebar-section { padding: 8px 0 4px; border-bottom: 1px solid var(--border); }
     .rb-sidebar-label {
       font-size: 9px;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--fg-faint);
-      padding: 0 14px 6px;
+      padding: 6px 14px;
       user-select: none;
+      border-bottom: 1px solid var(--border);
     }
-    .rb-repo-list { list-style: none; margin: 0; padding: 0; }
-    .rb-repo-item {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 5px 14px;
-      cursor: pointer;
-      color: var(--fg-dim);
-      font-size: 11px;
-      border-left: 2px solid transparent;
-      transition: background 0.12s, color 0.12s;
-      user-select: none;
-    }
-    .rb-repo-item::before { content: '⬡'; font-size: 9px; color: var(--fg-faint); flex-shrink: 0; }
-    .rb-repo-item:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.85); }
-    .rb-repo-item.rb-active { background: rgba(94,43,255,0.12); border-left-color: var(--accent); color: #fff; }
-    .rb-repo-item.rb-active::before { color: var(--accent); }
 
     .rb-tree {
       flex: 1;
@@ -995,6 +978,56 @@
       font-size: 12px;
       user-select: none;
     }
+    /* File explorer grid */
+    .rb-explorer {
+      flex: 1;
+      overflow: auto;
+      padding: 12px 16px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
+    }
+    .rb-explorer::-webkit-scrollbar { width: 4px; }
+    .rb-explorer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    .rb-explorer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 6px;
+    }
+    .rb-explorer-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.12s;
+      overflow: hidden;
+    }
+    .rb-explorer-item:hover { background: rgba(255,255,255,0.06); }
+    .rb-explorer-item.rb-is-folder .rb-explorer-icon { color: #c9a94f; }
+    .rb-explorer-icon { font-size: 14px; flex-shrink: 0; color: var(--fg-faint); }
+    .rb-explorer-name {
+      font-size: 11px;
+      color: var(--fg-dim);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .rb-explorer-item:hover .rb-explorer-name { color: rgba(255,255,255,0.9); }
+    /* Download button */
+    .rb-download {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 2px 8px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--fg-faint);
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      margin-left: auto;
+    }
+    .rb-download:hover { color: #fff; border-color: var(--accent); }
     .rb-code-wrap {
       flex: 1;
       overflow: auto;
@@ -3755,9 +3788,11 @@
         '<div class="gh-repo-name">' + r.name + '</div>' +
         '<div class="gh-repo-desc">' + r.desc + '</div>' +
         '<div class="gh-repo-lang"><span class="gh-repo-lang-dot" style="background:' + (LANG_COLORS[r.lang] || '#888') + '"></span>' + r.lang + '</div>';
-      card.addEventListener('click', function() {
-        if (typeof openRepoBrowser === 'function') openRepoBrowser();
-      });
+      card.addEventListener('click', (function(name) {
+        return function() {
+          if (typeof openRepoBrowser === 'function') openRepoBrowser(name);
+        };
+      })(r.name));
       grid.appendChild(card);
     });
   })();
@@ -4265,10 +4300,7 @@
       </div>
       <div class="rb-pane">
         <div class="rb-sidebar">
-          <div class="rb-sidebar-section">
-            <div class="rb-sidebar-label">Repositories</div>
-            <ul class="rb-repo-list" id="rbRepoList"></ul>
-          </div>
+          <div class="rb-sidebar-label" id="rbSidebarLabel">Explorer</div>
           <div class="rb-tree" id="rbTree">
             <ul class="rb-tree-list" id="rbTreeList"></ul>
           </div>
@@ -4286,7 +4318,7 @@
 </div>
 
 <script>
-// ======== REPO BROWSER ========
+// ======== REPO BROWSER (VS Code style) ========
 (function() {
   var repoPopup = document.getElementById('repoPopup');
   if (!repoPopup) return;
@@ -4301,49 +4333,17 @@
   ];
   var OWNER = 'CalilDrissi';
 
-  var repoList = document.getElementById('rbRepoList');
   var treeList = document.getElementById('rbTreeList');
   var viewer = document.getElementById('rbViewer');
   var breadcrumb = document.getElementById('rbBreadcrumb');
   var statusEl = document.getElementById('rbStatus');
   var langEl = document.getElementById('rbLang');
   var ghLink = document.getElementById('rbGithubLink');
+  var sidebarLabel = document.getElementById('rbSidebarLabel');
   var activeRepo = null;
   var treeCache = {};
-
-  REPOS.forEach(function(repo) {
-    var li = document.createElement('li');
-    li.className = 'rb-repo-item';
-    li.textContent = repo.name;
-    li.title = repo.desc;
-    li.addEventListener('click', function() { selectRepo(repo); });
-    repoList.appendChild(li);
-  });
-
-  function selectRepo(repo) {
-    activeRepo = repo;
-    repoList.querySelectorAll('.rb-repo-item').forEach(function(el, i) {
-      el.classList.toggle('rb-active', REPOS[i].name === repo.name);
-    });
-    ghLink.href = 'https://github.com/' + OWNER + '/' + repo.name;
-    breadcrumb.innerHTML = '<span class="rb-breadcrumb-item rb-active">' + repo.name + '</span>';
-    viewer.innerHTML = '<div class="rb-viewer-empty">Loading file tree...</div>';
-    statusEl.textContent = 'Fetching...';
-    langEl.textContent = repo.lang;
-
-    if (treeCache[repo.name]) { renderTree(treeCache[repo.name], repo); return; }
-    fetch('https://api.github.com/repos/' + OWNER + '/' + repo.name + '/git/trees/' + repo.branch + '?recursive=1')
-      .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function(data) {
-        var files = data.tree.filter(function(f) { return f.type === 'blob'; }).map(function(f) { return f.path; });
-        treeCache[repo.name] = files;
-        renderTree(files, repo);
-      })
-      .catch(function(err) {
-        viewer.innerHTML = '<div class="rb-viewer-empty">Failed to load: ' + err.message + '</div>';
-        statusEl.textContent = 'Error';
-      });
-  }
+  var currentPath = ''; // tracks current folder path in explorer
+  var currentFile = null; // tracks currently viewed file
 
   function getFileIcon(name) {
     var ext = name.split('.').pop().toLowerCase();
@@ -4352,12 +4352,98 @@
       py: ['◆', 'rb-file-py'], rs: ['◆', 'rb-file-rs'],
       css: ['◆', 'rb-file-css'], html: ['◆', 'rb-file-html'], htm: ['◆', 'rb-file-html'],
       json: ['◆', 'rb-file-json'], md: ['◆', 'rb-file-md'],
+      toml: ['◆', 'rb-file-json'], yml: ['◆', 'rb-file-json'], yaml: ['◆', 'rb-file-json'],
+      sh: ['◆', ''], txt: ['◆', ''], lock: ['◆', ''],
     };
     return map[ext] || ['◇', ''];
   }
 
-  function renderTree(files, repo) {
+  function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function highlightLine(line) {
+    var e = escapeHtml(line);
+    e = e.replace(/^(\s*)(\/\/.*)$/, '$1<span class="rb-t-cmt">$2</span>');
+    e = e.replace(/^(\s*)(#.*)$/, '$1<span class="rb-t-cmt">$2</span>');
+    e = e.replace(/(["'])(?:(?=(\\?))\2.)*?\1/g, '<span class="rb-t-str">$&</span>');
+    e = e.replace(/\b(const|let|var|function|return|if|else|for|while|import|from|export|default|class|async|await|try|catch|def|self|fn|pub|use|mod|struct|impl|trait|enum|match)\b/g, '<span class="rb-t-kw">$&</span>');
+    e = e.replace(/\b(\d+\.?\d*)\b/g, '<span class="rb-t-num">$&</span>');
+    return e;
+  }
+
+  // Build structured tree from flat file list
+  function buildTree(files) {
+    var root = { children: {}, files: [] };
+    files.forEach(function(f) {
+      var parts = f.split('/');
+      var node = root;
+      for (var i = 0; i < parts.length - 1; i++) {
+        if (!node.children[parts[i]]) node.children[parts[i]] = { children: {}, files: [] };
+        node = node.children[parts[i]];
+      }
+      node.files.push({ name: parts[parts.length - 1], path: f });
+    });
+    return root;
+  }
+
+  // Get items at a specific path in the tree
+  function getItemsAtPath(tree, path) {
+    var node = tree;
+    if (path) {
+      var parts = path.split('/');
+      for (var i = 0; i < parts.length; i++) {
+        if (!node.children[parts[i]]) return { folders: [], files: [] };
+        node = node.children[parts[i]];
+      }
+    }
+    var folders = Object.keys(node.children).sort();
+    var files = node.files.slice().sort(function(a, b) { return a.name.localeCompare(b.name); });
+    return { folders: folders, files: files };
+  }
+
+  // Update breadcrumb
+  function updateBreadcrumb(repo, path, isFile) {
+    var html = '<span class="rb-breadcrumb-item" data-nav="root">' + repo.name + '</span>';
+    if (path) {
+      var parts = path.split('/');
+      var limit = isFile ? parts.length : parts.length;
+      for (var i = 0; i < limit; i++) {
+        var partial = parts.slice(0, i + 1).join('/');
+        var cls = (i === parts.length - 1) ? 'rb-breadcrumb-item rb-active' : 'rb-breadcrumb-item';
+        html += '<span class="rb-breadcrumb-sep">›</span>';
+        html += '<span class="' + cls + '" data-nav="' + partial + '">' + parts[i] + '</span>';
+      }
+    }
+    if (isFile) {
+      html += '<button class="rb-download" id="rbDownloadBtn" title="Download file">↓ Download</button>';
+    }
+    breadcrumb.innerHTML = html;
+
+    // Attach click handlers to breadcrumb items
+    breadcrumb.querySelectorAll('.rb-breadcrumb-item').forEach(function(el) {
+      el.addEventListener('click', function() {
+        var nav = el.getAttribute('data-nav');
+        currentFile = null;
+        if (nav === 'root') {
+          currentPath = '';
+        } else {
+          currentPath = nav;
+        }
+        renderExplorer(repo);
+      });
+    });
+
+    // Download handler
+    if (isFile) {
+      document.getElementById('rbDownloadBtn').addEventListener('click', function() {
+        downloadFile(repo, path, parts[parts.length - 1]);
+      });
+    }
+  }
+
+  // Render sidebar tree for the repo
+  function renderSidebarTree(files, repo) {
     treeList.innerHTML = '';
+    sidebarLabel.textContent = repo.name;
     var allItems = [];
     files.forEach(function(f) {
       var parts = f.split('/');
@@ -4384,32 +4470,88 @@
       return 0;
     });
 
-    var limited = allItems.slice(0, 200);
+    var limited = allItems.slice(0, 300);
     limited.forEach(function(item) {
       var li = document.createElement('li');
       li.className = 'rb-tree-item';
       li.setAttribute('data-depth', Math.min(item.depth, 4));
+      li.setAttribute('data-path', item.path);
       if (item.isFolder) {
         li.innerHTML = '<span class="rb-tree-icon rb-folder">▸</span><span class="rb-tree-name">' + item.name + '</span>';
+        li.addEventListener('click', function() {
+          currentFile = null;
+          currentPath = item.path;
+          renderExplorer(repo);
+          highlightSidebarItem(item.path);
+        });
       } else {
         var ic = getFileIcon(item.name);
         li.innerHTML = '<span class="rb-tree-icon ' + ic[1] + '">' + ic[0] + '</span><span class="rb-tree-name">' + item.name + '</span>';
-        li.addEventListener('click', function() { loadFile(repo, item.path, item.name, this); });
+        li.addEventListener('click', function() {
+          loadFile(repo, item.path, item.name);
+          highlightSidebarItem(item.path);
+        });
       }
       treeList.appendChild(li);
     });
-    statusEl.textContent = files.length + ' files';
-    viewer.innerHTML = '<div class="rb-viewer-empty">Select a file to view source code</div>';
   }
 
-  function loadFile(repo, filepath, filename, el) {
-    treeList.querySelectorAll('.rb-tree-item').forEach(function(e) { e.classList.remove('rb-active'); });
-    if (el) el.classList.add('rb-active');
-    var parts = filepath.split('/');
-    breadcrumb.innerHTML = parts.map(function(p, i) {
-      var cls = i === parts.length - 1 ? 'rb-breadcrumb-item rb-active' : 'rb-breadcrumb-item';
-      return '<span class="' + cls + '">' + p + '</span>';
-    }).join('<span class="rb-breadcrumb-sep">›</span>');
+  function highlightSidebarItem(path) {
+    treeList.querySelectorAll('.rb-tree-item').forEach(function(el) {
+      el.classList.toggle('rb-active', el.getAttribute('data-path') === path);
+    });
+  }
+
+  // Render file explorer in main area
+  function renderExplorer(repo) {
+    var tree = buildTree(treeCache[repo.name]);
+    var items = getItemsAtPath(tree, currentPath);
+    updateBreadcrumb(repo, currentPath, false);
+
+    var html = '<div class="rb-explorer"><div class="rb-explorer-grid">';
+    items.folders.forEach(function(folder) {
+      var folderPath = currentPath ? currentPath + '/' + folder : folder;
+      html += '<div class="rb-explorer-item rb-is-folder" data-path="' + folderPath + '">';
+      html += '<span class="rb-explorer-icon">▸</span>';
+      html += '<span class="rb-explorer-name">' + folder + '</span>';
+      html += '</div>';
+    });
+    items.files.forEach(function(file) {
+      var ic = getFileIcon(file.name);
+      html += '<div class="rb-explorer-item rb-is-file" data-path="' + file.path + '" data-name="' + file.name + '">';
+      html += '<span class="rb-explorer-icon ' + ic[1] + '">' + ic[0] + '</span>';
+      html += '<span class="rb-explorer-name">' + file.name + '</span>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+    viewer.innerHTML = html;
+
+    var count = items.folders.length + items.files.length;
+    statusEl.textContent = count + ' items' + (currentPath ? ' in /' + currentPath : '');
+    langEl.textContent = repo.lang;
+
+    // Attach click handlers
+    viewer.querySelectorAll('.rb-explorer-item').forEach(function(el) {
+      el.addEventListener('click', function() {
+        if (el.classList.contains('rb-is-folder')) {
+          currentPath = el.getAttribute('data-path');
+          currentFile = null;
+          renderExplorer(repo);
+          highlightSidebarItem(currentPath);
+        } else {
+          var fp = el.getAttribute('data-path');
+          var fn = el.getAttribute('data-name');
+          loadFile(repo, fp, fn);
+          highlightSidebarItem(fp);
+        }
+      });
+    });
+  }
+
+  // Load and display file content
+  function loadFile(repo, filepath, filename) {
+    currentFile = { path: filepath, name: filename };
+    updateBreadcrumb(repo, filepath, true);
     viewer.innerHTML = '<div class="rb-viewer-empty">Loading...</div>';
     statusEl.textContent = 'Fetching ' + filename + '...';
 
@@ -4418,8 +4560,12 @@
     })
       .then(function(r) { if (!r.ok) throw new Error(r.status); return r.text(); })
       .then(function(text) {
-        renderCode(text);
-        statusEl.textContent = filename + ' · ' + text.split('\n').length + ' lines';
+        var lines = text.split('\n');
+        var rows = lines.map(function(line, i) {
+          return '<div class="rb-code-row"><div class="rb-ln">' + (i + 1) + '</div><div class="rb-lc">' + highlightLine(line) + '</div></div>';
+        }).join('');
+        viewer.innerHTML = '<div class="rb-code-wrap"><div class="rb-code-table">' + rows + '</div></div>';
+        statusEl.textContent = filename + ' · ' + lines.length + ' lines';
         langEl.textContent = filename.split('.').pop().toUpperCase();
       })
       .catch(function() {
@@ -4428,31 +4574,78 @@
       });
   }
 
-  function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-  function highlightLine(line) {
-    var e = escapeHtml(line);
-    e = e.replace(/^(\s*)(\/\/.*)$/, '$1<span class="rb-t-cmt">$2</span>');
-    e = e.replace(/^(\s*)(#.*)$/, '$1<span class="rb-t-cmt">$2</span>');
-    e = e.replace(/(["'])(?:(?=(\\?))\2.)*?\1/g, '<span class="rb-t-str">$&</span>');
-    e = e.replace(/\b(const|let|var|function|return|if|else|for|while|import|from|export|default|class|async|await|try|catch|def|self|fn|pub|use|mod|struct|impl|trait|enum|match)\b/g, '<span class="rb-t-kw">$&</span>');
-    e = e.replace(/\b(\d+\.?\d*)\b/g, '<span class="rb-t-num">$&</span>');
-    return e;
+  // Download a single file
+  function downloadFile(repo, filepath, filename) {
+    statusEl.textContent = 'Downloading ' + filename + '...';
+    fetch('https://api.github.com/repos/' + OWNER + '/' + repo.name + '/contents/' + filepath + '?ref=' + repo.branch, {
+      headers: { 'Accept': 'application/vnd.github.v3.raw' }
+    })
+      .then(function(r) { if (!r.ok) throw new Error(r.status); return r.blob(); })
+      .then(function(blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        statusEl.textContent = 'Downloaded ' + filename;
+      })
+      .catch(function() {
+        statusEl.textContent = 'Download failed';
+      });
   }
 
-  function renderCode(text) {
-    var lines = text.split('\n');
-    var rows = lines.map(function(line, i) {
-      return '<div class="rb-code-row"><div class="rb-ln">' + (i + 1) + '</div><div class="rb-lc">' + highlightLine(line) + '</div></div>';
-    }).join('');
-    viewer.innerHTML = '<div class="rb-code-wrap"><div class="rb-code-table">' + rows + '</div></div>';
+  // Select repo — called from outside (repo cards) or openRepoBrowser
+  function selectRepo(repo) {
+    activeRepo = repo;
+    currentPath = '';
+    currentFile = null;
+    ghLink.href = 'https://github.com/' + OWNER + '/' + repo.name;
+    viewer.innerHTML = '<div class="rb-viewer-empty">Loading file tree...</div>';
+    statusEl.textContent = 'Fetching...';
+    langEl.textContent = repo.lang;
+
+    if (treeCache[repo.name]) {
+      renderSidebarTree(treeCache[repo.name], repo);
+      renderExplorer(repo);
+      return;
+    }
+    fetch('https://api.github.com/repos/' + OWNER + '/' + repo.name + '/git/trees/' + repo.branch + '?recursive=1')
+      .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function(data) {
+        var files = data.tree.filter(function(f) { return f.type === 'blob'; }).map(function(f) { return f.path; });
+        treeCache[repo.name] = files;
+        renderSidebarTree(files, repo);
+        renderExplorer(repo);
+      })
+      .catch(function(err) {
+        viewer.innerHTML = '<div class="rb-viewer-empty">Failed to load: ' + err.message + '</div>';
+        statusEl.textContent = 'Error';
+      });
   }
 
-  window.openRepoBrowser = function() {
-    if (repoPopup.classList.contains('open') && !repoWin.minimized) { WM.focus(repoWin); return; }
+  window.openRepoBrowser = function(repoName) {
+    if (repoPopup.classList.contains('open') && !repoWin.minimized) {
+      // If a specific repo requested, switch to it
+      if (repoName && (!activeRepo || activeRepo.name !== repoName)) {
+        var r = REPOS.find(function(x) { return x.name === repoName; });
+        if (r) selectRepo(r);
+      }
+      WM.focus(repoWin);
+      return;
+    }
     if (repoWin.minimized) { WM.restore(repoWin); return; }
     repoPopup.classList.add('open');
     WM.focus(repoWin);
+    // Auto-select repo if specified, or first repo if none active
+    var target = repoName ? REPOS.find(function(x) { return x.name === repoName; }) : null;
+    if (target) {
+      selectRepo(target);
+    } else if (!activeRepo) {
+      selectRepo(REPOS[0]);
+    }
   };
 
   var ghHeader = document.querySelector('.gh-header a');
