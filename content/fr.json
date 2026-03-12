@@ -182,7 +182,7 @@
     ]
   },
   "statement": {
-    "text": "Un développeur logiciel expérimenté axé sur {rotate} et le <em>savoir-faire</em>. Un partenaire fiable pour les startups, agences et marques qui construisent <em>sur&nbsp;toutes&nbsp;plateformes</em><span class=\"superscript\">15</span>.",
+    "text": "Un développeur logiciel expérimenté axé sur&nbsp;{rotate}&nbsp;et le&nbsp;<em>savoir-faire</em>. Un partenaire fiable pour les startups, agences et marques qui construisent&nbsp;<em>sur&nbsp;toutes&nbsp;plateformes</em><span class=\"superscript\">15</span>.",
     "rotateWords": [
       "la performance",
       "la scalabilité",
