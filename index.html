@@ -761,7 +761,7 @@
       flex-wrap: wrap;
       align-items: stretch;
       position: relative;
-      gap: clamp(6px, 1vh, 12px) 0;
+      gap: clamp(6px, 1vh, 12px) clamp(16px, 2vw, 32px);
     }
     .gh-wrap {
       flex: 1 1 50%;
@@ -792,7 +792,6 @@
       letter-spacing: -0.005em;
       color: var(--fg-dim);
       margin: 0;
-      padding-left: clamp(10px, 1.2vw, 20px);
       word-spacing: 0.05em;
     }
     .gh-body .statement em {
@@ -896,10 +895,11 @@
     .gh-repos-header a:hover { color: var(--fg-dim); }
     .gh-repo-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fill, minmax(200px, 280px));
       gap: clamp(6px, 0.8vh, 10px);
-      flex: 1;
-      align-content: stretch;
+      max-height: 180px;
+      overflow-y: auto;
+      align-content: start;
     }
     .gh-repo-card {
       background: rgba(255,255,255,0.03);
