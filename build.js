@@ -1476,6 +1476,21 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     .post-body code { font-family: var(--mono); font-size: 12px; }
     .post-body img { border-radius: 8px; margin: 20px 0; }
 
+    /* Download buttons */
+    .formation-downloads { margin: 32px 0; padding: 24px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; }
+    .formation-downloads h2 { margin-top: 0 !important; }
+    .download-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+    .download-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 24px; border-radius: 6px;
+      background: rgba(94,43,255,0.12); border: 1px solid rgba(94,43,255,0.3);
+      color: #fff; font-family: var(--mono); font-size: 13px; font-weight: 500;
+      text-decoration: none; transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      letter-spacing: 0.01em;
+    }
+    .download-btn:hover { background: rgba(94,43,255,0.22); border-color: rgba(94,43,255,0.5); transform: translateY(-1px); }
+    .download-btn svg { flex-shrink: 0; opacity: 0.8; }
+
     /* ---- Listen (TTS) ---- */
     .listen-bar {
       max-width: 720px; margin: 0 auto; padding: 0 20px;
