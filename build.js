@@ -1398,7 +1398,7 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --bg: #121212; --fg: #ffffff; --fg-dim: rgba(255,255,255,0.7);
+      --bg: #0e0e0e; --fg: #ffffff; --fg-dim: rgba(255,255,255,0.7);
       --fg-faint: rgba(255,255,255,0.30); --accent: #7c4dff;
       --mono: 'DM Mono', monospace; --sans: 'Inter', sans-serif; --display: 'Space Grotesk', sans-serif;
     }
