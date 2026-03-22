@@ -102,7 +102,7 @@
       color: var(--fg);
       font-family: var(--mono);
       font-size: var(--body);
-      font-weight: 300;
+      font-weight: 400;
       line-height: 1.5;
       letter-spacing: 0;
       overflow: hidden;
@@ -428,15 +428,8 @@
     }
     .position-cost span,
     .position-prev span {
-      display: flex;
-      align-items: baseline;
-      gap: 0.4em;
-    }
-    .position-cost span::before,
-    .position-prev span::before {
-      content: '·';
-      color: rgba(255,255,255,0.4);
-      flex-shrink: 0;
+      display: block;
+      padding-left: 0;
     }
 
     /* Recognition column */
@@ -453,11 +446,6 @@
       cursor: default;
     }
     .venture-item:hover .venture-name { color: var(--accent); }
-    .venture-item::before {
-      content: '·';
-      color: rgba(255,255,255,0.4);
-      flex-shrink: 0;
-    }
     .venture-name {
       color: #fff;
       font-weight: 500;
@@ -519,11 +507,6 @@
       align-items: baseline;
       gap: 0.4em;
       padding: clamp(2px, 0.4vh, 5px) 0;
-    }
-    .articles-list a::before {
-      content: '·';
-      color: rgba(255,255,255,0.4);
-      flex-shrink: 0;
     }
     .articles-list a span {
       text-decoration: underline;
@@ -603,11 +586,6 @@
       display: flex;
       align-items: baseline;
       gap: 0.4em;
-    }
-    .connect-links a::before {
-      content: '·';
-      color: rgba(255,255,255,0.4);
-      flex-shrink: 0;
     }
     .connect-links a:hover {
       color: var(--accent);
