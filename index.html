@@ -79,7 +79,7 @@
     :root {
       --bg: #121212;
       --fg: #ffffff;
-      --fg-dim: rgba(255,255,255,0.7);
+      --fg-dim: rgba(255,255,255,0.75);
       --fg-faint: rgba(255,255,255,0.30);
       --accent: #7c4dff;
       --border: rgba(255,255,255,0.10);
@@ -210,7 +210,7 @@
       60% { clip-path: inset(0 0% 0 0); opacity: 0.55; }
       75%, 100% { clip-path: inset(0 0% 0 0); opacity: 0; }
     }
-    .intro-name { font-weight: 500; }
+    .intro-name { font-weight: 600; }
     .intro-title {
       color: var(--fg-dim);
       display: inline-block;
@@ -394,13 +394,13 @@
     }
     .intro-stats strong {
       color: var(--fg);
-      font-weight: 400;
+      font-weight: 600;
     }
 
     /* Position column */
     .position-studio {
       color: var(--fg-dim);
-      font-weight: 500;
+      font-weight: 600;
       margin-bottom: clamp(1px, 0.2vh, 3px);
     }
     .position-revenue {
@@ -460,7 +460,7 @@
     }
     .venture-name {
       color: var(--fg-dim);
-      font-weight: 500;
+      font-weight: 600;
       transition: color 0.2s;
     }
     .venture-status {
@@ -619,7 +619,7 @@
     }
     .connect-avail strong {
       color: var(--fg);
-      font-weight: 400;
+      font-weight: 600;
     }
     .connect-ctas {
       margin-top: clamp(6px, 1.4vh, 14px);
@@ -858,8 +858,8 @@
       width: 10px;
       height: 10px;
     }
-    .gh-cell[data-level="1"] { background: rgba(124,77,255,0.25); }
-    .gh-cell[data-level="2"] { background: rgba(124,77,255,0.45); }
+    .gh-cell[data-level="1"] { background: rgba(124,77,255,0.30); }
+    .gh-cell[data-level="2"] { background: rgba(124,77,255,0.50); }
     .gh-cell[data-level="3"] { background: rgba(124,77,255,0.65); }
     .gh-cell[data-level="4"] { background: rgba(124,77,255,0.9); }
     .gh-month-stats {
@@ -903,8 +903,8 @@
       align-content: start;
     }
     .gh-repo-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.12);
       border-radius: 4px;
       padding: clamp(8px, 1vh, 14px) clamp(10px, 1.2vw, 16px);
       cursor: pointer;
