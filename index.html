@@ -1180,10 +1180,11 @@
 
     /* ---- BOTTOM (projects + repos) ---- */
     .bottom {
+      flex: 1;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      margin-top: auto;
+      min-height: 0;
     }
     .bottom-bar {
       display: flex;
@@ -1257,10 +1258,11 @@
       gap: clamp(4px, 0.4vw, 6px);
       overflow-x: auto;
       padding: clamp(4px, 1vh, 12px) 0 clamp(2px, 0.4vh, 4px);
-      /* scroll-snap removed for smooth auto-scroll */
       cursor: grab;
       -ms-overflow-style: none;
       scrollbar-width: none;
+      flex: 1;
+      min-height: 0;
       align-items: stretch;
     }
     .projects-strip::-webkit-scrollbar { display: none; }
@@ -1269,7 +1271,7 @@
     .project-thumb {
       flex-shrink: 0;
       width: clamp(180px, 20vw, 320px);
-      height: clamp(140px, 26vh, 300px);
+      height: 100%;
       border-radius: 4px;
       overflow: hidden;
       position: relative;
