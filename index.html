@@ -102,7 +102,7 @@
       color: var(--fg);
       font-family: var(--mono);
       font-size: var(--body);
-      font-weight: 400;
+      font-weight: 300;
       line-height: 1.5;
       letter-spacing: 0;
       overflow: hidden;
@@ -210,11 +210,11 @@
       60% { clip-path: inset(0 0% 0 0); opacity: 0.55; }
       75%, 100% { clip-path: inset(0 0% 0 0); opacity: 0; }
     }
-    .intro-name { font-weight: 600; }
+    .intro-name { font-weight: 500; color: #fff; }
     .intro-title {
-      color: var(--fg-dim);
+      color: #fff;
       display: inline-block;
-      border: 1px solid var(--fg-faint);
+      border: 1px solid rgba(255,255,255,0.15);
       border-radius: 4px;
       padding: clamp(1px, 0.2vh, 3px) clamp(4px, 0.5vw, 10px);
       margin-top: clamp(2px, 0.4vh, 6px);
@@ -362,7 +362,7 @@
       margin-left: 1px;
     }
     .intro-meta {
-      color: var(--fg-dim);
+      color: #fff;
       margin: clamp(4px, 1vh, 10px) 0;
       display: flex;
       flex-direction: column;
@@ -377,9 +377,9 @@
     }
 
     .intro-what {
-      font-weight: 500;
+      font-weight: 300;
       margin-bottom: clamp(2px, 0.6vh, 6px);
-      color: var(--fg-dim);
+      color: #fff;
       text-transform: uppercase;
       font-size: var(--label);
       letter-spacing: 0.04em;
@@ -390,39 +390,38 @@
     }
     .intro-stats {
       margin-top: clamp(4px, 1vh, 10px);
-      color: var(--fg-dim);
+      color: #fff;
     }
     .intro-stats strong {
-      color: var(--fg);
-      font-weight: 600;
+      color: #fff;
+      font-weight: 500;
     }
 
     /* Position column */
     .position-studio {
-      color: var(--fg-dim);
-      font-weight: 600;
+      color: #fff;
+      font-weight: 500;
       margin-bottom: clamp(1px, 0.2vh, 3px);
     }
     .position-revenue {
-      color: var(--fg-dim);
+      color: #fff;
       margin-bottom: clamp(6px, 1.4vh, 14px);
     }
     .sub-label {
       font-size: var(--label);
-      color: var(--fg-dim);
+      color: #fff;
       text-transform: uppercase;
       letter-spacing: 0.03em;
       margin-bottom: clamp(2px, 0.6vh, 6px);
       margin-top: clamp(6px, 1.4vh, 14px);
       display: inline-block;
-      border: 1px solid var(--fg-faint);
+      border: 1px solid rgba(255,255,255,0.15);
       border-radius: 4px;
       padding: clamp(1px, 0.2vh, 3px) clamp(4px, 0.5vw, 10px);
     }
     .position-cost,
     .position-prev {
-      color: var(--fg);
-      font-weight: 600;
+      color: #fff;
       display: flex;
       flex-direction: column;
       gap: 0.15em;
@@ -436,7 +435,7 @@
     .position-cost span::before,
     .position-prev span::before {
       content: '·';
-      color: var(--fg-faint);
+      color: rgba(255,255,255,0.4);
       flex-shrink: 0;
     }
 
@@ -456,25 +455,24 @@
     .venture-item:hover .venture-name { color: var(--accent); }
     .venture-item::before {
       content: '·';
-      color: var(--fg-faint);
+      color: rgba(255,255,255,0.4);
       flex-shrink: 0;
     }
     .venture-name {
-      color: var(--fg-dim);
-      font-weight: 600;
+      color: #fff;
+      font-weight: 500;
       transition: color 0.2s;
     }
     .venture-status {
       font-size: calc(var(--label) - 1px);
       padding: clamp(1px, 0.2vh, 3px) clamp(4px, 0.4vw, 8px);
       border-radius: 2px;
-      background: var(--fg-faint);
-      color: var(--fg-dim);
+      background: rgba(255,255,255,0.12);
+      color: #fff;
       letter-spacing: 0.02em;
     }
     .ventures-stats {
-      color: var(--fg);
-      font-weight: 600;
+      color: #fff;
       display: flex;
       flex-direction: column;
       gap: 1px;
@@ -513,8 +511,7 @@
       position: relative;
     }
     .articles-list a {
-      color: var(--fg);
-      font-weight: 600;
+      color: #fff;
       font-size: var(--article);
       text-decoration: none;
       transition: color 0.15s;
@@ -525,7 +522,7 @@
     }
     .articles-list a::before {
       content: '·';
-      color: var(--fg-faint);
+      color: rgba(255,255,255,0.4);
       flex-shrink: 0;
     }
     .articles-list a span {
@@ -601,8 +598,7 @@
       gap: clamp(1px, 0.3vh, 3px);
     }
     .connect-links a {
-      color: var(--fg);
-      font-weight: 600;
+      color: #fff;
       transition: color 0.15s;
       display: flex;
       align-items: baseline;
@@ -610,7 +606,7 @@
     }
     .connect-links a::before {
       content: '·';
-      color: var(--fg-faint);
+      color: rgba(255,255,255,0.4);
       flex-shrink: 0;
     }
     .connect-links a:hover {
@@ -619,11 +615,11 @@
     }
     .connect-avail {
       margin-top: clamp(6px, 1.4vh, 14px);
-      color: var(--fg-dim);
+      color: #fff;
     }
     .connect-avail strong {
-      color: var(--fg);
-      font-weight: 600;
+      color: #fff;
+      font-weight: 500;
     }
     .connect-ctas {
       margin-top: clamp(6px, 1.4vh, 14px);
@@ -634,11 +630,11 @@
     }
     .cta-btn {
       padding: clamp(3px, 0.5vh, 5px) clamp(6px, 0.6vw, 10px);
-      border: 1px solid var(--fg-faint);
+      border: 1px solid rgba(255,255,255,0.15);
       border-radius: 2px;
       font-family: var(--mono);
       font-size: clamp(8px, 0.5vw, 9px);
-      color: var(--fg-dim);
+      color: #fff;
       text-transform: uppercase;
       letter-spacing: 0.04em;
       cursor: pointer;
