@@ -1398,8 +1398,8 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --bg: #121212; --fg: #ffffff; --fg-dim: rgba(255,255,255,0.6);
-      --fg-faint: rgba(255,255,255,0.22); --accent: #5e2bff;
+      --bg: #121212; --fg: #ffffff; --fg-dim: rgba(255,255,255,0.7);
+      --fg-faint: rgba(255,255,255,0.30); --accent: #7c4dff;
       --mono: 'DM Mono', monospace; --sans: 'Inter', sans-serif; --display: 'Space Grotesk', sans-serif;
     }
     html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
@@ -1483,12 +1483,12 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     .download-btn {
       display: inline-flex; align-items: center; gap: 10px;
       padding: 14px 24px; border-radius: 6px;
-      background: rgba(94,43,255,0.12); border: 1px solid rgba(94,43,255,0.3);
+      background: rgba(124,77,255,0.12); border: 1px solid rgba(124,77,255,0.3);
       color: #fff; font-family: var(--mono); font-size: 13px; font-weight: 500;
       text-decoration: none; transition: background 0.2s, border-color 0.2s, transform 0.15s;
       letter-spacing: 0.01em;
     }
-    .download-btn:hover { background: rgba(94,43,255,0.22); border-color: rgba(94,43,255,0.5); transform: translateY(-1px); }
+    .download-btn:hover { background: rgba(124,77,255,0.22); border-color: rgba(124,77,255,0.5); transform: translateY(-1px); }
     .download-btn svg { flex-shrink: 0; opacity: 0.8; }
 
     /* ---- Listen (TTS) ---- */
