@@ -1180,18 +1180,16 @@
 
     /* ---- BOTTOM (projects + repos) ---- */
     .bottom {
-      flex: 1 0 auto;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      margin-top: clamp(8px, 1.5vh, 16px);
+      margin-top: auto;
     }
     .bottom-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: clamp(4px, 1vh, 12px) 0;
-      margin-top: auto;
     }
     .scroll-indicator {
       display: flex;
@@ -1263,8 +1261,6 @@
       cursor: grab;
       -ms-overflow-style: none;
       scrollbar-width: none;
-      flex: 1;
-      min-height: 0;
       align-items: stretch;
     }
     .projects-strip::-webkit-scrollbar { display: none; }
@@ -1273,9 +1269,7 @@
     .project-thumb {
       flex-shrink: 0;
       width: clamp(180px, 20vw, 320px);
-      height: 100%;
-      min-height: 100px;
-      max-height: 300px;
+      height: clamp(140px, 26vh, 300px);
       border-radius: 4px;
       overflow: hidden;
       position: relative;
@@ -1374,7 +1368,7 @@
       .sub-label { margin-top: clamp(4px, 0.8vh, 8px); margin-bottom: clamp(1px, 0.3vh, 4px); }
       .intro-what { margin-top: clamp(2px, 0.4vh, 4px); margin-bottom: clamp(1px, 0.3vh, 4px); }
       .github-section { padding: clamp(4px, 0.6vh, 8px) 0; }
-      .bottom { min-height: 0; flex-shrink: 1; }
+      .bottom { min-height: 0; }
       .project-thumb { height: clamp(80px, 12vh, 140px); }
       .projects-strip { padding: clamp(2px, 0.5vh, 6px) 0; }
       .bottom-bar { padding: clamp(2px, 0.5vh, 6px) 0; }
