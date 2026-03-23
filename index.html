@@ -1520,16 +1520,19 @@
     }
     .loader-inner {
       position: relative;
-      width: 64px;
-      height: 64px;
+      width: 80px;
+      height: 80px;
     }
     .loader-icon {
-      width: 64px;
-      height: 64px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       position: absolute;
       inset: 0;
-      animation: loaderPulse 1.5s ease-in-out infinite;
+      object-fit: cover;
+      filter: grayscale(1);
+      animation: loaderPulse 1.5s ease-in-out infinite, loaderColor 1.2s ease-out forwards;
+      animation-delay: 0s, 0.4s;
     }
     .loader-ring {
       position: absolute;
@@ -1540,8 +1543,12 @@
       animation: loaderSpin 0.8s linear infinite;
     }
     @keyframes loaderPulse {
-      0%, 100% { transform: scale(1); opacity: 0.8; }
-      50% { transform: scale(1.06); opacity: 1; }
+      0%, 100% { transform: scale(1); opacity: 0.85; }
+      50% { transform: scale(1.05); opacity: 1; }
+    }
+    @keyframes loaderColor {
+      from { filter: grayscale(1); }
+      to { filter: grayscale(0); }
     }
     @keyframes loaderSpin {
       to { transform: rotate(360deg); }
@@ -2486,7 +2493,7 @@
 <!-- LOADING SCREEN -->
 <div class="loader" id="pageLoader">
   <div class="loader-inner">
-    <img class="loader-icon" src="/favicon.png" alt="" />
+    <img class="loader-icon" src="/loader-avatar.png" alt="" />
     <div class="loader-ring"></div>
   </div>
 </div>

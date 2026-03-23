@@ -2326,7 +2326,7 @@ async function build() {
   }
 
   // Copy static assets (images, favicon)
-  const staticFiles = ['profile.png', 'favicon.png', 'apple-touch-icon.png', 'video.mp4', 'video-ai-me.mp4'];
+  const staticFiles = ['profile.png', 'favicon.png', 'apple-touch-icon.png', 'loader-avatar.png', 'video.mp4', 'video-ai-me.mp4'];
   for (const f of staticFiles) {
     const src = path.join(__dirname, f);
     if (fs.existsSync(src)) {
