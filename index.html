@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@200;300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -83,7 +83,7 @@
       --fg-faint: rgba(255,255,255,0.30);
       --accent: #7c4dff;
       --border: rgba(255,255,255,0.10);
-      --mono: 'Space Mono', 'Courier New', monospace;
+      --mono: 'IBM Plex Mono', 'Courier New', monospace;
       --serif: 'Instrument Serif', 'Georgia', serif;
       --col-gap: clamp(16px, 2.5vw, 40px);
       --edge: clamp(12px, 1.4vw, 20px);
@@ -102,7 +102,7 @@
       color: var(--fg);
       font-family: var(--mono);
       font-size: var(--body);
-      font-weight: 400;
+      font-weight: 200;
       line-height: 1.5;
       letter-spacing: 0.01em;
       overflow: hidden;
@@ -143,7 +143,7 @@
       gap: 0.5em;
       margin-bottom: clamp(6px, 1.4vh, 14px);
       font-size: clamp(9.5px, 0.76vw, 13.3px);
-      font-weight: 700;
+      font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       color: #fff;
@@ -155,7 +155,7 @@
       flex-shrink: 0;
     }
 
-    .col-section { font-size: clamp(8.5px, 0.68vw, 12.8px); font-weight: 400; -webkit-font-smoothing: antialiased; }
+    .col-section { font-size: clamp(8.5px, 0.68vw, 12.8px); font-weight: 300; -webkit-font-smoothing: antialiased; }
 
     /* Intro column */
     .intro-identity {
@@ -210,7 +210,7 @@
       60% { clip-path: inset(0 0% 0 0); opacity: 0.55; }
       75%, 100% { clip-path: inset(0 0% 0 0); opacity: 0; }
     }
-    .intro-name { font-weight: 700; color: #fff; }
+    .intro-name { font-weight: 500; color: #fff; }
     .intro-title {
       color: #fff;
       display: inline-block;
@@ -394,13 +394,13 @@
     }
     .intro-stats strong {
       color: #fff;
-      font-weight: 700;
+      font-weight: 500;
     }
 
     /* Position column */
     .position-studio {
       color: #fff;
-      font-weight: 700;
+      font-weight: 500;
       margin-bottom: clamp(1px, 0.2vh, 3px);
     }
     .position-revenue {
@@ -448,7 +448,7 @@
     .venture-item:hover .venture-name { color: var(--accent); }
     .venture-name {
       color: #fff;
-      font-weight: 700;
+      font-weight: 500;
       transition: color 0.2s;
     }
     .venture-status {
@@ -597,7 +597,7 @@
     }
     .connect-avail strong {
       color: #fff;
-      font-weight: 700;
+      font-weight: 500;
     }
     .connect-ctas {
       margin-top: clamp(6px, 1.4vh, 14px);
