@@ -2481,6 +2481,7 @@
   </style>
 </head>
 <body>
+<script>window.__loaderStart = Date.now();</script>
 
 <!-- LOADING SCREEN -->
 <div class="loader" id="pageLoader">
@@ -3616,11 +3617,17 @@
   createRotator('rotateSlot3', rotate3Words, 9000);
 
   // ======== GSAP ENTRANCE ANIMATIONS ========
-  // Dismiss loader
+  // Dismiss loader after minimum display time
   var loader = document.getElementById('pageLoader');
   if (loader) {
-    loader.classList.add('done');
-    setTimeout(function() { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 600);
+    var minTime = 1200;
+    var start = window.__loaderStart || Date.now();
+    var elapsed = Date.now() - start;
+    var delay = Math.max(0, minTime - elapsed);
+    setTimeout(function() {
+      loader.classList.add('done');
+      setTimeout(function() { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 600);
+    }, delay);
   }
 
   function playEntrance() {
