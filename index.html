@@ -87,7 +87,7 @@
       --sans: 'Inter', -apple-system, system-ui, sans-serif;
       --serif: 'Instrument Serif', 'Georgia', serif;
       --col-gap: clamp(16px, 2.5vw, 40px);
-      --edge: clamp(12px, 1.4vw, 20px);
+      --edge: clamp(10px, 1vw, 16px);
       --label: clamp(11px, 0.83vw, 13px);
       --body: clamp(12px, 0.9vw, 15px);
       --name: clamp(13px, 1vw, 17px);
@@ -215,15 +215,11 @@
     .intro-name { font-weight: 500; color: #fff; }
     .intro-title {
       font-family: var(--mono);
-      color: #fff;
-      display: inline-block;
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 4px;
-      padding: clamp(1px, 0.2vh, 3px) clamp(4px, 0.5vw, 10px);
-      margin-top: clamp(2px, 0.4vh, 6px);
+      color: rgba(255,255,255,0.5);
       font-size: var(--ticker);
       letter-spacing: -0.01em;
       white-space: nowrap;
+      margin-top: clamp(1px, 0.3vh, 4px);
     }
 
     /* Hover pill on identity */
@@ -374,23 +370,18 @@
     .intro-meta .flag { font-style: normal; }
 
     .intro-divider {
-      width: 100%; height: 1px;
-      background: var(--border);
-      margin: clamp(4px, 1.2vh, 12px) 0;
+      display: none;
     }
 
     .intro-what {
       font-family: var(--mono);
-      font-weight: 500;
-      margin-bottom: clamp(2px, 0.6vh, 6px);
-      color: #fff;
+      font-weight: 600;
+      margin-bottom: clamp(2px, 0.4vh, 4px);
+      margin-top: clamp(2px, 0.4vh, 4px);
+      color: rgba(255,255,255,0.5);
       text-transform: uppercase;
       font-size: var(--ticker);
       letter-spacing: -0.01em;
-      display: inline-block;
-      border: 1px solid var(--fg-faint);
-      border-radius: 4px;
-      padding: clamp(1px, 0.2vh, 3px) clamp(4px, 0.5vw, 10px);
     }
     .intro-stats {
       margin-top: clamp(4px, 1vh, 10px);
@@ -414,15 +405,12 @@
     .sub-label {
       font-family: var(--mono);
       font-size: var(--ticker);
-      color: #fff;
+      color: rgba(255,255,255,0.5);
       text-transform: uppercase;
       letter-spacing: -0.01em;
-      margin-bottom: clamp(2px, 0.6vh, 6px);
-      margin-top: clamp(6px, 1.4vh, 14px);
-      display: inline-block;
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 4px;
-      padding: clamp(1px, 0.2vh, 3px) clamp(4px, 0.5vw, 10px);
+      font-weight: 600;
+      margin-bottom: clamp(2px, 0.4vh, 4px);
+      margin-top: clamp(4px, 0.8vh, 8px);
     }
     .position-cost,
     .position-prev {
