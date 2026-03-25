@@ -725,6 +725,8 @@
       flex-direction: column;
       padding: clamp(4px, 0.8vh, 10px) 0;
       position: relative;
+      flex: 1;
+      min-height: 0;
     }
     .gh-username {
       font-size: var(--label);
@@ -746,6 +748,8 @@
       align-items: stretch;
       position: relative;
       gap: 0 clamp(32px, 3vw, 48px);
+      flex: 1;
+      min-height: 0;
     }
     .gh-wrap {
       flex: 1 1 50%;
@@ -1164,11 +1168,10 @@
 
     /* ---- BOTTOM (projects + repos) ---- */
     .bottom {
-      flex: 1;
+      flex-shrink: 0;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      min-height: 0;
     }
     .bottom-bar {
       display: flex;
@@ -1245,18 +1248,14 @@
       cursor: grab;
       -ms-overflow-style: none;
       scrollbar-width: none;
-      flex: 1;
-      min-height: 0;
-      align-items: stretch;
     }
     .projects-strip::-webkit-scrollbar { display: none; }
     .projects-strip:active { cursor: grabbing; }
 
     .project-thumb {
       flex-shrink: 0;
-      width: auto;
-      height: 100%;
-      aspect-ratio: 3 / 2;
+      height: clamp(120px, 14vh, 180px);
+      aspect-ratio: 5 / 3;
       border-radius: 4px;
       overflow: hidden;
       position: relative;
@@ -1355,7 +1354,6 @@
       .sub-label { margin-top: clamp(4px, 0.8vh, 8px); margin-bottom: clamp(1px, 0.3vh, 4px); }
       .intro-what { margin-top: clamp(2px, 0.4vh, 4px); margin-bottom: clamp(1px, 0.3vh, 4px); }
       .github-section { padding: clamp(4px, 0.6vh, 8px) 0; }
-      .bottom { min-height: 0; }
       .projects-strip { padding: clamp(2px, 0.5vh, 6px) 0; }
       .bottom-bar { padding: clamp(2px, 0.5vh, 6px) 0; }
       .gh-repos { max-height: 160px; }
