@@ -186,6 +186,7 @@ function render(template, data, lang, featuredPosts, ghData) {
         </div>
       </div>
       <div class="intro-meta">
+        <span>GMT+1</span>
         <a href="https://fezlang.com" target="_blank" rel="noopener" class="fez-link"><img src="/fez-icon.png" alt="Fez" class="fez-icon" /> Creator of Fez Lang ↗</a>
       </div>
       <div class="intro-divider"></div>
