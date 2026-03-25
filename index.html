@@ -368,7 +368,20 @@
       gap: 0.2em;
       line-height: 1.5;
     }
-    .intro-meta .flag { font-style: normal; }
+    .fez-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #fff;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .fez-link:hover { opacity: 0.7; text-decoration: none; }
+    .fez-icon {
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+    }
 
     .intro-divider {
       display: none;
@@ -2451,8 +2464,7 @@
         </div>
       </div>
       <div class="intro-meta">
-        <span><span class="flag">&#127474;&#127462;</span> Morocco. GMT+1.</span>
-        <span>&#9679; Built for Global Collabs.</span>
+        <a href="https://fezlang.com" target="_blank" rel="noopener" class="fez-link"><img src="/fez-icon.png" alt="Fez" class="fez-icon" /> Creator of Fez Lang ↗</a>
       </div>
       <div class="intro-divider"></div>
       <div class="intro-what">What I do</div>
