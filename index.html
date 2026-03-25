@@ -1494,59 +1494,9 @@
       .scroll-indicator { display: none; }
     }
 
-    /* Loading screen */
-    .loader {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
-    }
-    .loader.done {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-    .loader-inner {
-      position: relative;
-      width: 80px;
-      height: 80px;
-    }
-    .loader-icon {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      position: absolute;
-      inset: 0;
-      object-fit: cover;
-      filter: grayscale(1);
-      animation: loaderPulse 1.5s ease-in-out infinite, loaderColor 1.2s ease-out forwards;
-      animation-delay: 0s, 0.4s;
-    }
-    .loader-ring {
-      position: absolute;
-      inset: -6px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      border-top-color: var(--accent);
-      animation: loaderSpin 0.8s linear infinite;
-    }
-    @keyframes loaderPulse {
-      0%, 100% { transform: scale(1); opacity: 0.85; }
-      50% { transform: scale(1.05); opacity: 1; }
-    }
-    @keyframes loaderColor {
-      from { filter: grayscale(1); }
-      to { filter: grayscale(0); }
-    }
-    @keyframes loaderSpin {
-      to { transform: rotate(360deg); }
-    }
-
     /* Initial hidden state — GSAP animates in */
+    .col-header::before { opacity: 0; }
+    .col-header { opacity: 0; transform: translateY(8px); }
     .col-section { opacity: 0; transform: translateY(12px); }
     .github-section { opacity: 0; transform: translateY(10px); }
     .bottom { opacity: 0; transform: translateY(10px); }
@@ -2480,15 +2430,6 @@
   </style>
 </head>
 <body>
-<script>window.__loaderStart = Date.now();</script>
-
-<!-- LOADING SCREEN -->
-<div class="loader" id="pageLoader">
-  <div class="loader-inner">
-    <img class="loader-icon" src="/loader-avatar.png" alt="" />
-    <div class="loader-ring"></div>
-  </div>
-</div>
 
 <div class="page">
 
@@ -3616,36 +3557,26 @@
   createRotator('rotateSlot3', rotate3Words, 9000);
 
   // ======== GSAP ENTRANCE ANIMATIONS ========
-  // Dismiss loader after minimum display time
-  var loader = document.getElementById('pageLoader');
-  if (loader) {
-    var minTime = 1200;
-    var start = window.__loaderStart || Date.now();
-    var elapsed = Date.now() - start;
-    var delay = Math.max(0, minTime - elapsed);
-    setTimeout(function() {
-      loader.classList.add('done');
-      setTimeout(function() { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 600);
-    }, delay);
-  }
-
   function playEntrance() {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-    // 1. Columns stagger in
-    tl.to('.col-section', { opacity: 1, y: 0, duration: 0.7, stagger: 0.1 }, 0.2);
+    // 1. Section headers (with purple dots) slide up + fade in, staggered
+    tl.to('.col-header', { opacity: 1, y: 0, duration: 0.5, stagger: 0.06 }, 0.05);
 
-    // 2. Statement fade in
+    // 3. Column content staggers in
+    tl.to('.col-section', { opacity: 1, y: 0, duration: 0.6, stagger: 0.08 }, 0.25);
 
+    // 4. GitHub section
+    tl.to('.github-section', { opacity: 1, y: 0, duration: 0.5 }, 0.6);
 
-    // 2.5. GitHub graph
-    tl.to('.github-section', { opacity: 1, y: 0, duration: 0.6 }, 0.9);
+    // 5. Repos
+    tl.fromTo('.gh-repos', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.4 }, 0.8);
 
-    // 3. Bottom strip
-    tl.to('.bottom', { opacity: 1, y: 0, duration: 0.6 }, 1.0);
+    // 6. Bottom strip (pills + carousel)
+    tl.to('.bottom', { opacity: 1, y: 0, duration: 0.5 }, 0.9);
 
-    // 4. Footer ribbon
-    gsap.from('.footer-ribbon', { y: 30, opacity: 0, duration: 0.6, delay: 1.2, ease: 'power2.out' });
+    // 7. Footer ribbon
+    gsap.from('.footer-ribbon', { y: 20, opacity: 0, duration: 0.5, delay: 1.1, ease: 'power2.out' });
 
     // 5. Project thumbs stagger (no scale/transform to avoid breaking scroll)
     const thumbs = document.querySelectorAll('.project-thumb');
