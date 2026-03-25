@@ -186,8 +186,7 @@ function render(template, data, lang, featuredPosts, ghData) {
         </div>
       </div>
       <div class="intro-meta">
-        <span><span class="flag">&#127474;&#127462;</span> ${data.intro.location}</span>
-        <span>&#9679; ${data.intro.tagline}</span>
+        <a href="https://fezlang.com" target="_blank" rel="noopener" class="fez-link"><img src="/fez-icon.png" alt="Fez" class="fez-icon" /> Creator of Fez Lang ↗</a>
       </div>
       <div class="intro-divider"></div>
       <div class="intro-what">${data.intro.whatIDo}</div>
