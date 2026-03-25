@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@200;300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -84,14 +84,15 @@
       --accent: #7c4dff;
       --border: rgba(255,255,255,0.10);
       --mono: 'IBM Plex Mono', 'Courier New', monospace;
+      --sans: 'Inter', -apple-system, system-ui, sans-serif;
       --serif: 'Instrument Serif', 'Georgia', serif;
       --col-gap: clamp(16px, 2.5vw, 40px);
       --edge: clamp(12px, 1.4vw, 20px);
-      --label: clamp(9px, 0.7vw, 13px);
-      --body: clamp(11px, 0.8vw, 15px);
+      --label: clamp(10px, 0.75vw, 12px);
+      --body: clamp(12px, 0.9vw, 15px);
       --name: clamp(13px, 1vw, 17px);
       --hero: clamp(12px, 1.6vw, 24px);
-      --article: clamp(10px, 0.75vw, 14px);
+      --article: clamp(11px, 0.8vw, 14px);
       --ticker: clamp(8px, 0.6vw, 10px);
     }
 
@@ -100,11 +101,11 @@
     body {
       background: var(--bg);
       color: var(--fg);
-      font-family: var(--mono);
+      font-family: var(--sans);
       font-size: var(--body);
-      font-weight: 200;
-      line-height: 1.5;
-      letter-spacing: 0.01em;
+      font-weight: 400;
+      line-height: 1.3;
+      letter-spacing: normal;
       overflow: hidden;
       height: 100vh;
       height: 100dvh;
@@ -142,10 +143,11 @@
       align-items: center;
       gap: 0.5em;
       margin-bottom: clamp(6px, 1.4vh, 14px);
-      font-size: clamp(9.5px, 0.76vw, 13.3px);
-      font-weight: 500;
+      font-family: var(--mono);
+      font-size: var(--label);
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: -0.01em;
       color: #fff;
     }
     .col-header::before {
@@ -155,7 +157,7 @@
       flex-shrink: 0;
     }
 
-    .col-section { font-size: clamp(8.5px, 0.68vw, 12.8px); font-weight: 300; -webkit-font-smoothing: antialiased; }
+    .col-section { font-size: var(--label); font-weight: 400; }
 
     /* Intro column */
     .intro-identity {
@@ -212,14 +214,15 @@
     }
     .intro-name { font-weight: 500; color: #fff; }
     .intro-title {
+      font-family: var(--mono);
       color: #fff;
       display: inline-block;
       border: 1px solid rgba(255,255,255,0.15);
       border-radius: 4px;
       padding: clamp(1px, 0.2vh, 3px) clamp(4px, 0.5vw, 10px);
       margin-top: clamp(2px, 0.4vh, 6px);
-      font-size: calc(var(--body) - 1px);
-      letter-spacing: 0.02em;
+      font-size: var(--ticker);
+      letter-spacing: -0.01em;
       white-space: nowrap;
     }
 
@@ -377,12 +380,13 @@
     }
 
     .intro-what {
-      font-weight: 300;
+      font-family: var(--mono);
+      font-weight: 500;
       margin-bottom: clamp(2px, 0.6vh, 6px);
       color: #fff;
       text-transform: uppercase;
-      font-size: var(--label);
-      letter-spacing: 0.04em;
+      font-size: var(--ticker);
+      letter-spacing: -0.01em;
       display: inline-block;
       border: 1px solid var(--fg-faint);
       border-radius: 4px;
@@ -408,10 +412,11 @@
       margin-bottom: clamp(6px, 1.4vh, 14px);
     }
     .sub-label {
-      font-size: var(--label);
+      font-family: var(--mono);
+      font-size: var(--ticker);
       color: #fff;
       text-transform: uppercase;
-      letter-spacing: 0.03em;
+      letter-spacing: -0.01em;
       margin-bottom: clamp(2px, 0.6vh, 6px);
       margin-top: clamp(6px, 1.4vh, 14px);
       display: inline-block;
@@ -452,12 +457,13 @@
       transition: color 0.2s;
     }
     .venture-status {
-      font-size: calc(var(--label) - 1px);
+      font-family: var(--mono);
+      font-size: var(--ticker);
       padding: clamp(1px, 0.2vh, 3px) clamp(4px, 0.4vw, 8px);
       border-radius: 2px;
       background: rgba(255,255,255,0.12);
       color: #fff;
-      letter-spacing: 0.02em;
+      letter-spacing: -0.01em;
     }
     .ventures-stats {
       color: #fff;
