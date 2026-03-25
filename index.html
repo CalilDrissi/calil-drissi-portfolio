@@ -645,17 +645,21 @@
     /* ---- MIDDLE (statement) ---- */
     .statement {
       font-family: var(--mono);
-      font-size: var(--hero);
-      line-height: 1.45;
+      font-size: clamp(14px, 1.8vw, 26px);
+      line-height: 1.5;
       font-weight: 400;
       letter-spacing: -0.01em;
-      color: var(--fg-dim);
+      color: #fff;
     }
     .statement em {
       font-family: var(--sans);
       font-style: normal;
       font-weight: 700;
       color: #fff;
+      text-decoration: underline;
+      text-decoration-color: var(--accent);
+      text-underline-offset: 4px;
+      text-decoration-thickness: 2px;
     }
     .statement .superscript {
       font-size: 0.5em;
@@ -670,10 +674,10 @@
     .statement em::after {
       content: '';
       position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 1px;
+      bottom: -2px; left: 0; right: 0;
+      height: 2px;
       background: var(--accent);
-      opacity: 0.4;
+      box-shadow: 0 0 8px var(--accent), 0 0 16px rgba(124,77,255,0.3);
       transform: scaleX(0);
       transform-origin: left;
       transition: transform 0.6s cubic-bezier(0.22,1,0.36,1);
