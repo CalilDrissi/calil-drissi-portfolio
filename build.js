@@ -186,14 +186,8 @@ function render(template, data, lang, featuredPosts, ghData) {
         </div>
       </div>
       <div class="intro-meta">
-        <span>GMT+1</span>
+        <span>Timezone GMT+1</span>
         <a href="https://fezlang.com" target="_blank" rel="noopener" class="fez-link"><img src="/fez-icon.png" alt="Fez" class="fez-icon" /> Creator of Fez Lang ↗</a>
-      </div>
-      <div class="intro-divider"></div>
-      <div class="intro-what">${data.intro.whatIDo}</div>
-      <div>${data.intro.whatIDoDesc}</div>
-      <div class="intro-stats">
-        ${data.intro.stats.map(s => `<strong>${s.value}</strong> ${s.label}`).join('<br />\n        ')}
       </div>
     </div>
 `
