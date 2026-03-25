@@ -893,12 +893,14 @@
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.12);
       border-radius: 4px;
-      padding: clamp(8px, 1vh, 14px) clamp(10px, 1.2vw, 16px);
+      padding: clamp(8px, 1.5vh, 20px) clamp(10px, 1.2vw, 16px);
       cursor: pointer;
       transition: background 0.15s, border-color 0.15s;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      justify-content: center;
+      align-items: flex-start;
+      gap: clamp(4px, 1vh, 12px);
       min-width: 0;
       min-height: 0;
     }
@@ -925,10 +927,8 @@
     }
     .gh-repo-desc {
       font-size: calc(var(--label) - 1px);
-      color: var(--fg-faint);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.4;
     }
     .gh-repo-lang {
       font-size: calc(var(--label) - 1px);
