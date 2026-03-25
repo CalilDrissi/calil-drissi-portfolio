@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Inter:wght@400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -88,12 +88,13 @@
       --serif: 'Instrument Serif', 'Georgia', serif;
       --col-gap: clamp(16px, 2.5vw, 40px);
       --edge: clamp(10px, 1vw, 16px);
-      --label: clamp(11px, 0.83vw, 13px);
+      --grid-text: clamp(10px, 0.76vw, 12px);
+      --label: clamp(10px, 0.76vw, 12px);
+      --ticker: clamp(10px, 0.76vw, 12px);
       --body: clamp(12px, 0.9vw, 15px);
       --name: clamp(13px, 1vw, 17px);
       --hero: clamp(12px, 1.6vw, 24px);
-      --article: clamp(11px, 0.83vw, 13px);
-      --ticker: clamp(9px, 0.7vw, 11px);
+      --article: clamp(10px, 0.76vw, 12px);
     }
 
     html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
@@ -101,10 +102,10 @@
     body {
       background: var(--bg);
       color: var(--fg);
-      font-family: var(--sans);
+      font-family: var(--mono);
       font-size: var(--body);
       font-weight: 400;
-      line-height: 1.3;
+      line-height: 1.2;
       letter-spacing: normal;
       overflow: hidden;
       height: 100vh;
@@ -143,21 +144,22 @@
       align-items: center;
       gap: 0.5em;
       margin-bottom: clamp(6px, 1.4vh, 14px);
-      font-family: var(--mono);
-      font-size: var(--label);
-      font-weight: 600;
+      font-family: var(--sans);
+      font-size: var(--grid-text);
+      font-weight: 400;
       text-transform: uppercase;
-      letter-spacing: -0.01em;
+      letter-spacing: normal;
+      line-height: 1.75;
       color: #fff;
     }
     .col-header::before {
       content: '●';
-      font-size: 0.735em;
+      font-size: 0.8em;
       color: var(--accent);
       flex-shrink: 0;
     }
 
-    .col-section { font-size: var(--label); font-weight: 400; }
+    .col-section { font-size: var(--grid-text); font-weight: 400; line-height: 1.2; }
 
     /* Intro column */
     .intro-identity {
@@ -212,12 +214,9 @@
       60% { clip-path: inset(0 0% 0 0); opacity: 0.55; }
       75%, 100% { clip-path: inset(0 0% 0 0); opacity: 0; }
     }
-    .intro-name { font-weight: 500; color: #fff; }
+    .intro-name { font-weight: 700; color: #fff; }
     .intro-title {
-      font-family: var(--mono);
       color: rgba(255,255,255,0.5);
-      font-size: var(--ticker);
-      letter-spacing: -0.01em;
       white-space: nowrap;
       margin-top: clamp(1px, 0.3vh, 4px);
     }
@@ -374,14 +373,10 @@
     }
 
     .intro-what {
-      font-family: var(--mono);
-      font-weight: 600;
-      margin-bottom: clamp(2px, 0.4vh, 4px);
-      margin-top: clamp(2px, 0.4vh, 4px);
       color: rgba(255,255,255,0.5);
       text-transform: uppercase;
-      font-size: var(--ticker);
-      letter-spacing: -0.01em;
+      margin-bottom: clamp(2px, 0.4vh, 4px);
+      margin-top: clamp(4px, 0.8vh, 8px);
     }
     .intro-stats {
       margin-top: clamp(4px, 1vh, 10px);
@@ -389,13 +384,13 @@
     }
     .intro-stats strong {
       color: #fff;
-      font-weight: 500;
+      font-weight: 700;
     }
 
     /* Position column */
     .position-studio {
       color: #fff;
-      font-weight: 500;
+      font-weight: 700;
       margin-bottom: clamp(1px, 0.2vh, 3px);
     }
     .position-revenue {
@@ -403,12 +398,8 @@
       margin-bottom: clamp(6px, 1.4vh, 14px);
     }
     .sub-label {
-      font-family: var(--mono);
-      font-size: var(--ticker);
       color: rgba(255,255,255,0.5);
       text-transform: uppercase;
-      letter-spacing: -0.01em;
-      font-weight: 600;
       margin-bottom: clamp(2px, 0.4vh, 4px);
       margin-top: clamp(4px, 0.8vh, 8px);
     }
@@ -441,17 +432,11 @@
     .venture-item:hover .venture-name { color: var(--accent); }
     .venture-name {
       color: #fff;
-      font-weight: 500;
+      font-weight: 700;
       transition: color 0.2s;
     }
     .venture-status {
-      font-family: var(--mono);
-      font-size: var(--ticker);
-      padding: clamp(1px, 0.2vh, 3px) clamp(4px, 0.4vw, 8px);
-      border-radius: 2px;
-      background: rgba(255,255,255,0.12);
-      color: #fff;
-      letter-spacing: -0.01em;
+      color: rgba(255,255,255,0.5);
     }
     .ventures-stats {
       color: #fff;
@@ -591,7 +576,7 @@
     }
     .connect-avail strong {
       color: #fff;
-      font-weight: 500;
+      font-weight: 700;
     }
     .connect-ctas {
       margin-top: clamp(6px, 1.4vh, 14px);
@@ -605,7 +590,7 @@
       border: 1px solid rgba(255,255,255,0.15);
       border-radius: 2px;
       font-family: var(--mono);
-      font-size: clamp(9px, 0.65vw, 11px);
+      font-size: var(--grid-text);
       color: #fff;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -623,26 +608,18 @@
       text-decoration: none;
     }
     .cta-btn-primary {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-      font-weight: 600;
-      position: relative;
-      overflow: hidden;
+      border-color: rgba(255,255,255,0.25);
     }
     .cta-btn-primary:hover {
-      background: #7c3aed;
-      border-color: #7c3aed;
+      border-color: var(--fg);
       color: #fff;
     }
     .cta-btn-secondary {
-      border-color: var(--accent);
-      color: var(--accent);
+      border-color: rgba(255,255,255,0.25);
     }
     .cta-btn-secondary:hover {
-      background: rgba(124,77,255,0.1);
+      border-color: var(--fg);
       color: #fff;
-      border-color: var(--accent);
     }
 
     /* ---- MIDDLE (statement) ---- */
