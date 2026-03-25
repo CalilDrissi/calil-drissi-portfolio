@@ -579,10 +579,11 @@
     }
     .connect-ctas {
       margin-top: clamp(6px, 1.4vh, 14px);
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: clamp(4px, 0.5vw, 8px);
     }
+    .cta-btn { white-space: nowrap; }
     .cta-btn {
       padding: clamp(3px, 0.5vh, 5px) clamp(6px, 0.6vw, 10px);
       border: 1px solid rgba(255,255,255,0.15);
