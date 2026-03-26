@@ -658,11 +658,12 @@
     /* ---- MIDDLE (statement) ---- */
     .statement {
       font-family: var(--mono);
-      font-size: clamp(16px, 2.2vw, 32px);
+      font-size: clamp(14px, 1.6vw, 24px);
       line-height: 1.5;
       font-weight: 700;
       letter-spacing: -0.01em;
       color: #fff;
+      min-width: 0;
     }
     .statement em {
       font-family: var(--sans);
@@ -750,6 +751,7 @@
       align-items: stretch;
       position: relative;
       gap: 0 clamp(32px, 3vw, 48px);
+      overflow: hidden;
       flex: 1;
       min-height: 0;
     }
@@ -1266,14 +1268,17 @@
       cursor: pointer;
     }
     .project-thumb:hover {
-      border-color: var(--accent);
+      border-color: rgba(255,255,255,0.3);
     }
-    /* Click hint overlay */
+    /* Click hint overlay — glass effect */
     .project-thumb::after {
       content: 'View Project ↗';
       position: absolute;
-      inset: 0;
-      background: rgba(124,77,255,0.85);
+      bottom: 0; left: 0; right: 0;
+      padding: 10px;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1282,13 +1287,15 @@
       text-transform: uppercase;
       letter-spacing: 0.1em;
       color: #fff;
-      font-weight: 500;
+      font-weight: 400;
       opacity: 0;
-      transition: opacity 0.25s;
+      transform: translateY(100%);
+      transition: opacity 0.3s, transform 0.3s;
       z-index: 1;
     }
     .project-thumb:hover::after {
       opacity: 1;
+      transform: translateY(0);
     }
     .project-thumb img {
       width: 100%; height: 100%;
