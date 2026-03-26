@@ -777,6 +777,8 @@
     .gh-body .statement {
       flex: 1 1 50%;
       min-width: 0;
+      min-height: 0;
+      overflow: hidden;
       font-family: var(--mono);
       font-size: clamp(11px, 1vw, 14px);
       line-height: 1.55;
@@ -863,9 +865,9 @@
 
     /* ---- REPO LIST (full width, below carousel) ---- */
     .gh-repos {
-      flex: 1;
+      flex: 0 0 auto;
       min-width: 0;
-      min-height: 0;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       gap: clamp(4px, 0.6vh, 8px);
@@ -1396,7 +1398,9 @@
         gap: clamp(6px, 1vh, 12px);
       }
       .gh-body .statement {
-        flex: none;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
         font-size: clamp(14px, 2.5vw, 18px);
       }
     }
