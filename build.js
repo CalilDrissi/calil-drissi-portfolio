@@ -262,11 +262,6 @@ function render(template, data, lang, featuredPosts, ghData) {
         ${data.connect.links.map(l => `<a href="${l.url}">${l.label}</a>`).join('\n        ')}
       </div>
 
-      <div class="connect-avail">
-        <strong>${data.connect.availStatus}</strong><br />
-        ${data.connect.availCta}
-      </div>
-
       <div class="connect-ctas">
         <button class="cta-btn cta-btn-primary cta-btn-terminal" id="terminalChallengeBtn">${lang === 'fr' ? 'Consultation Gratuite' : 'Win Free Consult'} &#8599;</button>
         <button class="cta-btn cta-btn-secondary" id="openScheduleBtn">${lang === 'fr' ? 'Planifier un appel' : 'Schedule a Call'} &#8599;</button>
