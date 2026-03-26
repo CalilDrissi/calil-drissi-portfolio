@@ -182,10 +182,10 @@
     ]
   },
   "statement": {
-    "text": "Un développeur logiciel expérimenté axé sur&nbsp;{rotate1}&nbsp;et le&nbsp;{rotate2}. Un partenaire fiable pour les startups, agences et marques qui construisent&nbsp;{rotate3}<span class=\"superscript\">15</span>.",
-    "rotate1Words": ["la performance", "la scalabilité", "la précision", "l'élégance", "l'innovation", "la qualité"],
-    "rotate2Words": ["savoir-faire", "sens du détail", "souci de clarté", "esprit créatif", "vision globale", "impact réel"],
-    "rotate3Words": ["sur toutes plateformes", "pour le web", "à grande échelle", "avec intention", "de zéro", "ce qui compte"]
+    "text": "Création d'outils logiciels, de modèles IA et de systèmes d'automatisation. Axé sur&nbsp;{rotate1}&nbsp;et le&nbsp;{rotate2}, construisant&nbsp;{rotate3}.",
+    "rotate1Words": ["la simplicité", "la fiabilité", "la performance", "la précision", "l'efficacité", "la qualité"],
+    "rotate2Words": ["savoir-faire", "la clarté", "la rapidité", "l'impact", "le détail", "l'échelle"],
+    "rotate3Words": ["ce qui compte", "pour le long terme", "des outils durables", "des systèmes qui tiennent", "des choses qui marchent", "du logiciel fiable"]
   },
   "ribbon": [
     "Khalil Drissi",
