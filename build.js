@@ -187,7 +187,7 @@ function render(template, data, lang, featuredPosts, ghData) {
       </div>
       <div class="intro-meta">
         <span>🌐 Timezone GMT+1</span>
-        <a href="https://fezlang.com" target="_blank" rel="noopener" class="fez-link"><img src="/fez-icon.png" alt="Fez" class="fez-icon" /> Creator of Fez Lang ↗</a>
+        <a href="https://fezlang.org" target="_blank" rel="noopener" class="fez-link"><img src="/fez-icon.png" alt="Fez" class="fez-icon" /> Creator of Fez Lang ↗</a>
       </div>
       <div class="intro-what">What I do</div>
       <div class="intro-desc">I turn complex things into their simplest form.</div>
