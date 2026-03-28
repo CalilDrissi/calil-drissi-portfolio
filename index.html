@@ -752,8 +752,7 @@
       position: relative;
       gap: 0 clamp(32px, 3vw, 48px);
       overflow: hidden;
-      flex: 1;
-      min-height: 0;
+      flex: 0 0 auto;
     }
     .gh-wrap {
       flex: 1 1 50%;
@@ -865,8 +864,9 @@
 
     /* ---- REPO LIST (full width, below carousel) ---- */
     .gh-repos {
-      flex: 0 0 auto;
+      flex: 1;
       min-width: 0;
+      min-height: 0;
       overflow: hidden;
       display: flex;
       flex-direction: column;
