@@ -1432,12 +1432,23 @@
       /* Show all sections — reorganize into 2-col grid */
       .top-grid .col-section { display: block !important; }
 
-      .github-section { padding: 0.75rem 0; }
+      .github-section { padding: 0.5rem 0; flex: none; }
 
       .gh-wrap { width: 100%; max-width: none; }
       .gh-grid:empty { display: none; }
+      .gh-body { flex: 0 0 auto; }
+      .gh-body .statement {
+        font-size: clamp(16px, 2.5vw, 20px);
+        margin-bottom: clamp(8px, 1.5vh, 16px);
+      }
+      .gh-repos { max-height: 160px; overflow: hidden; flex: 0 0 auto; }
       .gh-repo-grid { grid-template-columns: 1fr 1fr; }
       .statement { max-width: 100%; }
+      .bottom { flex: none; }
+      .projects-strip { flex: none; }
+      .project-thumb { height: clamp(120px, 20vh, 200px); }
+      .page { gap: 16px; }
+      .top-grid { gap: 1.5rem; }
 
       /* Windows go full-screen on tablet */
       .win.open {
