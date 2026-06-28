@@ -43,39 +43,38 @@ async function uploadToKV(kvNamespace, fileName, fileData, mimeType, siteUrl) {
   };
 }
 
-async function sendFormSubmitNotification(senderName, senderEmail, messageText, messageType, fileLinks) {
-  const typeLabel = messageType.charAt(0).toUpperCase() + messageType.slice(1);
+// Submit to Contact Form 7 on the WordPress CMS (public feedback endpoint — no auth needed).
+const CF7_BASE = 'https://cms.drissi.xyz';
+const CF7_FORM_ID = '338';
 
-  const payload = {
-    _subject: `New ${typeLabel} Message from ${senderName}`,
-    _replyto: senderEmail,
-    _captcha: 'false',
-    _template: 'table',
-    Name: senderName,
-    Email: senderEmail,
-    Type: typeLabel,
-    Message: messageText || '(no text message)',
-  };
-
-  if (fileLinks.length > 0) {
-    payload['Attachments'] = fileLinks.map((l, i) => `File ${i + 1}: ${l}`).join('\n');
-    payload['Note'] = `This submission includes ${fileLinks.length} file(s). Click the links above to view/download. Files expire after 90 days.`;
+async function submitToCF7({ name, email, type, message, company, date }, fileLinks) {
+  let body = message || '';
+  if (fileLinks && fileLinks.length > 0) {
+    body += `\n\nAttachments (links expire in 90 days):\n` + fileLinks.map((l, i) => `${i + 1}. ${l}`).join('\n');
   }
 
-  const res = await fetch('https://formsubmit.co/ajax/khalil@drissi.org', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Origin': 'https://khalildrissi.com',
-      'Referer': 'https://khalildrissi.com/',
-    },
-    body: JSON.stringify(payload),
-  });
+  const fd = new FormData();
+  fd.append('_wpcf7', CF7_FORM_ID);
+  fd.append('_wpcf7_version', '6.0');
+  fd.append('_wpcf7_locale', 'en_US');
+  fd.append('_wpcf7_unit_tag', `wpcf7-f${CF7_FORM_ID}-o1`);
+  fd.append('_wpcf7_container_post', '0');
+  fd.append('your-name', name);
+  fd.append('your-email', email);
+  fd.append('submission-type', type);
+  fd.append('company', company || '');
+  fd.append('preferred-date', date || '');
+  fd.append('preferred-time', '');
+  fd.append('topic', '');
+  fd.append('your-message', body.trim() || '(no message)');
 
-  const result = await res.json();
-  if (result.success === 'false' || result.success === false) {
-    throw new Error('FormSubmit failed: ' + (result.message || JSON.stringify(result)));
+  const res = await fetch(`${CF7_BASE}/wp-json/contact-form-7/v1/contact-forms/${CF7_FORM_ID}/feedback`, {
+    method: 'POST',
+    body: fd,
+  });
+  const result = await res.json().catch(() => ({}));
+  if (result.status !== 'mail_sent') {
+    throw new Error('CF7: ' + (result.message || result.status || `HTTP ${res.status}`));
   }
   return result;
 }
@@ -96,6 +95,8 @@ export async function onRequestPost(context) {
   const email = formData.get('email');
   const type = formData.get('type');
   const message = formData.get('message') || '';
+  const company = formData.get('company') || '';
+  const date = formData.get('date') || '';
   const file = formData.get('file'); // recording blob
   const attachments = formData.getAll('attachment'); // additional file attachments
 
@@ -166,20 +167,17 @@ export async function onRequestPost(context) {
     uploadErrors.push('storage-not-configured');
   }
 
-  // Send notification via FormSubmit
+  // Deliver via Contact Form 7 on the WordPress CMS
   try {
     let finalMessage = message;
     if (uploadErrors.length > 0 && filesToUpload.length > 0) {
       finalMessage += `\n\n[Note: ${filesToUpload.length} file(s) could not be saved. Error: ${uploadErrors.join(', ')}]`;
     }
-    if (filesToUpload.length > 0 && fileLinks.length === 0 && uploadErrors.length > 0) {
-      finalMessage += `\n\n[${type} recording/files were attached but could not be saved. Please follow up with the sender.]`;
-    }
 
-    await sendFormSubmitNotification(name, email, finalMessage.trim(), type, fileLinks);
+    await submitToCF7({ name, email, type, message: finalMessage, company, date }, fileLinks);
   } catch (err) {
-    console.error('FormSubmit notification error:', err);
-    return jsonResponse({ success: false, error: 'Failed to deliver message. Please email khalil@drissi.org directly.', detail: err.message }, 500);
+    console.error('CF7 submission error:', err);
+    return jsonResponse({ success: false, error: 'Failed to send. Please email khalil@drissi.org directly.', detail: err.message }, 500);
   }
 
   const result = { success: true };
