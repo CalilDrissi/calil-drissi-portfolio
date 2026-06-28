@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Start a Collaboration — Khalil Drissi</title>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <style>
+    :root {
+      --bg: #0a0a0a; --panel: #121212; --fg: #f2f2f2; --dim: #9a9a9a;
+      --faint: #6a6a6a; --border: rgba(255,255,255,0.12); --accent: #7c4dff;
+      --mono: ui-monospace, "SF Mono", Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.5; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+    }
+    .card {
+      width: 100%; max-width: 560px; background: var(--panel);
+      border: 1px solid var(--border); border-radius: 14px;
+      padding: clamp(24px, 5vw, 40px);
+    }
+    .eyebrow {
+      font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.14em; color: var(--accent); margin: 0 0 8px;
+    }
+    h1 { font-size: clamp(22px, 4vw, 30px); margin: 0 0 6px; }
+    .sub { color: var(--dim); font-size: 14px; margin: 0 0 26px; }
+    label {
+      display: block; font-family: var(--mono); font-size: 11px;
+      text-transform: uppercase; letter-spacing: 0.06em; color: var(--dim);
+      margin: 0 0 6px;
+    }
+    .row { display: flex; gap: 14px; }
+    .row .field { flex: 1; }
+    .field { margin-bottom: 16px; min-width: 0; }
+    input, select, textarea {
+      width: 100%; background: #0a0a0a; color: var(--fg);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 11px 13px; font-size: 14px; font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 120px; }
+    button {
+      width: 100%; margin-top: 6px; padding: 13px;
+      background: var(--accent); color: #fff; border: none; border-radius: 8px;
+      font-family: var(--mono); font-size: 13px; text-transform: uppercase;
+      letter-spacing: 0.06em; cursor: pointer; transition: opacity 0.15s;
+    }
+    button:hover { opacity: 0.9; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .status { margin-top: 14px; font-size: 13px; min-height: 18px; text-align: center; }
+    .status.success { color: #28c840; }
+    .status.error { color: #ff5f57; }
+    .status.sending { color: var(--dim); }
+    .foot { margin-top: 22px; text-align: center; font-size: 12px; color: var(--faint); }
+    .foot a { color: var(--dim); }
+    @media (max-width: 480px) { .row { flex-direction: column; gap: 0; } }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <p class="eyebrow">Collaboration</p>
+    <h1>Let's build something</h1>
+    <p class="sub">Tell me about your project and I'll get back to you within 24 hours.</p>
+
+    <form id="collabForm" novalidate>
+      <div class="row">
+        <div class="field">
+          <label for="name">Name</label>
+          <input type="text" id="name" placeholder="Your name" required />
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@example.com" required />
+        </div>
+      </div>
+      <div class="field">
+        <label for="company">Company / Organization</label>
+        <input type="text" id="company" placeholder="Optional" />
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="ptype">Project type</label>
+          <select id="ptype">
+            <option>Web application</option>
+            <option>Mobile app</option>
+            <option>AI / Automation</option>
+            <option>Cybersecurity</option>
+            <option>Consulting</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="budget">Budget</label>
+          <select id="budget">
+            <option>Not sure yet</option>
+            <option>Under $5k</option>
+            <option>$5k – $15k</option>
+            <option>$15k – $50k</option>
+            <option>$50k+</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="timeline">Timeline</label>
+        <input type="text" id="timeline" placeholder="e.g. ASAP, Q3 2026, flexible" />
+      </div>
+      <div class="field">
+        <label for="details">Project details</label>
+        <textarea id="details" placeholder="What are you building, and what do you need help with?" required></textarea>
+      </div>
+      <button type="submit" id="submitBtn">Send request</button>
+      <div class="status" id="status"></div>
+    </form>
+
+    <p class="foot">Khalil Drissi · <a href="https://khalildrissi.com">khalildrissi.com</a></p>
+  </main>
+
+  <script>
+    var form = document.getElementById('collabForm');
+    var btn = document.getElementById('submitBtn');
+    var status = document.getElementById('status');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name = document.getElementById('name').value.trim();
+      var email = document.getElementById('email').value.trim();
+      var company = document.getElementById('company').value.trim();
+      var ptype = document.getElementById('ptype').value;
+      var budget = document.getElementById('budget').value;
+      var timeline = document.getElementById('timeline').value.trim();
+      var details = document.getElementById('details').value.trim();
+
+      if (!name || !email || !details) {
+        status.textContent = 'Name, email, and project details are required.';
+        status.className = 'status error';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+      status.textContent = '';
+      status.className = 'status sending';
+
+      var msg = 'Type: ' + ptype + '\nBudget: ' + budget + '\nTimeline: ' + (timeline || 'N/A') + '\n\n' + details;
+      var body = new FormData();
+      body.append('type', 'collaboration');
+      body.append('name', name);
+      body.append('email', email);
+      body.append('company', company);
+      body.append('message', msg);
+
+      fetch('/api/message', { method: 'POST', body: body })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.success) {
+            status.textContent = 'Thanks! Your request has been sent. I\'ll reply within 24 hours.';
+            status.className = 'status success';
+            form.reset();
+          } else {
+            status.textContent = d.error || 'Something went wrong. Please email khalil@drissi.org.';
+            status.className = 'status error';
+          }
+        })
+        .catch(function () {
+          status.textContent = 'Network error. Please email khalil@drissi.org.';
+          status.className = 'status error';
+        })
+        .finally(function () {
+          btn.disabled = false;
+          btn.textContent = 'Send request';
+        });
+    });
+  </script>
+</body>
+</html>

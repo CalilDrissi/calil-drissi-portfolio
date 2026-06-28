@@ -2332,6 +2332,15 @@ async function build() {
     }
   }
 
+  // Standalone collaboration form page at /collab-form/ (not linked from the site)
+  const collabSrc = path.join(__dirname, 'collab-form.html');
+  if (fs.existsSync(collabSrc)) {
+    const collabDist = path.join(DIST, 'collab-form');
+    fs.mkdirSync(collabDist, { recursive: true });
+    fs.copyFileSync(collabSrc, path.join(collabDist, 'index.html'));
+    console.log('  ✓ /collab-form/');
+  }
+
   // Copy project screenshots
   const projectsSrc = path.join(__dirname, 'projects');
   if (fs.existsSync(projectsSrc)) {
