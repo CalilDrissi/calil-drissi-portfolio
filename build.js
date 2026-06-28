@@ -2340,11 +2340,21 @@ async function build() {
     fs.copyFileSync(collabSrc, path.join(collabDist, 'index.html'));
     console.log('  ✓ /collab-form/');
   }
-  // Printable PDF version of the intake form
-  const pdfSrc = path.join(__dirname, 'work-offer-intake.pdf');
-  if (fs.existsSync(pdfSrc)) {
-    fs.copyFileSync(pdfSrc, path.join(DIST, 'work-offer-intake.pdf'));
-    console.log('  ✓ /work-offer-intake.pdf');
+  // French collaboration form at /fr/collab-form/
+  const collabFrSrc = path.join(__dirname, 'collab-form-fr.html');
+  if (fs.existsSync(collabFrSrc)) {
+    const collabFrDist = path.join(DIST, 'fr', 'collab-form');
+    fs.mkdirSync(collabFrDist, { recursive: true });
+    fs.copyFileSync(collabFrSrc, path.join(collabFrDist, 'index.html'));
+    console.log('  ✓ /fr/collab-form/');
+  }
+  // Printable PDF versions of the intake form (EN + FR)
+  for (const pdf of ['work-offer-intake.pdf', 'work-offer-intake-fr.pdf']) {
+    const src = path.join(__dirname, pdf);
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, path.join(DIST, pdf));
+      console.log('  ✓ /' + pdf);
+    }
   }
 
   // Copy project screenshots
