@@ -17,7 +17,7 @@ const WP_URL = process.env.WP_URL; // e.g. https://cms.drissi.xyz
 const WP_USER = process.env.WP_USER;
 const WP_APP_PASSWORD = process.env.WP_APP_PASSWORD;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const GITHUB_USERNAME = 'CalilDrissi';
+const GITHUB_USERNAME = 'CalDrissi';
 
 // ---- Helpers ----
 function readJSON(file) {
@@ -2330,6 +2330,17 @@ async function build() {
       fs.copyFileSync(src, path.join(DIST, f));
       console.log(`  ✓ /${f}`);
     }
+  }
+
+  // Copy project screenshots
+  const projectsSrc = path.join(__dirname, 'projects');
+  if (fs.existsSync(projectsSrc)) {
+    const projectsDist = path.join(DIST, 'projects');
+    fs.mkdirSync(projectsDist, { recursive: true });
+    for (const f of fs.readdirSync(projectsSrc)) {
+      fs.copyFileSync(path.join(projectsSrc, f), path.join(projectsDist, f));
+    }
+    console.log(`  ✓ /projects/ (${fs.readdirSync(projectsSrc).length} images)`);
   }
 
   console.log('Done!');

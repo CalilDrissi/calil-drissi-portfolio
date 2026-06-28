@@ -153,7 +153,7 @@
     "links": [
       {
         "label": "LinkedIn",
-        "url": "#"
+        "url": "https://www.linkedin.com/in/khalil-drissi-8a4568257"
       },
       {
         "label": "Email",
@@ -161,11 +161,11 @@
       },
       {
         "label": "GitHub",
-        "url": "#"
+        "url": "https://github.com/CalDrissi"
       },
       {
         "label": "Twitter / X",
-        "url": "#"
+        "url": "https://x.com/CalilDrissi"
       }
     ],
     "availStatus": "Disponible maintenant",
@@ -183,9 +183,30 @@
   },
   "statement": {
     "text": "Création d'outils logiciels, de modèles IA et de systèmes d'automatisation. Axé sur&nbsp;{rotate1}&nbsp;et le&nbsp;{rotate2}, construisant&nbsp;{rotate3}.",
-    "rotate1Words": ["la simplicité", "la fiabilité", "la performance", "la précision", "l'efficacité", "la qualité"],
-    "rotate2Words": ["savoir-faire", "la clarté", "la rapidité", "l'impact", "le détail", "l'échelle"],
-    "rotate3Words": ["ce qui compte", "pour le long terme", "des outils durables", "des systèmes qui tiennent", "des choses qui marchent", "du logiciel fiable"]
+    "rotate1Words": [
+      "la simplicité",
+      "la fiabilité",
+      "la performance",
+      "la précision",
+      "l'efficacité",
+      "la qualité"
+    ],
+    "rotate2Words": [
+      "savoir-faire",
+      "la clarté",
+      "la rapidité",
+      "l'impact",
+      "le détail",
+      "l'échelle"
+    ],
+    "rotate3Words": [
+      "ce qui compte",
+      "pour le long terme",
+      "des outils durables",
+      "des systèmes qui tiennent",
+      "des choses qui marchent",
+      "du logiciel fiable"
+    ]
   },
   "ribbon": [
     "Khalil Drissi",
@@ -195,326 +216,112 @@
   ],
   "projects": [
     {
-      "title": "Application Dashboard",
-      "subtitle": "Startup Fintech — Application Web",
-      "desc": "Un tableau de bord financier en temps réel avec des graphiques interactifs, suivi de portefeuille et reporting automatisé. Construit avec Next.js et D3.js pour une visualisation haute performance.",
+      "title": "Cercle Immobilier",
+      "subtitle": "ERP — CRM Immobilier",
+      "desc": "Plateforme de gestion immobilière couvrant tout le cycle de vente — inventaire des biens, contacts, projets, prospects, ventes, plans de paiement, facturation et reporting P&L. Bilingue français/arabe avec annonces cartographiées.",
       "tags": [
-        "Next.js",
-        "TypeScript",
-        "D3.js",
-        "PostgreSQL",
-        "WebSocket"
+        "React",
+        "CRM",
+        "SaaS",
+        "Cartes",
+        "i18n"
       ],
       "year": "2025",
-      "role": "Développeur Principal",
-      "visit": "#",
+      "role": "Créateur & Développeur",
+      "visit": "https://cercle.kiloctet.com",
       "code": "#",
-      "img": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=360&h=240&fit=crop"
+      "img": "/projects/cercle-immobilier.jpg",
+      "thumb": "/projects/cercle-immobilier.jpg"
     },
     {
-      "title": "Plateforme Analytics",
-      "subtitle": "Entreprise SaaS — Produit Complet",
-      "desc": "Plateforme d'analyse traitant des millions d'événements quotidiens. Constructeur de requêtes, tableaux de bord en temps réel et génération automatique d'insights.",
-      "tags": [
-        "React",
-        "Python",
-        "FastAPI",
-        "ClickHouse",
-        "Redis"
-      ],
-      "year": "2024",
-      "role": "Développeur Full-Stack",
-      "visit": "#",
-      "code": "#",
-      "img": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=360&h=240&fit=crop"
-    },
-    {
-      "title": "E-Commerce",
-      "subtitle": "Marque Retail — Boutique & CMS",
-      "desc": "Plateforme e-commerce haute conversion avec CMS headless, filtrage dynamique de produits et tunnel de paiement personnalisé. Optimisé pour les Core Web Vitals avec un score Lighthouse de 98+.",
-      "tags": [
-        "Next.js",
-        "Shopify API",
-        "Tailwind",
-        "Sanity",
-        "Stripe"
-      ],
-      "year": "2024",
-      "role": "Lead Frontend",
-      "visit": "#",
-      "code": "#",
-      "img": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=360&h=240&fit=crop"
-    },
-    {
-      "title": "Plateforme Sociale",
-      "subtitle": "Startup — MVP au Lancement",
-      "desc": "Plateforme sociale communautaire avec messagerie temps réel, flux de contenu et modération. Passage de MVP à 10K utilisateurs actifs en 3 mois.",
+      "title": "Kiloctet ERP",
+      "subtitle": "ERP — Transport & Gestion de Flotte",
+      "desc": "ERP complet pour les entreprises de transport et logistique — facturation, flotte de véhicules, gestion carburant, TVA, paiements, dépenses et RH dans un seul tableau de bord. Multidevise avec support arabe et français.",
       "tags": [
         "React",
         "Node.js",
-        "Socket.io",
-        "MongoDB",
-        "AWS"
-      ],
-      "year": "2024",
-      "role": "Co-fondateur Technique",
-      "visit": "#",
-      "code": "#",
-      "img": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=360&h=240&fit=crop"
-    },
-    {
-      "title": "Produit IA",
-      "subtitle": "Startup IA/ML — Design & Développement",
-      "desc": "Interface IA conversationnelle avec réponses en streaming, gestion du contexte et entrées multimodales pour les workflows d'entreprise.",
-      "tags": [
-        "Next.js",
-        "Python",
-        "LangChain",
-        "OpenAI",
-        "Vercel AI SDK"
+        "PostgreSQL",
+        "Facturation",
+        "Multi-tenant"
       ],
       "year": "2025",
-      "role": "Développeur Full-Stack",
+      "role": "Créateur & Développeur",
       "visit": "#",
       "code": "#",
-      "img": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=360&h=240&fit=crop"
+      "img": "/projects/kiloctet-erp.jpg",
+      "thumb": "/projects/kiloctet-erp.jpg"
     },
     {
-      "title": "Plateforme Cloud",
-      "subtitle": "Outil DevOps — Infrastructure",
-      "desc": "Tableau de bord de gestion d'infrastructure cloud avec déploiements automatisés, monitoring et optimisation des coûts.",
+      "title": "ShopFlow",
+      "subtitle": "Produit — Constructeur d'Automatisation Visuel",
+      "desc": "Un système d'automatisation visuel conçu pour les boutiques Shopify — un constructeur de workflows basé sur des nœuds avec déclencheurs, filtres et actions pour automatiser les opérations. Pensé pour l'ère de l'IA.",
       "tags": [
-        "React",
-        "Go",
-        "Terraform",
-        "Docker",
-        "Kubernetes"
+        "Workflow Builder",
+        "Shopify",
+        "Automatisation",
+        "Éditeur de nœuds"
       ],
-      "year": "2023",
-      "role": "Développeur Backend",
-      "visit": "#",
-      "code": "#",
-      "img": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=360&h=240&fit=crop"
-    },
-    {
-      "title": "Outils Dev",
-      "subtitle": "Open Source — Expérience Développeur",
-      "desc": "Suite d'outils CLI et extensions VS Code pour accélérer les workflows de développement.",
-      "tags": [
-        "TypeScript",
-        "Node.js",
-        "VS Code API",
-        "CLI",
-        "NPM"
-      ],
-      "year": "2023",
-      "role": "Créateur & Mainteneur",
-      "visit": "#",
-      "code": "#",
-      "img": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=360&h=240&fit=crop"
-    },
-    {
-      "title": "Application Mobile",
-      "subtitle": "Santé Tech — Multi-plateforme",
-      "desc": "Application mobile de suivi santé avec synchronisation biométrique temps réel, insights personnalisés et intégration télémédecine.",
-      "tags": [
-        "React Native",
-        "TypeScript",
-        "Firebase",
-        "HealthKit",
-        "GraphQL"
-      ],
-      "year": "2023",
-      "role": "Développeur Mobile",
-      "visit": "#",
-      "code": "#",
-      "img": "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=360&h=240&fit=crop"
-    },
-    {
-      "title": "Plateforme Équipe",
-      "subtitle": "Entreprise — Suite Collaboration",
-      "desc": "Outil de collaboration interne avec gestion de projets, partage de documents et tableau blanc temps réel.",
-      "tags": [
-        "Next.js",
-        "Prisma",
-        "PostgreSQL",
-        "tRPC",
-        "Auth0"
-      ],
-      "year": "2022",
-      "role": "Développeur Principal",
-      "visit": "#",
-      "code": "#",
-      "img": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=360&h=240&fit=crop"
-    },
-    {
-      "title": "Data Viz",
-      "subtitle": "Société Média — Histoires Interactives",
-      "desc": "Plateforme de visualisation de données interactive pour le storytelling éditorial avec graphiques animés, cartes et effets WebGL.",
-      "tags": [
-        "D3.js",
-        "Three.js",
-        "GSAP",
-        "Mapbox",
-        "Canvas API"
-      ],
-      "year": "2022",
-      "role": "Développeur Créatif",
-      "visit": "#",
-      "code": "#",
-      "img": "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=360&h=240&fit=crop"
-    },
-    {
-      "title": "Landing Pages",
-      "subtitle": "Agence — Axé Conversion",
-      "desc": "Landing pages haute performance avec animations GSAP au scroll, atteignant +40% de taux de conversion.",
-      "tags": [
-        "HTML",
-        "CSS",
-        "GSAP",
-        "JavaScript",
-        "Figma"
-      ],
-      "year": "2022",
-      "role": "Développeur Frontend",
-      "visit": "#",
-      "code": "#",
-      "img": "https://images.unsplash.com/photo-1536104968055-4d61aa56f46a?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1536104968055-4d61aa56f46a?w=360&h=240&fit=crop"
-    },
-    {
-      "title": "Open Source",
-      "subtitle": "Communauté — Bibliothèques & Outils",
-      "desc": "Bibliothèques open-source maintenues dont un toolkit d'animation React et un boilerplate API Node.js. 2K+ étoiles GitHub.",
-      "tags": [
-        "TypeScript",
-        "React",
-        "Node.js",
-        "GitHub Actions",
-        "NPM"
-      ],
-      "year": "2021–Présent",
-      "role": "Créateur & Mainteneur",
-      "visit": "#",
-      "code": "#",
-      "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop"
-    }
-  ],
-  "openSource": [
-    {
-      "title": "React Animation Kit",
-      "subtitle": "Open Source — Bibliothèque React",
-      "desc": "Primitives d'animation composables pour React avec API déclarative, physique de ressorts et support des gestes. Utilisé dans 500+ projets.",
-      "tags": [
-        "React",
-        "TypeScript",
-        "Animation",
-        "NPM"
-      ],
-      "year": "2024",
-      "role": "Créateur & Mainteneur",
-      "visit": "#",
-      "code": "#",
-      "img": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=360&h=240&fit=crop"
-    },
-    {
-      "title": "Node API Boilerplate",
-      "subtitle": "Open Source — Starter Backend",
-      "desc": "Starter Express + TypeScript prêt pour la production avec auth, validation, tests, Docker et CI/CD pré-configurés.",
-      "tags": [
-        "Node.js",
-        "TypeScript",
-        "Express",
-        "Docker"
-      ],
-      "year": "2023",
-      "role": "Créateur & Mainteneur",
-      "visit": "#",
-      "code": "#",
-      "img": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=360&h=240&fit=crop"
-    },
-    {
-      "title": "DevKit CLI",
-      "subtitle": "Open Source — Outil Développeur",
-      "desc": "Toolkit de scaffolding et d'automatisation. Générateurs de projets, formateurs de code et scripts de déploiement en un seul CLI.",
-      "tags": [
-        "Node.js",
-        "CLI",
-        "Automation",
-        "NPM"
-      ],
-      "year": "2023",
-      "role": "Créateur & Mainteneur",
-      "visit": "#",
-      "code": "#",
-      "img": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=360&h=240&fit=crop"
-    },
-    {
-      "title": "MotionLib",
-      "subtitle": "Open Source — Bibliothèque Animation",
-      "desc": "Bibliothèque légère d'animations au scroll sans dépendances. Déclencheurs basés sur Intersection Observer avec easing personnalisable.",
-      "tags": [
-        "JavaScript",
-        "Animation",
-        "Scroll",
-        "Lightweight"
-      ],
-      "year": "2024",
-      "role": "Créateur & Mainteneur",
-      "visit": "#",
-      "code": "#",
-      "img": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=360&h=240&fit=crop"
-    },
-    {
-      "title": "PageRank",
-      "subtitle": "Open Source — Bibliothèque Rust",
-      "desc": "Implémentation rapide de PageRank en Rust avec support du calcul parallèle. Gère efficacement des graphes de millions de nœuds.",
-      "tags": [
-        "Rust",
-        "Algorithms",
-        "Graph",
-        "Performance"
-      ],
-      "year": "2023",
+      "year": "2026",
       "role": "Créateur",
       "visit": "#",
       "code": "#",
-      "img": "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?w=360&h=240&fit=crop"
+      "img": "/projects/shopflow.jpg",
+      "thumb": "/projects/shopflow.jpg"
     },
     {
-      "title": "Dotfiles",
-      "subtitle": "Open Source — Environnement Dev",
-      "desc": "Configurations personnelles d'environnement de développement. Zsh, Neovim, tmux et défauts macOS — installation en une commande.",
+      "title": "Virtus Operandi",
+      "subtitle": "IA — Opérations de Production",
+      "desc": "Assistants IA pour DELMIA Apriso, aidant les développeurs à construire plus vite et les opérateurs à travailler plus intelligemment dans l'écosystème MOM. Conçu avec RAG et SDK multi-tenant.",
       "tags": [
-        "Shell",
-        "Neovim",
-        "Zsh",
-        "macOS"
+        "IA",
+        "RAG",
+        "Python",
+        "Industrie",
+        "SDK"
       ],
-      "year": "2022",
-      "role": "Mainteneur",
+      "year": "2026",
+      "role": "Créateur & Développeur",
       "visit": "#",
       "code": "#",
-      "img": "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=820&h=400&fit=crop",
-      "thumb": "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=360&h=240&fit=crop"
+      "img": "/projects/virtus.jpg",
+      "thumb": "/projects/virtus.jpg"
+    },
+    {
+      "title": "ShopifyGMC",
+      "subtitle": "SaaS — Outil E-commerce Shopify",
+      "desc": "SaaS de surveillance qui détecte les suspensions Google Merchant Center avant qu'elles ne retirent les boutiques Shopify de Google Shopping. Audit gratuit en 90 secondes, puis surveillance continue du flux.",
+      "tags": [
+        "Go",
+        "Shopify API",
+        "Google Merchant",
+        "SaaS"
+      ],
+      "year": "2026",
+      "role": "Créateur",
+      "visit": "https://shopifygmc.com",
+      "code": "#",
+      "img": "/projects/shopifygmc.jpg",
+      "thumb": "/projects/shopifygmc.jpg"
+    },
+    {
+      "title": "SmartShop Automation",
+      "subtitle": "Produit — Automatisation E-commerce",
+      "desc": "Guides et workflows n8n prêts à importer qui automatisent les opérations Shopify — tableaux de bord de revenus, publication sociale, contenu SEO et comptabilité. Automatisation no-code pour les commerçants.",
+      "tags": [
+        "n8n",
+        "Automatisation",
+        "Shopify",
+        "No-code"
+      ],
+      "year": "2026",
+      "role": "Créateur",
+      "visit": "https://smartshopautomation.com",
+      "code": "#",
+      "img": "/projects/smartshop-automation.jpg",
+      "thumb": "/projects/smartshop-automation.jpg"
     }
   ],
+  "openSource": [],
   "about": {
     "titlebarText": "khalil drissi — à propos",
     "emailBtn": {
