@@ -567,14 +567,7 @@
       "default": "Great question! For detailed inquiries, the best way to get a thorough answer is to reach out directly at khalil@drissi.org or schedule a call. Khalil is always happy to chat about potential projects."
     }
   },
-  "projectsTab": {
-    "label": "Commercial",
-    "count": "15"
-  },
-  "openSourceTab": {
-    "label": "Open Source",
-    "count": "6"
-  },
+  "projectsTitle": "Projects",
   "scrollIndicator": "Scroll",
   "nav": {
     "blog": "Blog",

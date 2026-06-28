@@ -567,14 +567,7 @@
       "default": "Bonne question ! Pour des demandes détaillées, le meilleur moyen d'obtenir une réponse complète est de contacter directement khalil@drissi.org ou de planifier un appel. Khalil est toujours heureux de discuter de projets potentiels."
     }
   },
-  "projectsTab": {
-    "label": "Commercial",
-    "count": "15"
-  },
-  "openSourceTab": {
-    "label": "Open Source",
-    "count": "6"
-  },
+  "projectsTitle": "Projets",
   "scrollIndicator": "Défiler",
   "nav": {
     "blog": "Blog",

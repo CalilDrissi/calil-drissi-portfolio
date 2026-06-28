@@ -299,10 +299,11 @@ function render(template, data, lang, featuredPosts, ghData) {
     );
   }
 
-  // Project thumbs
-  const thumbsHTML = data.projects.map(p =>
-    `      <div class="project-thumb">
-        <img src="${p.thumb}" alt="" loading="lazy" />
+  // Project thumbs — commercial projects + open source merged into one strip
+  const allProjects = [...data.projects, ...(data.openSource || [])];
+  const thumbsHTML = allProjects.map((p, i) =>
+    `      <div class="project-thumb" data-pidx="${i}">
+        <img src="${p.thumb || p.img}" alt="" loading="lazy" />
         <div class="project-label">${p.title}</div>
       </div>`
   ).join('\n');
@@ -311,11 +312,16 @@ function render(template, data, lang, featuredPosts, ghData) {
     `<div class="projects-strip" id="projectsStrip">\n${thumbsHTML}\n    </div>\n  </div>\n</div>`
   );
 
-  // Filter tabs
+  // Inject localized project data for the client-side windows + hover tooltips
   html = html.replace(
-    /<button class="filter-tab active">[\s\S]*?<\/button>\s*<button class="filter-tab">[\s\S]*?<\/button>/,
-    `<button class="filter-tab active">${data.projectsTab.label} <span class="filter-count">${data.projectsTab.count}</span></button>
-        <button class="filter-tab">${data.openSourceTab.label} <span class="filter-count">${data.openSourceTab.count}</span></button>`
+    /<div class="projects-strip" id="projectsStrip">/,
+    `<script>var PROJECTS_DATA = ${JSON.stringify(allProjects)};<\/script>\n    <div class="projects-strip" id="projectsStrip">`
+  );
+
+  // Projects section title
+  html = html.replace(
+    /<div class="projects-title">[\s\S]*?<\/div>/,
+    `<div class="projects-title">${data.projectsTitle || 'Projects'} <span class="projects-count">${allProjects.length}</span></div>`
   );
 
   // Scroll indicator

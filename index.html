@@ -1214,35 +1214,82 @@
       100% { transform: translateX(300%); }
     }
 
-    .filter-tabs {
-      display: flex;
-      gap: 6px;
-    }
-    .filter-tab {
-      padding: clamp(3px, 0.6vh, 6px) clamp(8px, 1vw, 16px);
-      border-radius: 9999px;
+    .projects-title {
       font-family: var(--mono);
       font-size: var(--label);
       text-transform: uppercase;
-      letter-spacing: 0.03em;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: none;
-      color: var(--fg-dim);
-      transition: all 0.2s;
-    }
-    .filter-tab.active {
-      background: var(--fg);
-      color: var(--bg);
-      border-color: var(--fg);
-    }
-    .filter-tab:hover:not(.active) {
-      border-color: var(--fg-dim);
+      letter-spacing: 0.12em;
       color: var(--fg);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .filter-count {
+    .projects-title .projects-count {
       opacity: 0.5;
-      margin-left: 3px;
+    }
+
+    /* Project hover tooltip — card info */
+    .project-tooltip {
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+      max-width: 320px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: rgba(15,15,15,0.92);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.18s, transform 0.18s;
+    }
+    .project-tooltip.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .project-tooltip .pt-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+    .project-tooltip .pt-sub {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--fg-dim);
+      margin-bottom: 8px;
+    }
+    .project-tooltip .pt-desc {
+      font-size: 12px;
+      line-height: 1.45;
+      color: rgba(255,255,255,0.78);
+      margin-bottom: 8px;
+    }
+    .project-tooltip .pt-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .project-tooltip .pt-tags span {
+      font-family: var(--mono);
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      color: var(--fg-dim);
+    }
+    .project-tooltip .pt-hint {
+      font-family: var(--mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg);
+      opacity: 0.85;
     }
 
     /* Project strip */
@@ -1275,33 +1322,6 @@
     }
     .project-thumb:hover {
       border-color: rgba(255,255,255,0.3);
-    }
-    /* Click hint overlay — glass effect */
-    .project-thumb::after {
-      content: 'View Project ↗';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      padding: 10px;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--mono);
-      font-size: var(--label);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #fff;
-      font-weight: 400;
-      opacity: 0;
-      transform: translateY(100%);
-      transition: opacity 0.3s, transform 0.3s;
-      z-index: 1;
-    }
-    .project-thumb:hover::after {
-      opacity: 1;
-      transform: translateY(0);
     }
     .project-thumb img {
       width: 100%; height: 100%;
@@ -2605,10 +2625,7 @@
         <span>Scroll</span>
         <div class="scroll-line"></div>
       </div>
-      <div class="filter-tabs">
-        <button class="filter-tab active">Commercial <span class="filter-count">15</span></button>
-        <button class="filter-tab">Open Source <span class="filter-count">6</span></button>
-      </div>
+      <div class="projects-title">Projects <span class="projects-count">18</span></div>
     </div>
     <div class="projects-strip" id="projectsStrip">
       <div class="project-thumb">
@@ -3062,7 +3079,7 @@
   strip.addEventListener('pointerenter', () => { mouseOverStrip = true; });
   strip.addEventListener('pointerleave', () => { mouseOverStrip = false; isDown = false; strip.style.cursor = 'grab'; });
 
-  // Filter tabs — Open Source data
+  // Open Source project data (merged into the unified strip below)
   const openSourceProjects = [
     { title: 'React Animation Kit', subtitle: 'Open Source — React Library', desc: 'Composable animation primitives for React with declarative API, spring physics, and gesture support. Used in 500+ projects.', tags: ['React', 'TypeScript', 'Animation', 'NPM'], year: '2024', role: 'Creator & Maintainer', visit: '#', code: '#', img: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=820&h=400&fit=crop' },
     { title: 'Node API Boilerplate', subtitle: 'Open Source — Backend Starter', desc: 'Production-ready Express + TypeScript starter with auth, validation, testing, Docker, and CI/CD pre-configured.', tags: ['Node.js', 'TypeScript', 'Express', 'Docker'], year: '2023', role: 'Creator & Maintainer', visit: '#', code: '#', img: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=820&h=400&fit=crop' },
@@ -3072,39 +3089,6 @@
     { title: 'Dotfiles', subtitle: 'Open Source — Dev Environment', desc: 'Personal development environment configurations. Zsh, Neovim, tmux, and macOS defaults — one command setup.', tags: ['Shell', 'Neovim', 'Zsh', 'macOS'], year: '2022', role: 'Maintainer', visit: '#', code: '#', img: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=820&h=400&fit=crop' },
   ];
 
-  // Store original project thumbs HTML
-  const projectThumbsHTML = strip.innerHTML;
-
-  function attachOSThumbClicks() {
-    document.querySelectorAll('.project-thumb.os-thumb').forEach((thumb, i) => {
-      thumb.addEventListener('click', () => {
-        if (dragDist > 5) return;
-        WM.createProjectWindow(openSourceProjects[i], i + 100);
-      });
-    });
-  }
-
-  document.querySelectorAll('.filter-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-
-      const isOS = tab.textContent.toLowerCase().includes('open source');
-      if (isOS) {
-        strip.innerHTML = openSourceProjects.map(a =>
-          `<div class="project-thumb os-thumb">
-            <img src="${a.img}" alt="" loading="lazy" />
-            <div class="project-label">${a.title}</div>
-          </div>`
-        ).join('');
-        attachOSThumbClicks();
-      } else {
-        strip.innerHTML = projectThumbsHTML;
-        attachThumbClicks();
-      }
-      strip.scrollLeft = 0;
-    });
-  });
 
   // ======== WINDOW MANAGER ========
   const WM = {
@@ -3358,13 +3342,66 @@
     { title: 'Open Source', subtitle: 'Community — Libraries & Tools', desc: 'Maintained open-source libraries including a React animation toolkit and Node.js API boilerplate. 2K+ GitHub stars.', tags: ['TypeScript', 'React', 'Node.js', 'GitHub Actions', 'NPM'], year: '2021–Present', role: 'Creator & Maintainer', visit: '#', code: '#', img: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=820&h=400&fit=crop' },
   ];
 
-  // Attach project thumb clicks
+  // Unified project list — commercial first, then open source.
+  // Built output injects localized PROJECTS_DATA; fall back to the inline arrays when viewing the template directly.
+  const allProjects = (window.PROJECTS_DATA && window.PROJECTS_DATA.length)
+    ? window.PROJECTS_DATA
+    : [...projects, ...openSourceProjects];
+
+  const thumbUrl = u => (u || '').replace('w=820&h=400', 'w=360&h=240');
+
+  // Render the single merged strip
+  function renderProjects() {
+    strip.innerHTML = allProjects.map((p, i) =>
+      `<div class="project-thumb" data-pidx="${i}">
+        <img src="${p.thumb || thumbUrl(p.img)}" alt="" loading="lazy" />
+        <div class="project-label">${p.title}</div>
+      </div>`
+    ).join('');
+  }
+  renderProjects();
+
+  // Hover tooltip showing card info
+  const projTip = document.createElement('div');
+  projTip.className = 'project-tooltip';
+  document.body.appendChild(projTip);
+
+  const tipHint = (LANG === 'fr') ? 'Cliquez pour les détails →' : 'Click for details →';
+
+  function showTip(p) {
+    projTip.innerHTML =
+      `<div class="pt-title">${p.title}</div>
+       <div class="pt-sub">${p.subtitle}${p.year ? ' · ' + p.year : ''}</div>
+       <div class="pt-desc">${p.desc}</div>
+       <div class="pt-tags">${(p.tags || []).map(t => `<span>${t}</span>`).join('')}</div>
+       <div class="pt-hint">${tipHint}</div>`;
+    projTip.classList.add('visible');
+  }
+  function moveTip(e) {
+    const pad = 14;
+    const r = projTip.getBoundingClientRect();
+    let x = e.clientX + pad;
+    let y = e.clientY + pad;
+    if (x + r.width > window.innerWidth - 8) x = e.clientX - r.width - pad;
+    if (y + r.height > window.innerHeight - 8) y = e.clientY - r.height - pad;
+    projTip.style.left = Math.max(8, x) + 'px';
+    projTip.style.top = Math.max(8, y) + 'px';
+  }
+  function hideTip() { projTip.classList.remove('visible'); }
+
+  // Attach click + hover behaviour to each thumb
   function attachThumbClicks() {
-    document.querySelectorAll('.project-thumb:not(.os-thumb)').forEach((thumb, i) => {
+    document.querySelectorAll('.project-thumb').forEach(thumb => {
+      const i = +thumb.dataset.pidx;
+      const p = allProjects[i];
+      if (!p) return;
       thumb.addEventListener('click', () => {
         if (dragDist > 5) return;
-        WM.createProjectWindow(projects[i], i);
+        WM.createProjectWindow(p, i);
       });
+      thumb.addEventListener('mouseenter', e => { showTip(p); moveTip(e); });
+      thumb.addEventListener('mousemove', moveTip);
+      thumb.addEventListener('mouseleave', hideTip);
     });
   }
   attachThumbClicks();
