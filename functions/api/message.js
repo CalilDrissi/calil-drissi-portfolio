@@ -107,7 +107,7 @@ export async function onRequestPost(context) {
     return jsonResponse({ error: 'Invalid email address' }, 400);
   }
 
-  if (!['text', 'audio', 'video', 'file'].includes(type)) {
+  if (!['text', 'audio', 'video', 'file', 'schedule', 'collaboration'].includes(type)) {
     return jsonResponse({ error: 'Invalid message type' }, 400);
   }
 
@@ -179,7 +179,7 @@ export async function onRequestPost(context) {
     await sendFormSubmitNotification(name, email, finalMessage.trim(), type, fileLinks);
   } catch (err) {
     console.error('FormSubmit notification error:', err);
-    return jsonResponse({ success: false, error: 'Failed to deliver message. Please email khalil@drissi.org directly.' }, 500);
+    return jsonResponse({ success: false, error: 'Failed to deliver message. Please email khalil@drissi.org directly.', detail: err.message }, 500);
   }
 
   const result = { success: true };

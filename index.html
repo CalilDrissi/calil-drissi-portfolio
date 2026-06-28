@@ -4145,7 +4145,7 @@
   });
 
   // ---- Send handlers ----
-  document.querySelectorAll('.msg-send-btn').forEach(btn => {
+  document.querySelectorAll('.msg-send-btn[data-type]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const type = btn.dataset.type;
       const panel = getPanel(type);
@@ -4778,7 +4778,7 @@
     fetch('/api/message', { method: 'POST', body: body })
       .then(function(r) { return r.json(); })
       .then(function(d) {
-        if (d.ok) {
+        if (d.success) {
           status.textContent = _t('Message sent successfully!');
           status.className = 'msg-status success';
           document.getElementById('schedTopic').value = '';
@@ -4873,7 +4873,7 @@
     fetch('/api/message', { method: 'POST', body: body })
       .then(function(r) { return r.json(); })
       .then(function(d) {
-        if (d.ok) {
+        if (d.success) {
           status.textContent = _t('Message sent successfully!');
           status.className = 'msg-status success';
           document.getElementById('collabDesc').value = '';
