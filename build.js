@@ -2340,6 +2340,12 @@ async function build() {
     fs.copyFileSync(collabSrc, path.join(collabDist, 'index.html'));
     console.log('  ✓ /collab-form/');
   }
+  // Printable PDF version of the intake form
+  const pdfSrc = path.join(__dirname, 'work-offer-intake.pdf');
+  if (fs.existsSync(pdfSrc)) {
+    fs.copyFileSync(pdfSrc, path.join(DIST, 'work-offer-intake.pdf'));
+    console.log('  ✓ /work-offer-intake.pdf');
+  }
 
   // Copy project screenshots
   const projectsSrc = path.join(__dirname, 'projects');

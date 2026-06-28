@@ -115,7 +115,7 @@ export async function onRequestPost(context) {
     return jsonResponse({ error: 'Invalid email address' }, 400);
   }
 
-  if (!['text', 'audio', 'video', 'file', 'schedule', 'collaboration'].includes(type)) {
+  if (!['text', 'audio', 'video', 'file', 'schedule', 'collaboration', 'work-offer'].includes(type)) {
     return jsonResponse({ error: 'Invalid message type' }, 400);
   }
 

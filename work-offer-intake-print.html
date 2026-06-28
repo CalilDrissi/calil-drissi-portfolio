@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Work Offer Intake Form</title>
+<style>
+  :root{ --ink:#1a1a2e; --accent:#2d4a7c; --soft:#6b7280; --line:#b9c2d0; }
+  *{box-sizing:border-box;}
+  body{ margin:0; color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  header{ background:var(--accent); color:#fff; padding:22px 30px; }
+  header h1{ margin:0; font-size:23px; font-weight:700; }
+  header p{ margin:5px 0 0; font-size:12px; color:#cdd7e8; line-height:1.45; }
+  .body{ padding:18px 30px 24px; }
+
+  .note{
+    border:1.5px dashed var(--accent); border-radius:8px; background:#f2f6fc;
+    padding:11px 14px; margin:14px 0 6px; font-size:12px; color:var(--ink); line-height:1.5;
+  }
+  .note b{ color:var(--accent); }
+  .note a{ color:var(--accent); font-weight:700; text-decoration:none; }
+
+  .section{ margin-top:18px; }
+  .section h2{
+    display:flex; align-items:center; gap:8px;
+    font-size:10.5px; font-weight:700; letter-spacing:.9px; text-transform:uppercase;
+    margin:0 0 10px; color:var(--ink);
+  }
+  .section h2::before{ content:""; width:3px; height:12px; background:var(--accent); border-radius:2px; }
+  .section h2 small{ font-weight:500; color:var(--soft); text-transform:none; font-size:10.5px; letter-spacing:.3px; }
+
+  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px 18px; }
+  .grid.thirds{ grid-template-columns:1fr 1fr 1fr; }
+  .full{ grid-column:1 / -1; }
+  label{ display:block; font-size:8.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--soft); margin-bottom:4px; }
+  .line{ height:30px; border:1px solid var(--line); border-radius:5px; background:#fff; }
+  .area{ height:60px; border:1px solid var(--line); border-radius:5px; background:#fff; }
+  .types{ display:flex; flex-wrap:wrap; gap:9px; }
+  .opt{ display:flex; align-items:center; gap:8px; flex:1 1 150px;
+    border:1px solid var(--line); border-radius:6px; padding:8px 11px; font-size:12.5px; }
+  .box{ width:13px; height:13px; border:1.5px solid var(--accent); border-radius:3px; }
+  .footer-note{ margin-top:18px; padding-top:12px; border-top:1px solid var(--line);
+    font-size:10.5px; font-style:italic; color:var(--soft); }
+  @page{ margin:12mm; size:A4; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Work Offer Intake Form</h1>
+    <p>Please complete this form so I can evaluate your proposal accurately. State all
+       compensation figures clearly, with currency and period.</p>
+  </header>
+  <div class="body">
+
+    <div class="note">
+      <b>Allergic to printers, ink, and handwriting?</b> Honestly, same. If analogue paper-and-pen
+      isn't your thing, skip all this and fill it out online in two minutes at
+      <a href="https://khalildrissi.com/collab-form">khalildrissi.com/collab-form</a>.
+    </div>
+
+    <div class="section">
+      <h2>Company / Client Details</h2>
+      <div class="grid">
+        <div><label>Company name</label><div class="line"></div></div>
+        <div><label>Year founded / company age</label><div class="line"></div></div>
+        <div><label>Website</label><div class="line"></div></div>
+        <div><label>Location / country</label><div class="line"></div></div>
+        <div><label>Contact person &amp; role</label><div class="line"></div></div>
+        <div><label>Email</label><div class="line"></div></div>
+        <div class="full"><label>Brief company description (what you do, team size, industry)</label><div class="area"></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Engagement Type <small>— tick one</small></h2>
+      <div class="types">
+        <div class="opt"><span class="box"></span> Full-time</div>
+        <div class="opt"><span class="box"></span> Part-time</div>
+        <div class="opt"><span class="box"></span> Consulting</div>
+        <div class="opt"><span class="box"></span> Project-based</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Compensation <small>— state currency + period clearly</small></h2>
+      <div class="grid">
+        <div><label>Monthly salary (full / part-time)</label><div class="line"></div></div>
+        <div><label>Hourly / daily rate (consulting)</label><div class="line"></div></div>
+        <div><label>Total project budget (project-based)</label><div class="line"></div></div>
+        <div><label>Payment terms / schedule</label><div class="line"></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Scope &amp; Expectations</h2>
+      <div class="grid"><div class="full"><label>Role / project description &amp; key responsibilities</label><div class="area"></div></div></div>
+      <div class="grid thirds" style="margin-top:12px;">
+        <div><label>Start date</label><div class="line"></div></div>
+        <div><label>Duration / commitment</label><div class="line"></div></div>
+        <div><label>Weekly hours</label><div class="line"></div></div>
+      </div>
+      <div class="grid" style="margin-top:12px;"><div class="full"><label>Additional notes (remote/on-site, tools, deadlines, anything else)</label><div class="area"></div></div></div>
+    </div>
+
+    <p class="footer-note">Submitting this form is a proposal, not a binding agreement.
+       Final terms are confirmed in a separate signed contract. &nbsp;·&nbsp; Khalil Drissi · khalildrissi.com</p>
+  </div>
+</body>
+</html>
