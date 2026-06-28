@@ -317,47 +317,6 @@
     }
 
     /* About Me video section */
-    .about-video-section {
-      margin: 16px 0 8px;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: #0a0a0a;
-    }
-    .about-video-section video {
-      display: block;
-      width: 100%;
-      border-radius: 0;
-    }
-    .about-video-label {
-      padding: 8px 12px;
-      font-family: var(--mono);
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--fg-dim);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      border-top: 1px solid rgba(255,255,255,0.06);
-    }
-    .about-video-label .avl-icon {
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      border: 1.5px solid var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .about-video-label .avl-icon::after {
-      content: '';
-      display: block;
-      width: 0; height: 0;
-      border-left: 5px solid var(--accent);
-      border-top: 3px solid transparent;
-      border-bottom: 3px solid transparent;
-      margin-left: 1px;
-    }
     .intro-meta {
       color: #fff;
       font-size: var(--body);
@@ -890,7 +849,7 @@
     .gh-repos-header a:hover { color: var(--fg-dim); }
     .gh-repo-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       grid-auto-rows: 1fr;
       gap: clamp(6px, 0.8vh, 10px);
       flex: 1;
@@ -1423,8 +1382,8 @@
         flex-direction: column;
         gap: clamp(6px, 1vh, 12px);
       }
-      /* Balanced 2-rows-of-4 once the row can't comfortably hold all cards */
-      .gh-repo-grid { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 1fr; }
+      /* Balanced 3-per-row once the row can't comfortably hold all cards */
+      .gh-repo-grid { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 1fr; }
       .gh-body .statement {
         flex: 1;
         min-height: 0;
@@ -1466,7 +1425,7 @@
         margin-bottom: clamp(8px, 1.5vh, 16px);
       }
       .gh-repos { max-height: none; overflow: visible; flex: 0 0 auto; }
-      .gh-repo-grid { grid-template-columns: repeat(4, 1fr); grid-auto-rows: auto; overflow: visible; }
+      .gh-repo-grid { grid-template-columns: repeat(3, 1fr); grid-auto-rows: auto; overflow: visible; }
       .statement { max-width: 100%; }
       .bottom { flex: none; }
       .projects-strip { flex: none; }
@@ -2615,7 +2574,7 @@
     <!-- REPOSITORIES -->
     <div class="gh-repos" id="ghReposSection">
       <div class="gh-repos-header">
-        <span>· Repositories</span>
+        <span>· Latest Repos</span>
         <a href="https://github.com/CalDrissi" target="_blank" rel="noopener">View on GitHub ↗</a>
       </div>
       <div class="gh-repo-grid" id="ghRepoGrid"></div>
@@ -2751,10 +2710,6 @@
         <p>My work spans the full stack — from pixel-perfect frontends with React and Next.js to robust backend systems with Node.js and Python. I'm passionate about animation, interaction design, and pushing the boundaries of what's possible on the web.</p>
         <p>When I'm not coding, you'll find me exploring new tools, contributing to open source, or mentoring aspiring developers in the Moroccan tech community.</p>
       </div>
-      <div class="about-video-section">
-        <video src="/video-ai-me.mp4" controls playsinline></video>
-        <div class="about-video-label"><span class="avl-icon"></span>Video Introduction</div>
-      </div>
       <div class="about-details-grid">
         <div class="about-detail-card">
           <div class="about-detail-label">Location</div>
@@ -2765,8 +2720,8 @@
           <div class="about-detail-value">Arabic · French · English<br />Written & spoken fluently</div>
         </div>
         <div class="about-detail-card">
-          <div class="about-detail-label">Education</div>
-          <div class="about-detail-value">Computer Science<br />Self-taught + Continuous Learning</div>
+          <div class="about-detail-label">Experience</div>
+          <div class="about-detail-value">10+ Years<br />Senior Developer</div>
         </div>
         <div class="about-detail-card">
           <div class="about-detail-label">Interests</div>
@@ -3457,32 +3412,40 @@
     }
   });
 
-  // ---- CHAT (simulated AI responses) ----
+  // ---- CHAT (real AI via /api/chat → Ollama/Gemma; falls back to canned replies) ----
   const chatInput = document.getElementById('chatInput');
   const chatSend = document.getElementById('chatSend');
   const chatMessages = document.getElementById('chatMessages');
   const chatTyping = document.getElementById('chatTyping');
+  const chatHistory = [];
 
-  const chatResponses = {
-    stack: "Khalil works primarily with React, Next.js, and TypeScript on the frontend, paired with Node.js, Python, and PostgreSQL on the backend. He's also experienced with Tailwind CSS, GSAP, Three.js, and various cloud platforms.",
-    experience: "Khalil has 4+ years of professional experience, delivering 15+ projects for startups, agencies, and brands. He's worked across fintech, e-commerce, health tech, and SaaS industries.",
-    available: "Yes! Khalil is currently available for new projects. He works remotely from Morocco (GMT+1) and collaborates with clients globally. You can schedule a discovery call or request a cost estimate.",
-    pricing: "Khalil's rates depend on the project scope and complexity. For an accurate estimate, it's best to schedule a discovery call or send a project brief to khalil@drissi.org.",
-    contact: "You can reach Khalil via email at khalil@drissi.org, or connect on LinkedIn, GitHub, or Twitter. He typically responds within 24 hours.",
-    default: "Great question! For detailed inquiries, the best way to get a thorough answer is to reach out directly at khalil@drissi.org or schedule a call. Khalil is always happy to chat about potential projects."
+  const chatFallbacks = {
+    stack: "Khalil works primarily with React, Next.js, and TypeScript on the frontend, paired with Node.js, Python, and PostgreSQL on the backend. He's also experienced with Go, Rust, Tailwind, GSAP, and cloud platforms.",
+    experience: "Khalil is a senior developer with 10+ years of experience, delivering products across web, mobile, desktop, and systems for startups, agencies, and brands.",
+    available: "Yes! Khalil is available for new projects. He works remotely from Morocco (GMT+1) and collaborates globally. You can schedule a discovery call or request a cost estimate.",
+    pricing: "Khalil's rates depend on project scope and complexity. For an accurate estimate, email a brief to khalil@drissi.org or schedule a call.",
+    contact: "You can reach Khalil at khalil@drissi.org, or connect on LinkedIn, GitHub (@CalDrissi), or X. He typically responds within 24 hours.",
+    default: "For detailed inquiries, the best way to get a thorough answer is to reach out at khalil@drissi.org or schedule a call. Khalil is always happy to chat about potential projects."
   };
-
-  function getResponse(msg) {
+  function fallbackResponse(msg) {
     const m = msg.toLowerCase();
-    if (m.includes('stack') || m.includes('tech') || m.includes('tools') || m.includes('framework')) return chatResponses.stack;
-    if (m.includes('experience') || m.includes('years') || m.includes('background') || m.includes('work')) return chatResponses.experience;
-    if (m.includes('available') || m.includes('hire') || m.includes('freelance') || m.includes('open')) return chatResponses.available;
-    if (m.includes('price') || m.includes('cost') || m.includes('rate') || m.includes('budget')) return chatResponses.pricing;
-    if (m.includes('contact') || m.includes('email') || m.includes('reach') || m.includes('call')) return chatResponses.contact;
-    return chatResponses.default;
+    if (m.includes('stack') || m.includes('tech') || m.includes('tools') || m.includes('framework')) return chatFallbacks.stack;
+    if (m.includes('experience') || m.includes('years') || m.includes('background')) return chatFallbacks.experience;
+    if (m.includes('available') || m.includes('hire') || m.includes('freelance') || m.includes('open')) return chatFallbacks.available;
+    if (m.includes('price') || m.includes('cost') || m.includes('rate') || m.includes('budget')) return chatFallbacks.pricing;
+    if (m.includes('contact') || m.includes('email') || m.includes('reach') || m.includes('call')) return chatFallbacks.contact;
+    return chatFallbacks.default;
   }
 
-  function sendMessage() {
+  function appendBot(text) {
+    const botMsg = document.createElement('div');
+    botMsg.className = 'chat-msg bot';
+    botMsg.innerHTML = `<div class="msg-sender">AI Assistant</div>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}<div class="msg-time">Just now</div>`;
+    chatMessages.appendChild(botMsg);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  async function sendMessage() {
     const text = chatInput.value.trim();
     if (!text) return;
     const userMsg = document.createElement('div');
@@ -3493,14 +3456,25 @@
     chatMessages.scrollTop = chatMessages.scrollHeight;
     chatTyping.classList.add('active');
     chatMessages.scrollTop = chatMessages.scrollHeight;
-    setTimeout(() => {
-      chatTyping.classList.remove('active');
-      const botMsg = document.createElement('div');
-      botMsg.className = 'chat-msg bot';
-      botMsg.innerHTML = `<div class="msg-sender">AI Assistant</div>${getResponse(text)}<div class="msg-time">Just now</div>`;
-      chatMessages.appendChild(botMsg);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }, 1000 + Math.random() * 800);
+    chatSend.disabled = true;
+
+    let reply;
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history: chatHistory.slice(-8) }),
+      });
+      const data = await res.json().catch(() => ({}));
+      reply = (res.ok && data.reply) ? data.reply : fallbackResponse(text);
+    } catch {
+      reply = fallbackResponse(text);
+    }
+
+    chatTyping.classList.remove('active');
+    chatSend.disabled = false;
+    appendBot(reply);
+    chatHistory.push({ role: 'user', content: text }, { role: 'assistant', content: reply });
   }
 
   chatSend.addEventListener('click', sendMessage);
@@ -3745,17 +3719,15 @@
     var LANG_COLORS = {
       Python: '#3572A5', JavaScript: '#f1e05a', Rust: '#dea584',
       HTML: '#e34c26', TypeScript: '#3178c6', Go: '#00ADD8',
-      CSS: '#563d7c', Shell: '#89e051', 'C++': '#f34b7d', Ruby: '#701516'
+      CSS: '#563d7c', Shell: '#89e051', 'C++': '#f34b7d', Ruby: '#701516', Markdown: '#083fa1'
     };
     var REPOS = [
+      { name: 'awesome-cybersecurity', desc: 'Curated Security Resources', lang: 'Markdown' },
       { name: 'rustdesk', desc: 'Remote Desktop App', lang: 'Rust' },
       { name: 'rustdesk-server', desc: 'RustDesk Server', lang: 'Rust' },
-      { name: 'rustdesk-server-pro', desc: 'Server Pro Scripts', lang: 'Shell' },
       { name: 'hbb_common', desc: 'Shared Rust Library', lang: 'Rust' },
       { name: 'engine', desc: 'Flutter Engine', lang: 'C++' },
       { name: 'muxnet', desc: 'Networking Project', lang: 'Python' },
-      { name: 'doc.rustdesk.com', desc: 'Documentation Site', lang: 'HTML' },
-      { name: 'homebrew-cask', desc: 'macOS App Casks', lang: 'Ruby' },
     ];
     var grid = document.getElementById('ghRepoGrid');
     if (!grid) return;
@@ -3764,7 +3736,7 @@
       var hdr = document.querySelector('.gh-repos-header');
       if (hdr) {
         var sp = hdr.querySelector('span');
-        if (sp) sp.textContent = '· Dépôts';
+        if (sp) sp.textContent = '· Derniers Dépôts';
         var a = hdr.querySelector('a');
         if (a) a.textContent = 'Voir sur GitHub ↗';
       }
@@ -4265,14 +4237,12 @@
 // ======== REPO BROWSER (VS Code style, multi-window) ========
 (function() {
   var REPOS = [
+    { name: 'awesome-cybersecurity', desc: 'Curated Security Resources', lang: 'Markdown', branch: 'main' },
     { name: 'rustdesk', desc: 'Remote Desktop App', lang: 'Rust', branch: 'master' },
     { name: 'rustdesk-server', desc: 'RustDesk Server', lang: 'Rust', branch: 'master' },
-    { name: 'rustdesk-server-pro', desc: 'Server Pro Scripts', lang: 'Shell', branch: 'main' },
     { name: 'hbb_common', desc: 'Shared Rust Library', lang: 'Rust', branch: 'main' },
     { name: 'engine', desc: 'Flutter Engine', lang: 'C++', branch: 'main' },
     { name: 'muxnet', desc: 'Networking Project', lang: 'Python', branch: 'main' },
-    { name: 'doc.rustdesk.com', desc: 'Documentation Site', lang: 'HTML', branch: 'master' },
-    { name: 'homebrew-cask', desc: 'macOS App Casks', lang: 'Ruby', branch: 'main' },
   ];
   var OWNER = 'CalDrissi';
   var globalTreeCache = {};

@@ -364,7 +364,7 @@ function render(template, data, lang, featuredPosts, ghData) {
   );
   html = html.replace(
     /<div class="about-bio-text">[\s\S]*?<\/div>\s*\n\s*(?:<div class="about-video-section">[\s\S]*?<\/div>\s*\n\s*)?<div class="about-details-grid">/,
-    `<div class="about-bio-text">\n        ${data.about.bio.map(p => `<p>${p}</p>`).join('\n        ')}\n      </div>\n      <div class="about-video-section">\n        <video src="/video-ai-me.mp4" controls playsinline></video>\n        <div class="about-video-label"><span class="avl-icon"></span>${lang === 'fr' ? 'Présentation vidéo' : 'Video Introduction'}</div>\n      </div>\n      <div class="about-details-grid">`
+    `<div class="about-bio-text">\n        ${data.about.bio.map(p => `<p>${p}</p>`).join('\n        ')}\n      </div>\n      <div class="about-details-grid">`
   );
   html = html.replace(
     /<div class="about-details-grid">[\s\S]*?<\/div>\s*\n\s*<\/div>\s*\n\s*<\/div>\s*\n\s*<!-- Chat Panel -->/,
@@ -2323,7 +2323,7 @@ async function build() {
   }
 
   // Copy static assets (images, favicon)
-  const staticFiles = ['profile.png', 'favicon.png', 'apple-touch-icon.png', 'loader-avatar.png', 'fez-icon.png', 'video.mp4', 'video-ai-me.mp4'];
+  const staticFiles = ['profile.png', 'favicon.png', 'apple-touch-icon.png', 'loader-avatar.png', 'fez-icon.png', 'video.mp4'];
   for (const f of staticFiles) {
     const src = path.join(__dirname, f);
     if (fs.existsSync(src)) {
