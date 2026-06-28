@@ -14,7 +14,7 @@
     "location": "Actuellement basé au Maroc.",
     "tagline": "Disponible pour des collaborations internationales.",
     "whatIDo": "Ce que je fais",
-    "whatIDoDesc": "Je conçois et construis des logiciels.",
+    "whatIDoDesc": "Je transforme le complexe en solutions simples.",
     "stats": [
       {
         "value": "Senior",
@@ -32,7 +32,7 @@
   },
   "position": {
     "header": "Poste",
-    "studio": "Directeur Général — Virtus Operandi",
+    "studio": "Directeur Technique — Virtus Operandi",
     "focus": "Full-Stack · Toutes Plateformes",
     "stackLabel": "Focus",
     "stack": [
@@ -54,13 +54,13 @@
     "header": "Projets",
     "list": [
       {
-        "name": "DevKit CLI",
-        "desc": "Toolkit CLI open-source pour scaffolding et automatisation de workflows",
+        "name": "Backlinks Backer",
+        "desc": "Outil automatisé de création de backlinks et de prospection qui trouve, qualifie et suit les opportunités de liens pour le SEO.",
         "status": "Actif"
       },
       {
-        "name": "MotionLib",
-        "desc": "Bibliothèque d'animation React légère basée sur GSAP",
+        "name": "Server Guard Agent",
+        "desc": "Agent de surveillance autonome qui veille sur les serveurs, trie les incidents et répond aux menaces en temps réel.",
         "status": "Actif"
       },
       {
@@ -69,15 +69,15 @@
         "status": "Bêta"
       },
       {
-        "name": "Dotfiles",
-        "desc": "Config d'environnement dev personnel — Neovim, tmux, Warp, et plus",
+        "name": "Capsule EDMS",
+        "desc": "Système de gestion électronique de documents pour stocker, versionner et partager en toute sécurité les documents d'entreprise.",
         "status": "En cours"
       }
     ],
     "changelogLabel": "Changelog",
     "changelog": [
-      "DevKit CLI v2.3 — Mars 2026",
-      "MotionLib v1.1 — Fév 2026",
+      "Backlinks Backer v2.3 — Mars 2026",
+      "Server Guard Agent v1.1 — Fév 2026",
       "Pagerank Bêta — Jan 2026"
     ]
   },
