@@ -882,15 +882,14 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      display: flex;
-      align-items: center;
-      gap: 5px;
+      display: block;
+      max-width: 100%;
     }
     .gh-repo-name::before {
       content: '⬡';
       font-size: 8px;
       color: var(--accent);
-      flex-shrink: 0;
+      margin-right: 5px;
     }
     .gh-repo-desc {
       font-size: calc(var(--label) - 1px);
