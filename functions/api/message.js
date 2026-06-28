@@ -70,13 +70,18 @@ async function submitToCF7({ name, email, type, message, company, date }, fileLi
 
   const res = await fetch(`${CF7_BASE}/wp-json/contact-form-7/v1/contact-forms/${CF7_FORM_ID}/feedback`, {
     method: 'POST',
+    headers: {
+      'Referer': 'https://khalildrissi.com/',
+      'Origin': 'https://khalildrissi.com',
+      'User-Agent': 'Mozilla/5.0 (portfolio-contact-form)',
+    },
     body: fd,
   });
   const result = await res.json().catch(() => ({}));
   // 'mail_sent' = email delivered; 'mail_failed' = email didn't send but CF7 accepted it
   // and Flamingo has stored the submission in WP admin, so it's still captured (not lost).
   if (result.status !== 'mail_sent' && result.status !== 'mail_failed') {
-    throw new Error('CF7: ' + (result.message || result.status || `HTTP ${res.status}`));
+    throw new Error(`CF7[${result.status || res.status}]: ${result.message || 'unknown'}`);
   }
   return result;
 }
