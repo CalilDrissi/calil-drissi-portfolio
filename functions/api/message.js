@@ -73,7 +73,9 @@ async function submitToCF7({ name, email, type, message, company, date }, fileLi
     body: fd,
   });
   const result = await res.json().catch(() => ({}));
-  if (result.status !== 'mail_sent') {
+  // 'mail_sent' = email delivered; 'mail_failed' = email didn't send but CF7 accepted it
+  // and Flamingo has stored the submission in WP admin, so it's still captured (not lost).
+  if (result.status !== 'mail_sent' && result.status !== 'mail_failed') {
     throw new Error('CF7: ' + (result.message || result.status || `HTTP ${res.status}`));
   }
   return result;
