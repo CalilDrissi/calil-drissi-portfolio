@@ -2032,6 +2032,20 @@
       transition: background 0.15s;
     }
     .chat-send:hover { background: #7c4dff; }
+    .chat-mic, .chat-voice-toggle {
+      flex: none; width: 34px; border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.06); border-radius: 4px; cursor: pointer;
+      font-size: 14px; color: var(--fg); display: grid; place-items: center;
+      transition: background 0.15s; padding: 0;
+    }
+    .chat-mic:hover, .chat-voice-toggle:hover { background: rgba(255,255,255,0.12); }
+    .chat-mic.listening { background: #ff5470; animation: chatMicPulse 1.3s infinite; }
+    .chat-mic.speaking { background: #2fbf9b; }
+    @keyframes chatMicPulse {
+      0% { box-shadow: 0 0 0 0 rgba(255,84,112,.5); }
+      70% { box-shadow: 0 0 0 10px rgba(255,84,112,0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,84,112,0); }
+    }
 
     @media (max-width: 1024px) {
       .about-details-grid { grid-template-columns: 1fr; }
@@ -2743,7 +2757,9 @@
         <span></span><span></span><span></span>
       </div>
       <div class="chat-input-bar">
+        <button class="chat-mic" id="chatMic" type="button" title="Tap to talk" aria-label="Voice input">&#127908;</button>
         <input class="chat-input" id="chatInput" type="text" placeholder="Ask about Khalil's work, stack, availability..." />
+        <button class="chat-voice-toggle" id="chatVoiceToggle" type="button" title="Voice reply: on" aria-label="Toggle spoken replies">&#128266;</button>
         <button class="chat-send" id="chatSend">Send</button>
       </div>
     </div>
@@ -3481,12 +3497,83 @@
     chatSend.disabled = false;
     appendBot(reply);
     chatHistory.push({ role: 'user', content: text }, { role: 'assistant', content: reply });
+    maybeSpeak(reply);
   }
 
   chatSend.addEventListener('click', sendMessage);
   chatInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') sendMessage();
   });
+
+  // ---- Voice layer: speech-to-text input + spoken (TTS) replies, browser-native ----
+  const speechSR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const speechSynth = window.speechSynthesis;
+  const chatMic = document.getElementById('chatMic');
+  const chatVoiceToggle = document.getElementById('chatVoiceToggle');
+  const voiceLang = (typeof LANG !== 'undefined' && LANG === 'fr') ? 'fr-FR' : 'en-US';
+  let voiceReplyOn = true;
+  let micListening = false;
+  let chatTtsVoice = null;
+
+  function pickChatVoice() {
+    if (!speechSynth) return;
+    const vs = speechSynth.getVoices();
+    const pfx = voiceLang.slice(0, 2);
+    chatTtsVoice = vs.find(v => v.lang && v.lang.toLowerCase().startsWith(pfx) && /google|natural|samantha|amelie|thomas|aurelie/i.test(v.name))
+      || vs.find(v => v.lang && v.lang.toLowerCase().startsWith(pfx)) || vs[0] || null;
+  }
+  if (speechSynth) { pickChatVoice(); speechSynth.onvoiceschanged = pickChatVoice; }
+
+  function setMicState(state) {
+    if (!chatMic) return;
+    chatMic.classList.remove('listening', 'speaking');
+    if (state === 'listening' || state === 'speaking') chatMic.classList.add(state);
+  }
+  function speakReply(text) {
+    if (!speechSynth) return;
+    speechSynth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    if (chatTtsVoice) u.voice = chatTtsVoice;
+    u.lang = voiceLang;
+    u.onstart = () => setMicState('speaking');
+    u.onend = () => setMicState('idle');
+    speechSynth.speak(u);
+  }
+  function maybeSpeak(text) { if (voiceReplyOn) speakReply(text); }
+
+  if (speechSR && chatMic) {
+    const rec = new speechSR();
+    rec.lang = voiceLang;
+    rec.interimResults = true;
+    rec.continuous = false;
+    rec.maxAlternatives = 1;
+    rec.onstart = () => setMicState('listening');
+    rec.onerror = () => { micListening = false; setMicState('idle'); };
+    rec.onend = () => { if (micListening) { micListening = false; setMicState('idle'); } };
+    rec.onresult = (e) => {
+      let interim = '', finalText = '';
+      for (const r of e.results) { if (r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript; }
+      chatInput.value = finalText || interim;
+      if (finalText.trim()) { micListening = false; chatInput.value = finalText.trim(); sendMessage(); }
+    };
+    chatMic.addEventListener('click', () => {
+      if (micListening) { rec.stop(); return; }
+      if (speechSynth) speechSynth.cancel();
+      try { micListening = true; rec.start(); } catch { micListening = false; }
+    });
+  } else if (chatMic) {
+    chatMic.style.display = 'none'; // STT unsupported (e.g. Firefox/Safari) — keep text input + TTS
+  }
+
+  if (chatVoiceToggle) {
+    if (!speechSynth) { chatVoiceToggle.style.display = 'none'; }
+    chatVoiceToggle.addEventListener('click', () => {
+      voiceReplyOn = !voiceReplyOn;
+      chatVoiceToggle.innerHTML = voiceReplyOn ? '&#128266;' : '&#128263;';
+      chatVoiceToggle.title = 'Voice reply: ' + (voiceReplyOn ? 'on' : 'off');
+      if (!voiceReplyOn && speechSynth) speechSynth.cancel();
+    });
+  }
 
   // Reveal statement underlines after page load
   setTimeout(() => {
