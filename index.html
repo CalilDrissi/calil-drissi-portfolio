@@ -83,8 +83,8 @@
       --fg-faint: rgba(255,255,255,0.30);
       --accent: #7c4dff;
       --border: rgba(255,255,255,0.10);
-      --mono: 'IBM Plex Mono', 'Courier New', monospace;
-      --sans: 'Inter', -apple-system, system-ui, sans-serif;
+      --mono: 'IBM Plex Mono', 'Courier New', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', monospace;
+      --sans: 'Inter', -apple-system, system-ui, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
       --serif: 'Instrument Serif', 'Georgia', serif;
       --col-gap: clamp(16px, 2.5vw, 40px);
       --edge: clamp(10px, 1vw, 16px);
@@ -3571,6 +3571,9 @@
   const chatMic = document.getElementById('chatMic');
   const chatVoiceToggle = document.getElementById('chatVoiceToggle');
   const voiceLang = (typeof LANG !== 'undefined' && LANG === 'fr') ? 'fr-FR' : 'en-US';
+  // On mobile the speech recognizer needs exclusive mic access — a parallel getUserMedia
+  // (the orb analyser) steals the mic and breaks recognition, so we skip it there.
+  const IS_MOBILE = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.matchMedia('(max-width: 640px)').matches;
   const ORB_T = (typeof LANG !== 'undefined' && LANG === 'fr')
     ? { listening: "À l'écoute…", thinking: 'Réflexion…', speaking: 'Réponse…' }
     : { listening: 'Listening…', thinking: 'Thinking…', speaking: 'Speaking…' };
@@ -3635,6 +3638,7 @@
     if (chatMic && orbPrev.mic != null) chatMic.style.display = orbPrev.mic;
   }
   async function startUserAudio() {            // attaches mic analyser for reactivity (after orb is already shown)
+    if (IS_MOBILE) return;                      // skip on mobile: leave the mic free for SpeechRecognition
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !AC) return;
     try {
@@ -3672,7 +3676,7 @@
     const rec = new speechSR();
     rec.lang = voiceLang;
     rec.interimResults = true;
-    rec.continuous = true;
+    rec.continuous = !IS_MOBILE;   // mobile recognizers are unreliable in continuous mode; one utterance per turn
     rec.maxAlternatives = 1;
     const SILENCE_MS = 1500;        // auto-send after this much silence
     let silenceTimer = null;
