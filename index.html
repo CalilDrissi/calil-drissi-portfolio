@@ -3530,6 +3530,9 @@
   const chatMic = document.getElementById('chatMic');
   const chatVoiceToggle = document.getElementById('chatVoiceToggle');
   const voiceLang = (typeof LANG !== 'undefined' && LANG === 'fr') ? 'fr-FR' : 'en-US';
+  const ORB_T = (typeof LANG !== 'undefined' && LANG === 'fr')
+    ? { listening: "À l'écoute…", thinking: 'Réflexion…', speaking: 'Réponse…' }
+    : { listening: 'Listening…', thinking: 'Thinking…', speaking: 'Speaking…' };
   let voiceReplyOn = true;
   let micListening = false;
   let chatTtsVoice = null;
@@ -3584,7 +3587,7 @@
     if (orbRAF) { cancelAnimationFrame(orbRAF); orbRAF = null; }
     if (chatOrb) chatOrb.style.display = 'none';
     if (chatOrbCore) { chatOrbCore.style.transform = ''; chatOrbCore.style.boxShadow = ''; }
-    setOrbText('Listening…');
+    setOrbText(ORB_T.listening);
     chatInput.style.display = (orbPrev.input != null ? orbPrev.input : '');
     if (chatVoiceToggle && orbPrev.toggle != null) chatVoiceToggle.style.display = orbPrev.toggle;
     chatSend.style.display = (orbPrev.send != null ? orbPrev.send : '');
@@ -3613,7 +3616,7 @@
     const u = new SpeechSynthesisUtterance(text);
     if (chatTtsVoice) u.voice = chatTtsVoice;
     u.lang = voiceLang;
-    u.onstart = () => { orbState = 'speaking'; if (conversationMode) { showOrbUI(); setOrbText('Speaking…'); } };
+    u.onstart = () => { orbState = 'speaking'; if (conversationMode) { showOrbUI(); setOrbText(ORB_T.speaking); } };
     u.onend = () => { orbState = 'idle'; if (onDone) onDone(); };
     u.onerror = () => { orbState = 'idle'; if (onDone) onDone(); };
     speechSynth.speak(u);
@@ -3635,7 +3638,7 @@
 
     function beginListen() {                    // start (or auto-resume) a listening turn
       micListening = true; orbState = 'listening';
-      showOrbUI(); setOrbText('Listening…');    // orb appears instantly on tap
+      showOrbUI(); setOrbText(ORB_T.listening);    // orb appears instantly on tap
       chatInput.value = '';
       try { rec.start(); } catch {}
       startUserAudio();                          // mic analyser attaches when ready (reactivity)
@@ -3649,7 +3652,7 @@
       try { rec.stop(); } catch {}
       stopUserAudio();
       const text = chatInput.value.trim();
-      if (send && text) { orbState = 'thinking'; setOrbText('Thinking…'); sendMessage(); }
+      if (send && text) { orbState = 'thinking'; setOrbText(ORB_T.thinking); sendMessage(); }
       else { endConversation(); }                // nothing said -> end the hands-free loop
     }
     function endConversation() {
@@ -3665,7 +3668,7 @@
       let interim = '', finalText = '';
       for (const r of e.results) { if (r.isFinal) finalText += r[0].transcript + ' '; else interim += r[0].transcript; }
       chatInput.value = (finalText + interim).trim();
-      setOrbText(chatInput.value || 'Listening…');
+      setOrbText(chatInput.value || ORB_T.listening);
       if (chatOrbText) chatOrbText.scrollLeft = chatOrbText.scrollWidth;
       clearTimeout(silenceTimer);
       silenceTimer = setTimeout(() => finishListen(true), SILENCE_MS);
@@ -3954,7 +3957,7 @@
       var hdr = document.querySelector('.gh-repos-header');
       if (hdr) {
         var sp = hdr.querySelector('span');
-        if (sp) sp.textContent = '· Derniers Dépôts';
+        if (sp) sp.textContent = '· Derniers Repos';
         var a = hdr.querySelector('a');
         if (a) a.textContent = 'Voir sur GitHub ↗';
       }
