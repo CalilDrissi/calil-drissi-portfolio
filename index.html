@@ -363,6 +363,24 @@
       margin-top: clamp(4px, 0.6vh, 8px);
       line-height: 1.5;
     }
+    .ask-ai-pill {
+      display: inline-flex; align-items: center; gap: 8px; margin-top: clamp(8px, 1.2vh, 14px);
+      background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.35);
+      color: var(--fg); font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.08em; padding: 7px 14px; border-radius: 9999px; cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    }
+    .ask-ai-pill:hover { background: rgba(56,189,248,0.16); border-color: rgba(56,189,248,0.6); transform: translateY(-1px); }
+    .ask-ai-orb {
+      width: 11px; height: 11px; border-radius: 50%; flex: none;
+      background: radial-gradient(circle at 35% 30%, #bae6fd, #38bdf8 45%, #6366f1 100%);
+      animation: askAiPulse 2s ease-in-out infinite;
+    }
+    .ask-ai-arrow { opacity: 0.55; }
+    @keyframes askAiPulse {
+      0%, 100% { box-shadow: 0 0 5px rgba(56,189,248,0.5); transform: scale(1); }
+      50% { box-shadow: 0 0 13px rgba(56,189,248,0.9), 0 0 22px rgba(99,102,241,0.5); transform: scale(1.14); }
+    }
     .intro-stats {
       margin-top: clamp(4px, 0.6vh, 8px);
       color: #fff;
@@ -3443,6 +3461,21 @@
       tab.classList.add('active');
       document.querySelector(`[data-about-panel="${tab.dataset.aboutTab}"]`).classList.add('active');
     });
+  });
+
+  // "Ask my AI" intro pill -> open About straight to the chat tab
+  const askAiPill = document.getElementById('askAiPill');
+  if (askAiPill) askAiPill.addEventListener('click', () => {
+    if (aboutWin.minimized) WM.restore(aboutWin);
+    else if (!aboutPopup.classList.contains('open')) aboutPopup.classList.add('open');
+    WM.focus(aboutWin);
+    document.querySelectorAll('.about-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.about-panel').forEach(p => p.classList.remove('active'));
+    const ct = document.querySelector('.about-tab[data-about-tab="chat"]');
+    const cp = document.querySelector('[data-about-panel="chat"]');
+    if (ct) ct.classList.add('active');
+    if (cp) cp.classList.add('active');
+    const ci = document.getElementById('chatInput'); if (ci) setTimeout(() => ci.focus(), 60);
   });
 
   // ESC closes focused window
