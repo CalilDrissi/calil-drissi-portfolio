@@ -3029,7 +3029,6 @@
   (function autoScroll() {
     if (!mouseOverStrip && !isDown) {
       strip.scrollLeft += 0.6;
-      if (loopWidth <= 0) computeLoopWidth();
       if (loopWidth > 0 && strip.scrollLeft >= loopWidth) strip.scrollLeft -= loopWidth;
     }
     requestAnimationFrame(autoScroll);
