@@ -235,24 +235,6 @@
       "thumb": "/projects/cercle-immobilier.jpg"
     },
     {
-      "title": "Kiloctet ERP",
-      "subtitle": "ERP — Transport & Fleet Management",
-      "desc": "Full ERP for transport and logistics businesses — invoicing, vehicle fleet, fuel tracking, VAT (TVA), payments, expenses, and HR in one dashboard. Multi-currency with Arabic and French support.",
-      "tags": [
-        "React",
-        "Node.js",
-        "PostgreSQL",
-        "Invoicing",
-        "Multi-tenant"
-      ],
-      "year": "2025",
-      "role": "Creator & Developer",
-      "visit": "#",
-      "code": "#",
-      "img": "/projects/kiloctet-erp.jpg",
-      "thumb": "/projects/kiloctet-erp.jpg"
-    },
-    {
       "title": "ShopFlow",
       "subtitle": "Product — Visual Automation Builder",
       "desc": "A visual automation system purpose-built for Shopify stores — a node-based workflow builder with triggers, filters, and actions to automate store operations. Designed for store owners in the AI era.",
@@ -286,6 +268,24 @@
       "code": "#",
       "img": "/projects/virtus.jpg",
       "thumb": "/projects/virtus.jpg"
+    },
+    {
+      "title": "Kiloctet ERP",
+      "subtitle": "ERP — Transport & Fleet Management",
+      "desc": "Full ERP for transport and logistics businesses — invoicing, vehicle fleet, fuel tracking, VAT (TVA), payments, expenses, and HR in one dashboard. Multi-currency with Arabic and French support.",
+      "tags": [
+        "React",
+        "Node.js",
+        "PostgreSQL",
+        "Invoicing",
+        "Multi-tenant"
+      ],
+      "year": "2025",
+      "role": "Creator & Developer",
+      "visit": "#",
+      "code": "#",
+      "img": "/projects/kiloctet-erp.jpg",
+      "thumb": "/projects/kiloctet-erp.jpg"
     },
     {
       "title": "ShopifyGMC",
