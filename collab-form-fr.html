@@ -105,19 +105,19 @@
       <div class="section">
         <h2>Détails de l'entreprise / client</h2>
         <div class="grid">
-          <div><label>Nom de l'entreprise</label><input type="text" id="company_name"></div>
+          <div><label>Nom de l'entreprise <span class="req">*</span></label><input type="text" id="company_name"></div>
           <div><label>Année de création / ancienneté</label><input type="text" id="company_age"></div>
           <div><label>Site web</label><input type="text" id="website"></div>
           <div><label>Localisation / pays</label><input type="text" id="location"></div>
-          <div><label>Personne de contact &amp; rôle</label><input type="text" id="contact"></div>
-          <div><label>E-mail</label><input type="email" id="email"></div>
+          <div><label>Personne de contact &amp; rôle <span class="req">*</span></label><input type="text" id="contact"></div>
+          <div><label>E-mail <span class="req">*</span></label><input type="email" id="email"></div>
           <div class="full"><label>Brève description de l'entreprise (activité, taille d'équipe, secteur)</label>
             <textarea id="company_desc"></textarea></div>
         </div>
       </div>
 
       <div class="section">
-        <h2>Type d'engagement <small>— cochez une case</small></h2>
+        <h2>Type d'engagement <span class="req">*</span> <small>— cochez une case</small></h2>
         <div class="types">
           <label class="opt"><input type="radio" name="engagement" value="Temps plein"><span>Temps plein</span></label>
           <label class="opt"><input type="radio" name="engagement" value="Temps partiel"><span>Temps partiel</span></label>
@@ -139,7 +139,7 @@
       <div class="section">
         <h2>Périmètre &amp; attentes</h2>
         <div class="grid">
-          <div class="full"><label>Description du rôle / projet &amp; responsabilités clés</label>
+          <div class="full"><label>Description du rôle / projet &amp; responsabilités clés <span class="req">*</span></label>
             <textarea id="scope_desc"></textarea></div>
         </div>
         <div class="grid thirds" style="margin-top:14px;">
@@ -153,11 +153,19 @@
         </div>
       </div>
 
+      <p class="legend"><span class="req">*</span> Champs obligatoires</p>
       <p class="footer-note">Soumettre ce formulaire constitue une proposition, et non un accord contraignant.
          Les conditions finales sont confirmées dans un contrat signé séparé.</p>
 
     </div>
   </form>
+
+  <div class="success-card" id="successCard">
+    <div class="check">&#10003;</div>
+    <h2>Proposition reçue</h2>
+    <p>Merci. Votre proposition a bien été reçue. Je l'examinerai et vous répondrai sous 24 heures.</p>
+    <a class="home" href="https://khalildrissi.com/fr">&#8592; Retour à khalildrissi.com</a>
+  </div>
 
   <div class="actions">
     <span class="pdf-link">Vous préférez le papier et le stylo ? <a href="/work-offer-intake-fr.pdf" download>Téléchargez le PDF imprimable &#8595;</a> &nbsp;·&nbsp; <a href="/collab-form">English</a></span>
@@ -169,18 +177,45 @@
     var form = document.getElementById('intakeForm');
     var btn = document.getElementById('submitBtn');
     var status = document.getElementById('status');
+    var successCard = document.getElementById('successCard');
+    var actions = document.querySelector('.actions');
     function v(id){ var e = document.getElementById(id); return e ? e.value.trim() : ''; }
+    function typesEl(){ return document.querySelector('.types'); }
+
+    ['company_name','email','contact','scope_desc'].forEach(function(id){
+      var e = document.getElementById(id);
+      if (e) e.addEventListener('input', function(){ e.classList.remove('invalid'); });
+    });
+    document.querySelectorAll('input[name="engagement"]').forEach(function(r){
+      r.addEventListener('change', function(){ typesEl().classList.remove('invalid'); });
+    });
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      var company = v('company_name');
-      var email = v('email');
-      var contact = v('contact');
-      var eng = (document.querySelector('input[name="engagement"]:checked') || {}).value || 'Non précisé';
+      document.querySelectorAll('.invalid').forEach(function(el){ el.classList.remove('invalid'); });
+      typesEl().classList.remove('invalid');
 
-      if (!company || !email) {
-        status.textContent = "Le nom de l'entreprise et l'e-mail sont obligatoires.";
+      var company = v('company_name'), email = v('email'), contact = v('contact'), scope = v('scope_desc');
+      var engEl = document.querySelector('input[name="engagement"]:checked');
+      var eng = engEl ? engEl.value : '';
+      var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+      var bad = [];
+      if (!company) bad.push('company_name');
+      if (!email || !emailOk) bad.push('email');
+      if (!contact) bad.push('contact');
+      if (!scope) bad.push('scope_desc');
+      var engMissing = !engEl;
+
+      if (bad.length || engMissing) {
+        bad.forEach(function(id){ var el = document.getElementById(id); if (el) el.classList.add('invalid'); });
+        if (engMissing) typesEl().classList.add('invalid');
+        status.textContent = (email && !emailOk)
+          ? "Veuillez saisir un e-mail valide et remplir tous les champs obligatoires (*)."
+          : "Veuillez remplir tous les champs obligatoires marqués d'un *.";
         status.className = 'status error';
+        var firstEl = bad.length ? document.getElementById(bad[0]) : typesEl();
+        if (firstEl) firstEl.scrollIntoView({ behavior:'smooth', block:'center' });
         return;
       }
 
@@ -222,19 +257,22 @@
         .then(function (r) { return r.json(); })
         .then(function (d) {
           if (d.success) {
-            status.textContent = 'Merci. Votre proposition a bien été reçue. Je vous répondrai sous 24 heures.';
-            status.className = 'status success';
-            form.reset();
+            form.style.display = 'none';
+            if (actions) actions.style.display = 'none';
+            status.style.display = 'none';
+            successCard.style.display = 'block';
+            successCard.scrollIntoView({ behavior:'smooth', block:'center' });
           } else {
             status.textContent = (d.error || 'Une erreur est survenue') + '. Écrivez à portfolio@cms.drissi.xyz.';
             status.className = 'status error';
+            btn.disabled = false; btn.textContent = 'Envoyer la proposition';
           }
         })
         .catch(function () {
           status.textContent = 'Erreur réseau. Écrivez à portfolio@cms.drissi.xyz.';
           status.className = 'status error';
-        })
-        .finally(function () { btn.disabled = false; btn.textContent = 'Envoyer la proposition'; });
+          btn.disabled = false; btn.textContent = 'Envoyer la proposition';
+        });
     });
   </script>
 </body>
