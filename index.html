@@ -2047,16 +2047,16 @@
       70% { box-shadow: 0 0 0 10px rgba(255,84,112,0); }
       100% { box-shadow: 0 0 0 0 rgba(255,84,112,0); }
     }
-    .chat-orb { flex: 1; display: none; align-items: center; gap: 12px; min-height: 34px; padding-left: 6px; }
+    .chat-orb { flex: 1; display: none; align-items: center; gap: 12px; min-height: 34px; padding-left: 6px; cursor: pointer; }
     .chat-orb-core {
       width: 20px; height: 20px; border-radius: 50%; flex: none;
       background: radial-gradient(circle at 35% 30%, #bae6fd, #38bdf8 45%, #6366f1 100%);
       box-shadow: 0 0 10px rgba(56,189,248,0.6), 0 0 20px rgba(99,102,241,0.4);
       will-change: transform;
     }
-    .chat-orb-hint {
-      font-family: var(--mono); font-size: 10px; color: var(--fg-dim);
-      text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap;
+    .chat-orb-text {
+      flex: 1; min-width: 0; overflow: hidden; white-space: nowrap;
+      font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,0.72); letter-spacing: 0.02em;
     }
 
     @media (max-width: 1024px) {
@@ -2771,7 +2771,7 @@
       <div class="chat-input-bar">
         <button class="chat-mic" id="chatMic" type="button" title="Tap to talk" aria-label="Voice input"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
         <input class="chat-input" id="chatInput" type="text" placeholder="Ask about Khalil's work, stack, availability..." />
-        <div class="chat-orb" id="chatOrb"><span class="chat-orb-core" id="chatOrbCore"></span><span class="chat-orb-hint">Listening&#8230;</span></div>
+        <div class="chat-orb" id="chatOrb" title="Tap to send"><span class="chat-orb-core" id="chatOrbCore"></span><span class="chat-orb-text" id="chatOrbText">Listening&#8230;</span></div>
         <button class="chat-voice-toggle" id="chatVoiceToggle" type="button" title="Voice reply: on" aria-label="Toggle spoken replies"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></button>
         <button class="chat-send" id="chatSend">Send</button>
       </div>
@@ -3566,6 +3566,7 @@
     // --- audio-reactive pulsing orb (Web Audio API) ---
     const chatOrb = document.getElementById('chatOrb');
     const chatOrbCore = document.getElementById('chatOrbCore');
+    const chatOrbText = document.getElementById('chatOrbText');
     let orbStream = null, orbCtx = null, orbRAF = null, orbLevel = 0;
     const orbPrev = {};
     async function startOrb() {
@@ -3583,9 +3584,12 @@
         orbPrev.input = chatInput.style.display;
         orbPrev.toggle = chatVoiceToggle ? chatVoiceToggle.style.display : null;
         orbPrev.send = chatSend.style.display;
+        orbPrev.mic = chatMic.style.display;
         chatInput.style.display = 'none';
         if (chatVoiceToggle) chatVoiceToggle.style.display = 'none';
         chatSend.style.display = 'none';
+        chatMic.style.display = 'none';                 // hide mic while listening; orb is the control
+        if (chatOrbText) chatOrbText.textContent = 'Listening…';
         chatOrb.style.display = 'flex';
         let t = 0;
         (function loop() {
@@ -3611,9 +3615,11 @@
       orbLevel = 0;
       if (chatOrb) chatOrb.style.display = 'none';
       if (chatOrbCore) { chatOrbCore.style.transform = ''; chatOrbCore.style.boxShadow = ''; }
+      if (chatOrbText) chatOrbText.textContent = 'Listening…';
       chatInput.style.display = (orbPrev.input != null ? orbPrev.input : '');
       if (chatVoiceToggle && orbPrev.toggle != null) chatVoiceToggle.style.display = orbPrev.toggle;
       chatSend.style.display = (orbPrev.send != null ? orbPrev.send : '');
+      chatMic.style.display = (orbPrev.mic != null ? orbPrev.mic : '');
     }
 
     function finishVoice(send) {
@@ -3633,15 +3639,20 @@
       let interim = '', finalText = '';
       for (const r of e.results) { if (r.isFinal) finalText += r[0].transcript + ' '; else interim += r[0].transcript; }
       chatInput.value = (finalText + interim).trim();
+      if (chatOrbText) {                      // show live transcript next to the orb
+        chatOrbText.textContent = chatInput.value || 'Listening…';
+        chatOrbText.scrollLeft = chatOrbText.scrollWidth;   // keep the latest words in view
+      }
       clearTimeout(silenceTimer);            // reset the silence countdown on every word
       silenceTimer = setTimeout(() => finishVoice(true), SILENCE_MS);
     };
     chatMic.addEventListener('click', () => {
-      if (micListening) { finishVoice(true); return; }   // tap again = finish + send now
+      if (micListening) { finishVoice(true); return; }
       if (speechSynth) speechSynth.cancel();
       chatInput.value = '';
       try { micListening = true; rec.start(); startOrb(); } catch { micListening = false; }
     });
+    if (chatOrb) chatOrb.addEventListener('click', () => finishVoice(true));  // tap the orb to send
   } else if (chatMic) {
     chatMic.style.display = 'none'; // STT unsupported (e.g. Firefox/Safari) — keep text input + TTS
   }
