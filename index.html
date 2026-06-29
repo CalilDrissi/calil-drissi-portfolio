@@ -3462,7 +3462,7 @@
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history: chatHistory.slice(-8) }),
+        body: JSON.stringify({ message: text, history: chatHistory.slice(-8), lang: (typeof LANG !== 'undefined' ? LANG : 'en') }),
       });
       const data = await res.json().catch(() => ({}));
       reply = (res.ok && data.reply) ? data.reply : fallbackResponse(text);

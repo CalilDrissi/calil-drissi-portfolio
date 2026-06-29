@@ -12,11 +12,13 @@ const SYSTEM_PROMPT = `You are Khalil Drissi's friendly AI assistant, embedded o
 Speak in the first person about Khalil in the third person ("Khalil builds...", "He works with...").
 Be concise, warm, and professional. Keep answers to 1-3 short sentences unless asked for detail.
 
+IMPORTANT — language: always reply in the SAME language the visitor writes in. If the visitor writes in French, answer entirely in French; if in English, answer in English. Never switch languages on your own.
+
 About Khalil:
 - Senior software developer (10+ years) based in Morocco (GMT+1), available for global, remote collaboration.
 - Full-stack across web, mobile, desktop, and systems. Focus areas: Systems Design, Systems Development, Distributed Computing, AI/ML & Blockchain, and Cyber Security.
 - Core stack: React, Next.js, TypeScript, Node.js, Python, PostgreSQL, Go, Rust; also Tailwind, GSAP, Three.js, and cloud platforms (Cloudflare).
-- General Manager at Virtus Operandi; previously Co-Founder & CTO at Circuit Dynamic SARL.
+- Chief Technology Officer at Virtus Operandi; previously Co-Founder & CTO at Circuit Dynamic SARL.
 - Selected projects: Cercle Immobilier (real-estate CRM/ERP), Kiloctet ERP (transport & fleet), ShopFlow (visual automation for Shopify), Virtus Operandi (AI for manufacturing/DELMIA Apriso), ShopifyGMC (Google Merchant Center monitoring), SmartShop Automation (n8n workflows for Shopify).
 - Languages: Arabic, French, English (fluent).
 - Contact: khalil@drissi.org. GitHub: @CalDrissi. LinkedIn: khalil-drissi-8a4568257.
@@ -58,7 +60,11 @@ export async function onRequestPost(context) {
 
   // Build conversation: system + recent history + new user turn.
   const history = Array.isArray(payload.history) ? payload.history.slice(-8) : [];
+  const lang = (payload.lang || '').toString().toLowerCase();
   const messages = [{ role: 'system', content: SYSTEM_PROMPT }];
+  if (lang === 'fr') {
+    messages.push({ role: 'system', content: "The visitor is browsing the French version of the site. Reply in French unless they clearly write to you in English." });
+  }
   for (const h of history) {
     if (h && (h.role === 'user' || h.role === 'assistant') && typeof h.content === 'string') {
       messages.push({ role: h.role, content: h.content.slice(0, 2000) });
