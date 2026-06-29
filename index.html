@@ -3546,20 +3546,33 @@
     const rec = new speechSR();
     rec.lang = voiceLang;
     rec.interimResults = true;
-    rec.continuous = false;
+    rec.continuous = true;          // keep listening across natural pauses
     rec.maxAlternatives = 1;
+    const SILENCE_MS = 1500;        // auto-send after this much silence
+    let silenceTimer = null;
+    function finishVoice(send) {
+      clearTimeout(silenceTimer);
+      if (!micListening) return;
+      micListening = false;
+      try { rec.stop(); } catch {}
+      setMicState('idle');
+      if (send && chatInput.value.trim()) sendMessage();
+    }
     rec.onstart = () => setMicState('listening');
-    rec.onerror = () => { micListening = false; setMicState('idle'); };
-    rec.onend = () => { if (micListening) { micListening = false; setMicState('idle'); } };
+    rec.onerror = () => { clearTimeout(silenceTimer); micListening = false; setMicState('idle'); };
+    rec.onend = () => { clearTimeout(silenceTimer); if (micListening) { micListening = false; setMicState('idle'); } };
     rec.onresult = (e) => {
+      if (!micListening) return;
       let interim = '', finalText = '';
-      for (const r of e.results) { if (r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript; }
-      chatInput.value = finalText || interim;
-      if (finalText.trim()) { micListening = false; chatInput.value = finalText.trim(); sendMessage(); }
+      for (const r of e.results) { if (r.isFinal) finalText += r[0].transcript + ' '; else interim += r[0].transcript; }
+      chatInput.value = (finalText + interim).trim();
+      clearTimeout(silenceTimer);            // reset the silence countdown on every word
+      silenceTimer = setTimeout(() => finishVoice(true), SILENCE_MS);
     };
     chatMic.addEventListener('click', () => {
-      if (micListening) { rec.stop(); return; }
+      if (micListening) { finishVoice(true); return; }   // tap again = finish + send now
       if (speechSynth) speechSynth.cancel();
+      chatInput.value = '';
       try { micListening = true; rec.start(); } catch { micListening = false; }
     });
   } else if (chatMic) {
