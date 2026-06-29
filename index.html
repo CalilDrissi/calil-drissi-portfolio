@@ -1974,6 +1974,7 @@
     }
     .chat-typing {
       align-self: flex-start;
+      margin: 0 0 14px 16px;
       padding: 10px 14px;
       background: rgba(255,255,255,0.06);
       border-radius: 6px;
@@ -2757,9 +2758,9 @@
         <span></span><span></span><span></span>
       </div>
       <div class="chat-input-bar">
-        <button class="chat-mic" id="chatMic" type="button" title="Tap to talk" aria-label="Voice input">&#127908;</button>
+        <button class="chat-mic" id="chatMic" type="button" title="Tap to talk" aria-label="Voice input"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
         <input class="chat-input" id="chatInput" type="text" placeholder="Ask about Khalil's work, stack, availability..." />
-        <button class="chat-voice-toggle" id="chatVoiceToggle" type="button" title="Voice reply: on" aria-label="Toggle spoken replies">&#128266;</button>
+        <button class="chat-voice-toggle" id="chatVoiceToggle" type="button" title="Voice reply: on" aria-label="Toggle spoken replies"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></button>
         <button class="chat-send" id="chatSend">Send</button>
       </div>
     </div>
@@ -3566,10 +3567,12 @@
   }
 
   if (chatVoiceToggle) {
+    const SVG_ON = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+    const SVG_OFF = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
     if (!speechSynth) { chatVoiceToggle.style.display = 'none'; }
     chatVoiceToggle.addEventListener('click', () => {
       voiceReplyOn = !voiceReplyOn;
-      chatVoiceToggle.innerHTML = voiceReplyOn ? '&#128266;' : '&#128263;';
+      chatVoiceToggle.innerHTML = voiceReplyOn ? SVG_ON : SVG_OFF;
       chatVoiceToggle.title = 'Voice reply: ' + (voiceReplyOn ? 'on' : 'off');
       if (!voiceReplyOn && speechSynth) speechSynth.cancel();
     });
