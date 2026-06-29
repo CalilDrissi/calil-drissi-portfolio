@@ -3021,15 +3021,16 @@
     strip.scrollLeft = scrollLeft - walk;
   });
 
-  // Auto-scroll carousel
+  // Auto-scroll carousel (seamless loop — the strip renders two identical copies
+  // of the projects, and we wrap the scroll by exactly one copy's width)
   let mouseOverStrip = false;
+  let loopWidth = 0;
 
   (function autoScroll() {
     if (!mouseOverStrip && !isDown) {
       strip.scrollLeft += 0.6;
-      if (strip.scrollLeft >= strip.scrollWidth - strip.clientWidth - 1) {
-        strip.scrollLeft = 0;
-      }
+      if (loopWidth <= 0) computeLoopWidth();
+      if (loopWidth > 0 && strip.scrollLeft >= loopWidth) strip.scrollLeft -= loopWidth;
     }
     requestAnimationFrame(autoScroll);
   })();
@@ -3296,16 +3297,23 @@
 
   const thumbUrl = u => (u || '').replace('w=820&h=400', 'w=360&h=240');
 
-  // Render the single merged strip
+  // Render the merged strip TWICE so the auto-scroll can loop seamlessly
+  function computeLoopWidth() {
+    var secondStart = strip.children[allProjects.length];
+    loopWidth = secondStart ? secondStart.offsetLeft : 0;
+  }
   function renderProjects() {
-    strip.innerHTML = allProjects.map((p, i) =>
+    var cards = allProjects.map((p, i) =>
       `<div class="project-thumb" data-pidx="${i}">
         <img src="${p.thumb || thumbUrl(p.img)}" alt="" loading="lazy" />
         <div class="project-label">${p.title}</div>
       </div>`
     ).join('');
+    strip.innerHTML = cards + cards; // two identical copies for the loop
+    requestAnimationFrame(computeLoopWidth);
   }
   renderProjects();
+  window.addEventListener('resize', computeLoopWidth);
 
   // Hover tooltip showing card info
   const projTip = document.createElement('div');
