@@ -364,19 +364,19 @@
       line-height: 1.5;
     }
     .ask-ai-pill {
-      display: inline-flex; align-items: center; gap: 8px; margin-top: clamp(8px, 1.2vh, 14px);
-      background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.35);
-      color: var(--fg); font-family: var(--mono); font-size: 10px; text-transform: uppercase;
-      letter-spacing: 0.08em; padding: 7px 14px; border-radius: 9999px; cursor: pointer;
-      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      display: inline-flex; align-items: center; gap: 11px; margin-top: clamp(10px, 1.4vh, 16px);
+      background: rgba(56,189,248,0.10); border: none;
+      color: var(--fg); font-family: var(--mono); font-size: 13px; text-transform: uppercase;
+      letter-spacing: 0.09em; padding: 13px 24px; border-radius: 9999px; cursor: pointer;
+      box-shadow: 0 6px 22px rgba(56,189,248,0.28), 0 1px 3px rgba(0,0,0,0.4);
+      transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
     }
-    .ask-ai-pill:hover { background: rgba(56,189,248,0.16); border-color: rgba(56,189,248,0.6); transform: translateY(-1px); }
+    .ask-ai-pill:hover { background: rgba(56,189,248,0.18); box-shadow: 0 8px 30px rgba(56,189,248,0.45), 0 1px 3px rgba(0,0,0,0.4); transform: translateY(-1px); }
     .ask-ai-orb {
-      width: 11px; height: 11px; border-radius: 50%; flex: none;
+      width: 14px; height: 14px; border-radius: 50%; flex: none;
       background: radial-gradient(circle at 35% 30%, #bae6fd, #38bdf8 45%, #6366f1 100%);
       animation: askAiPulse 2s ease-in-out infinite;
     }
-    .ask-ai-arrow { opacity: 0.55; }
     @keyframes askAiPulse {
       0%, 100% { box-shadow: 0 0 5px rgba(56,189,248,0.5); transform: scale(1); }
       50% { box-shadow: 0 0 13px rgba(56,189,248,0.9), 0 0 22px rgba(99,102,241,0.5); transform: scale(1.14); }

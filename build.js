@@ -191,7 +191,7 @@ function render(template, data, lang, featuredPosts, ghData) {
       </div>
       <div class="intro-what">${data.intro.whatIDo}</div>
       <div class="intro-desc">${data.intro.whatIDoDesc}</div>
-      <button class="ask-ai-pill" id="askAiPill" type="button"><span class="ask-ai-orb"></span>${lang === 'fr' ? 'Discuter avec mon IA' : 'Ask my AI'} <span class="ask-ai-arrow">↗</span></button>
+      <button class="ask-ai-pill" id="askAiPill" type="button"><span class="ask-ai-orb"></span>${lang === 'fr' ? 'Discuter avec mon IA' : 'Ask my AI'}</button>
     </div>
 `
   );
