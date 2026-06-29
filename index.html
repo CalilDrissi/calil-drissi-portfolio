@@ -2058,6 +2058,12 @@
       flex: 1; min-width: 0; overflow: hidden; white-space: nowrap;
       font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,0.72); letter-spacing: 0.02em;
     }
+    .chat-orb-close {
+      flex: none; width: 28px; height: 28px; border: none; border-radius: 6px;
+      background: rgba(255,255,255,0.08); color: var(--fg-dim); cursor: pointer;
+      display: grid; place-items: center; transition: background 0.15s, color 0.15s;
+    }
+    .chat-orb-close:hover { background: rgba(255,255,255,0.16); color: var(--fg); }
 
     @media (max-width: 1024px) {
       .about-details-grid { grid-template-columns: 1fr; }
@@ -2771,7 +2777,7 @@
       <div class="chat-input-bar">
         <button class="chat-mic" id="chatMic" type="button" title="Tap to talk" aria-label="Voice input"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
         <input class="chat-input" id="chatInput" type="text" placeholder="Ask about Khalil's work, stack, availability..." />
-        <div class="chat-orb" id="chatOrb" title="Tap to send"><span class="chat-orb-core" id="chatOrbCore"></span><span class="chat-orb-text" id="chatOrbText">Listening&#8230;</span></div>
+        <div class="chat-orb" id="chatOrb" title="Tap to send"><span class="chat-orb-core" id="chatOrbCore"></span><span class="chat-orb-text" id="chatOrbText">Listening&#8230;</span><button class="chat-orb-close" id="chatOrbClose" type="button" title="Back to text input" aria-label="Back to text input"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg></button></div>
         <button class="chat-voice-toggle" id="chatVoiceToggle" type="button" title="Voice reply: on" aria-label="Toggle spoken replies"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></button>
         <button class="chat-send" id="chatSend">Send</button>
       </div>
@@ -3537,122 +3543,147 @@
   }
   if (speechSynth) { pickChatVoice(); speechSynth.onvoiceschanged = pickChatVoice; }
 
-  function setMicState(state) {
-    if (!chatMic) return;
-    chatMic.classList.remove('listening', 'speaking');
-    if (state === 'listening' || state === 'speaking') chatMic.classList.add(state);
+  // ---- orb visuals + hands-free conversation state ----
+  const chatOrb = document.getElementById('chatOrb');
+  const chatOrbCore = document.getElementById('chatOrbCore');
+  const chatOrbText = document.getElementById('chatOrbText');
+  let conversationMode = false, orbState = 'idle';
+  let beginListenFn = null;
+  let orbStream = null, orbCtx = null, orbAnalyser = null, orbData = null, orbRAF = null, orbLevel = 0, orbT = 0;
+  const orbPrev = {};
+  function setOrbText(s) { if (chatOrbText) chatOrbText.textContent = s; }
+  function orbLoop() {
+    let avg = 0;
+    if (orbAnalyser) { orbAnalyser.getByteFrequencyData(orbData); let sum = 0; for (let i = 0; i < orbData.length; i++) sum += orbData[i]; avg = sum / orbData.length / 255; }
+    orbLevel += (avg - orbLevel) * 0.3; orbT += 0.05;
+    const breath = (orbState === 'speaking') ? Math.sin(orbT * 1.4) * 0.12 : Math.sin(orbT) * 0.05;
+    const scale = 1 + Math.min(orbLevel * 2.4, 1.5) + breath;
+    const glow = 8 + orbLevel * 46 + (orbState === 'speaking' ? 14 : 0);
+    if (chatOrbCore) {
+      chatOrbCore.style.transform = 'scale(' + scale.toFixed(3) + ')';
+      chatOrbCore.style.boxShadow = '0 0 ' + glow.toFixed(0) + 'px rgba(56,189,248,0.7), 0 0 ' + (glow * 2).toFixed(0) + 'px rgba(99,102,241,0.45)';
+    }
+    orbRAF = requestAnimationFrame(orbLoop);
   }
-  function speakReply(text) {
-    if (!speechSynth) return;
+  function showOrbUI() {                       // synchronous — appears instantly on tap
+    if (!chatOrb) return;
+    if (chatOrb.style.display !== 'flex') {
+      orbPrev.input = chatInput.style.display;
+      orbPrev.toggle = chatVoiceToggle ? chatVoiceToggle.style.display : null;
+      orbPrev.send = chatSend.style.display;
+      orbPrev.mic = chatMic ? chatMic.style.display : null;
+      chatInput.style.display = 'none';
+      if (chatVoiceToggle) chatVoiceToggle.style.display = 'none';
+      chatSend.style.display = 'none';
+      if (chatMic) chatMic.style.display = 'none';
+      chatOrb.style.display = 'flex';
+    }
+    if (!orbRAF) orbLoop();
+  }
+  function hideOrbUI() {
+    if (orbRAF) { cancelAnimationFrame(orbRAF); orbRAF = null; }
+    if (chatOrb) chatOrb.style.display = 'none';
+    if (chatOrbCore) { chatOrbCore.style.transform = ''; chatOrbCore.style.boxShadow = ''; }
+    setOrbText('Listening…');
+    chatInput.style.display = (orbPrev.input != null ? orbPrev.input : '');
+    if (chatVoiceToggle && orbPrev.toggle != null) chatVoiceToggle.style.display = orbPrev.toggle;
+    chatSend.style.display = (orbPrev.send != null ? orbPrev.send : '');
+    if (chatMic && orbPrev.mic != null) chatMic.style.display = orbPrev.mic;
+  }
+  async function startUserAudio() {            // attaches mic analyser for reactivity (after orb is already shown)
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !AC) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (!micListening) { stream.getTracks().forEach(t => t.stop()); return; }
+      orbStream = stream; orbCtx = new AC(); await orbCtx.resume().catch(() => {});
+      orbAnalyser = orbCtx.createAnalyser(); orbAnalyser.fftSize = 256; orbAnalyser.smoothingTimeConstant = 0.8;
+      orbData = new Uint8Array(orbAnalyser.frequencyBinCount);
+      orbCtx.createMediaStreamSource(orbStream).connect(orbAnalyser);
+    } catch {}
+  }
+  function stopUserAudio() {
+    if (orbStream) { orbStream.getTracks().forEach(t => t.stop()); orbStream = null; }
+    if (orbCtx) { orbCtx.close().catch(() => {}); orbCtx = null; }
+    orbAnalyser = null; orbData = null; orbLevel = 0;
+  }
+  function speakReply(text, onDone) {
+    if (!speechSynth) { if (onDone) onDone(); return; }
     speechSynth.cancel();
     const u = new SpeechSynthesisUtterance(text);
     if (chatTtsVoice) u.voice = chatTtsVoice;
     u.lang = voiceLang;
-    u.onstart = () => setMicState('speaking');
-    u.onend = () => setMicState('idle');
+    u.onstart = () => { orbState = 'speaking'; if (conversationMode) { showOrbUI(); setOrbText('Speaking…'); } };
+    u.onend = () => { orbState = 'idle'; if (onDone) onDone(); };
+    u.onerror = () => { orbState = 'idle'; if (onDone) onDone(); };
     speechSynth.speak(u);
   }
-  function maybeSpeak(text) { if (voiceReplyOn) speakReply(text); }
+  function maybeSpeak(text) {                  // after a reply: speak, then auto re-listen (hands-free)
+    const cont = () => { if (conversationMode && beginListenFn) beginListenFn(); };
+    if (voiceReplyOn && speechSynth) speakReply(text, cont);
+    else cont();
+  }
 
   if (speechSR && chatMic) {
     const rec = new speechSR();
     rec.lang = voiceLang;
     rec.interimResults = true;
-    rec.continuous = true;          // keep listening across natural pauses
+    rec.continuous = true;
     rec.maxAlternatives = 1;
     const SILENCE_MS = 1500;        // auto-send after this much silence
     let silenceTimer = null;
 
-    // --- audio-reactive pulsing orb (Web Audio API) ---
-    const chatOrb = document.getElementById('chatOrb');
-    const chatOrbCore = document.getElementById('chatOrbCore');
-    const chatOrbText = document.getElementById('chatOrbText');
-    let orbStream = null, orbCtx = null, orbRAF = null, orbLevel = 0;
-    const orbPrev = {};
-    async function startOrb() {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!chatOrb || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !AC) return;
-      try {
-        orbStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        if (!micListening) { orbStream.getTracks().forEach(t => t.stop()); orbStream = null; return; }
-        orbCtx = new AC();
-        await orbCtx.resume().catch(() => {});
-        const analyser = orbCtx.createAnalyser();
-        analyser.fftSize = 256; analyser.smoothingTimeConstant = 0.8;
-        orbCtx.createMediaStreamSource(orbStream).connect(analyser);
-        const data = new Uint8Array(analyser.frequencyBinCount);
-        orbPrev.input = chatInput.style.display;
-        orbPrev.toggle = chatVoiceToggle ? chatVoiceToggle.style.display : null;
-        orbPrev.send = chatSend.style.display;
-        orbPrev.mic = chatMic.style.display;
-        chatInput.style.display = 'none';
-        if (chatVoiceToggle) chatVoiceToggle.style.display = 'none';
-        chatSend.style.display = 'none';
-        chatMic.style.display = 'none';                 // hide mic while listening; orb is the control
-        if (chatOrbText) chatOrbText.textContent = 'Listening…';
-        chatOrb.style.display = 'flex';
-        let t = 0;
-        (function loop() {
-          analyser.getByteFrequencyData(data);
-          let sum = 0; for (let i = 0; i < data.length; i++) sum += data[i];
-          const avg = sum / data.length / 255;             // 0..1 volume
-          orbLevel += (avg - orbLevel) * 0.3;              // smooth
-          t += 0.05;
-          const scale = 1 + Math.min(orbLevel * 2.4, 1.5) + Math.sin(t) * 0.05; // voice + idle breath
-          const glow = 8 + orbLevel * 46;
-          if (chatOrbCore) {
-            chatOrbCore.style.transform = 'scale(' + scale.toFixed(3) + ')';
-            chatOrbCore.style.boxShadow = '0 0 ' + glow.toFixed(0) + 'px rgba(56,189,248,0.7), 0 0 ' + (glow * 2).toFixed(0) + 'px rgba(99,102,241,0.45)';
-          }
-          orbRAF = requestAnimationFrame(loop);
-        })();
-      } catch { stopOrb(); }
+    function beginListen() {                    // start (or auto-resume) a listening turn
+      micListening = true; orbState = 'listening';
+      showOrbUI(); setOrbText('Listening…');    // orb appears instantly on tap
+      chatInput.value = '';
+      try { rec.start(); } catch {}
+      startUserAudio();                          // mic analyser attaches when ready (reactivity)
     }
-    function stopOrb() {
-      if (orbRAF) { cancelAnimationFrame(orbRAF); orbRAF = null; }
-      if (orbStream) { orbStream.getTracks().forEach(t => t.stop()); orbStream = null; }
-      if (orbCtx) { orbCtx.close().catch(() => {}); orbCtx = null; }
-      orbLevel = 0;
-      if (chatOrb) chatOrb.style.display = 'none';
-      if (chatOrbCore) { chatOrbCore.style.transform = ''; chatOrbCore.style.boxShadow = ''; }
-      if (chatOrbText) chatOrbText.textContent = 'Listening…';
-      chatInput.style.display = (orbPrev.input != null ? orbPrev.input : '');
-      if (chatVoiceToggle && orbPrev.toggle != null) chatVoiceToggle.style.display = orbPrev.toggle;
-      chatSend.style.display = (orbPrev.send != null ? orbPrev.send : '');
-      chatMic.style.display = (orbPrev.mic != null ? orbPrev.mic : '');
-    }
+    beginListenFn = beginListen;                 // let the conversation loop re-trigger listening
 
-    function finishVoice(send) {
+    function finishListen(send) {
       clearTimeout(silenceTimer);
       if (!micListening) return;
       micListening = false;
       try { rec.stop(); } catch {}
-      stopOrb();
-      setMicState('idle');
-      if (send && chatInput.value.trim()) sendMessage();
+      stopUserAudio();
+      const text = chatInput.value.trim();
+      if (send && text) { orbState = 'thinking'; setOrbText('Thinking…'); sendMessage(); }
+      else { endConversation(); }                // nothing said -> end the hands-free loop
     }
-    rec.onstart = () => setMicState('listening');
-    rec.onerror = () => { clearTimeout(silenceTimer); micListening = false; stopOrb(); setMicState('idle'); };
-    rec.onend = () => { clearTimeout(silenceTimer); if (micListening) { micListening = false; stopOrb(); setMicState('idle'); } };
+    function endConversation() {
+      conversationMode = false; micListening = false; orbState = 'idle';
+      clearTimeout(silenceTimer);
+      try { rec.stop(); } catch {}
+      if (speechSynth) speechSynth.cancel();
+      stopUserAudio(); hideOrbUI();
+    }
+
     rec.onresult = (e) => {
       if (!micListening) return;
       let interim = '', finalText = '';
       for (const r of e.results) { if (r.isFinal) finalText += r[0].transcript + ' '; else interim += r[0].transcript; }
       chatInput.value = (finalText + interim).trim();
-      if (chatOrbText) {                      // show live transcript next to the orb
-        chatOrbText.textContent = chatInput.value || 'Listening…';
-        chatOrbText.scrollLeft = chatOrbText.scrollWidth;   // keep the latest words in view
-      }
-      clearTimeout(silenceTimer);            // reset the silence countdown on every word
-      silenceTimer = setTimeout(() => finishVoice(true), SILENCE_MS);
+      setOrbText(chatInput.value || 'Listening…');
+      if (chatOrbText) chatOrbText.scrollLeft = chatOrbText.scrollWidth;
+      clearTimeout(silenceTimer);
+      silenceTimer = setTimeout(() => finishListen(true), SILENCE_MS);
     };
-    chatMic.addEventListener('click', () => {
-      if (micListening) { finishVoice(true); return; }
+    rec.onend = () => { if (micListening) finishListen(true); };
+    rec.onerror = () => { clearTimeout(silenceTimer); if (micListening) { micListening = false; stopUserAudio(); endConversation(); } };
+
+    chatMic.addEventListener('click', () => {    // tap once to start a hands-free conversation
+      conversationMode = true;
       if (speechSynth) speechSynth.cancel();
-      chatInput.value = '';
-      try { micListening = true; rec.start(); startOrb(); } catch { micListening = false; }
+      beginListen();
     });
-    if (chatOrb) chatOrb.addEventListener('click', () => finishVoice(true));  // tap the orb to send
+    if (chatOrb) chatOrb.addEventListener('click', () => {
+      if (orbState === 'listening') finishListen(true);  // tap orb = send now
+      else endConversation();                            // tap during reply/thinking = stop
+    });
+    const chatOrbClose = document.getElementById('chatOrbClose');
+    if (chatOrbClose) chatOrbClose.addEventListener('click', (e) => { e.stopPropagation(); endConversation(); });  // back to text input anytime
   } else if (chatMic) {
     chatMic.style.display = 'none'; // STT unsupported (e.g. Firefox/Safari) — keep text input + TTS
   }
