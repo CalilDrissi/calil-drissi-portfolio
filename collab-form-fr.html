@@ -176,7 +176,7 @@
   <script>
     var form = document.getElementById('intakeForm');
     var btn = document.getElementById('submitBtn');
-    var status = document.getElementById('status');
+    var statusEl = document.getElementById('status');
     var successCard = document.getElementById('successCard');
     var actions = document.querySelector('.actions');
     function v(id){ var e = document.getElementById(id); return e ? e.value.trim() : ''; }
@@ -210,17 +210,17 @@
       if (bad.length || engMissing) {
         bad.forEach(function(id){ var el = document.getElementById(id); if (el) el.classList.add('invalid'); });
         if (engMissing) typesEl().classList.add('invalid');
-        status.textContent = (email && !emailOk)
+        statusEl.textContent = (email && !emailOk)
           ? "Veuillez saisir un e-mail valide et remplir tous les champs obligatoires (*)."
           : "Veuillez remplir tous les champs obligatoires marqués d'un *.";
-        status.className = 'status error';
+        statusEl.className = 'status error';
         var firstEl = bad.length ? document.getElementById(bad[0]) : typesEl();
         if (firstEl) firstEl.scrollIntoView({ behavior:'smooth', block:'center' });
         return;
       }
 
       btn.disabled = true; btn.textContent = 'Envoi...';
-      status.textContent = ''; status.className = 'status sending';
+      statusEl.textContent = ''; statusEl.className = 'status sending';
 
       var lines = [
         'ENTREPRISE / CLIENT',
@@ -259,18 +259,18 @@
           if (d.success) {
             form.style.display = 'none';
             if (actions) actions.style.display = 'none';
-            status.style.display = 'none';
+            statusEl.style.display = 'none';
             successCard.style.display = 'block';
             successCard.scrollIntoView({ behavior:'smooth', block:'center' });
           } else {
-            status.textContent = (d.error || 'Une erreur est survenue') + '. Écrivez à portfolio@cms.drissi.xyz.';
-            status.className = 'status error';
+            statusEl.textContent = (d.error || 'Une erreur est survenue') + '. Écrivez à portfolio@cms.drissi.xyz.';
+            statusEl.className = 'status error';
             btn.disabled = false; btn.textContent = 'Envoyer la proposition';
           }
         })
         .catch(function () {
-          status.textContent = 'Erreur réseau. Écrivez à portfolio@cms.drissi.xyz.';
-          status.className = 'status error';
+          statusEl.textContent = 'Erreur réseau. Écrivez à portfolio@cms.drissi.xyz.';
+          statusEl.className = 'status error';
           btn.disabled = false; btn.textContent = 'Envoyer la proposition';
         });
     });

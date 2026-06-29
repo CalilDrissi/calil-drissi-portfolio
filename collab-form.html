@@ -196,7 +196,7 @@
   <script>
     var form = document.getElementById('intakeForm');
     var btn = document.getElementById('submitBtn');
-    var status = document.getElementById('status');
+    var statusEl = document.getElementById('status');
     var successCard = document.getElementById('successCard');
     var actions = document.querySelector('.actions');
     function v(id){ var e = document.getElementById(id); return e ? e.value.trim() : ''; }
@@ -230,17 +230,17 @@
       if (bad.length || engMissing) {
         bad.forEach(function(id){ var el = document.getElementById(id); if (el) el.classList.add('invalid'); });
         if (engMissing) typesEl().classList.add('invalid');
-        status.textContent = (email && !emailOk)
+        statusEl.textContent = (email && !emailOk)
           ? 'Please enter a valid email and fill in all required fields (*).'
           : 'Please fill in all required fields marked with *.';
-        status.className = 'status error';
+        statusEl.className = 'status error';
         var firstEl = bad.length ? document.getElementById(bad[0]) : typesEl();
         if (firstEl) firstEl.scrollIntoView({ behavior:'smooth', block:'center' });
         return;
       }
 
       btn.disabled = true; btn.textContent = 'Sending...';
-      status.textContent = ''; status.className = 'status sending';
+      statusEl.textContent = ''; statusEl.className = 'status sending';
 
       var lines = [
         'COMPANY / CLIENT',
@@ -279,18 +279,18 @@
           if (d.success) {
             form.style.display = 'none';
             if (actions) actions.style.display = 'none';
-            status.style.display = 'none';
+            statusEl.style.display = 'none';
             successCard.style.display = 'block';
             successCard.scrollIntoView({ behavior:'smooth', block:'center' });
           } else {
-            status.textContent = (d.error || 'Something went wrong') + '. Please email portfolio@cms.drissi.xyz.';
-            status.className = 'status error';
+            statusEl.textContent = (d.error || 'Something went wrong') + '. Please email portfolio@cms.drissi.xyz.';
+            statusEl.className = 'status error';
             btn.disabled = false; btn.textContent = 'Send proposal';
           }
         })
         .catch(function () {
-          status.textContent = 'Network error. Please email portfolio@cms.drissi.xyz.';
-          status.className = 'status error';
+          statusEl.textContent = 'Network error. Please email portfolio@cms.drissi.xyz.';
+          statusEl.className = 'status error';
           btn.disabled = false; btn.textContent = 'Send proposal';
         });
     });
