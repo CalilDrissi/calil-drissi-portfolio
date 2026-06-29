@@ -83,8 +83,8 @@
       --fg-faint: rgba(255,255,255,0.30);
       --accent: #7c4dff;
       --border: rgba(255,255,255,0.10);
-      --mono: 'IBM Plex Mono', 'Courier New', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', monospace;
-      --sans: 'Inter', -apple-system, system-ui, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+      --mono: 'IBM Plex Mono', 'Courier New', monospace, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
+      --sans: 'Inter', -apple-system, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
       --serif: 'Instrument Serif', 'Georgia', serif;
       --col-gap: clamp(16px, 2.5vw, 40px);
       --edge: clamp(10px, 1vw, 16px);
@@ -3135,6 +3135,7 @@
     },
 
     close(win) {
+      if (win.onHide) win.onHide();
       win.el.classList.remove('open', 'focused');
       win.closed = true;
       if (win.persistent) {
@@ -3153,6 +3154,7 @@
     },
 
     minimize(win) {
+      if (win.onHide) win.onHide();
       win.minimized = true;
       gsap.set(win.el, { clearProps: 'opacity,transform' });
       win.el.classList.add('minimized');
@@ -3708,6 +3710,7 @@
       if (speechSynth) speechSynth.cancel();
       stopUserAudio(); hideOrbUI();
     }
+    aboutWin.onHide = () => endConversation();   // closing/minimizing the window stops the AI audio + voice loop
 
     rec.onresult = (e) => {
       if (!micListening) return;
