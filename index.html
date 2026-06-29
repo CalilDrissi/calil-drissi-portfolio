@@ -3560,9 +3560,9 @@
     maybeSpeak(reply);
   }
 
-  chatSend.addEventListener('click', sendMessage);
+  chatSend.addEventListener('click', () => { lastMsgVoice = false; sendMessage(); });
   chatInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') sendMessage();
+    if (e.key === 'Enter') { lastMsgVoice = false; sendMessage(); }
   });
 
   // ---- Voice layer: speech-to-text input + spoken (TTS) replies, browser-native ----
@@ -3595,6 +3595,7 @@
   const chatOrbCore = document.getElementById('chatOrbCore');
   const chatOrbText = document.getElementById('chatOrbText');
   let conversationMode = false, orbState = 'idle';
+  let lastMsgVoice = false;   // only speak replies to voice messages, not typed ones
   let beginListenFn = null;
   let orbStream = null, orbCtx = null, orbAnalyser = null, orbData = null, orbRAF = null, orbLevel = 0, orbT = 0;
   const orbPrev = {};
@@ -3668,7 +3669,7 @@
   }
   function maybeSpeak(text) {                  // after a reply: speak, then auto re-listen (hands-free)
     const cont = () => { if (conversationMode && beginListenFn) beginListenFn(); };
-    if (voiceReplyOn && speechSynth) speakReply(text, cont);
+    if (lastMsgVoice && voiceReplyOn && speechSynth) speakReply(text, cont);
     else cont();
   }
 
@@ -3697,7 +3698,7 @@
       try { rec.stop(); } catch {}
       stopUserAudio();
       const text = chatInput.value.trim();
-      if (send && text) { orbState = 'thinking'; setOrbText(ORB_T.thinking); sendMessage(); }
+      if (send && text) { lastMsgVoice = true; orbState = 'thinking'; setOrbText(ORB_T.thinking); sendMessage(); }
       else { endConversation(); }                // nothing said -> end the hands-free loop
     }
     function endConversation() {
