@@ -186,12 +186,15 @@ function render(template, data, lang, featuredPosts, ghData) {
         </div>
       </div>
       <div class="intro-meta">
-        <span>🌐 ${lang === 'fr' ? 'Fuseau' : 'Timezone'} GMT+1</span>
+        <span class="meta-tz"><svg class="tz-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.9 2.6 15.1 0 18M12 3c-2.6 2.9-2.6 15.1 0 18"/></svg>${lang === 'fr' ? 'Fuseau' : 'Timezone'} GMT+1</span>
         <a href="https://fezlang.org" target="_blank" rel="noopener" class="fez-link"><img src="/fez-icon.png" alt="Fez" class="fez-icon" /> ${lang === 'fr' ? 'Créateur de Fez Lang' : 'Creator of Fez Lang'} ↗</a>
       </div>
       <div class="intro-what">${data.intro.whatIDo}</div>
       <div class="intro-desc">${data.intro.whatIDoDesc}</div>
-      <button class="ask-ai-pill" id="askAiPill" type="button"><span class="ask-ai-orb"></span>${lang === 'fr' ? 'Discuter avec mon IA' : 'Ask my AI'}</button>
+      <div class="intro-actions">
+        <button class="ask-ai-pill" id="askAiPill" type="button"><span class="ask-ai-orb"></span>${lang === 'fr' ? 'Discuter avec mon IA' : 'Ask my AI'}</button>
+        <button class="contact-me-btn" id="askContactBtn" type="button">${lang === 'fr' ? 'Me contacter' : 'Contact me'}</button>
+      </div>
     </div>
 `
   );
@@ -419,9 +422,12 @@ function render(template, data, lang, featuredPosts, ghData) {
   );
 
   // Add language toggle + blog link to the page
-  const navHTML = `<div class="page-nav" style="position:fixed;top:12px;right:20px;z-index:200;display:flex;gap:8px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;">
-    <a href="${lang === 'fr' ? '/fr/blog/' : '/blog/'}" style="color:var(--fg-dim);text-decoration:none;padding:4px 10px;border:1px solid var(--fg-faint);border-radius:4px;">${data.nav.blog}</a>
-    <a href="${data.nav.langToggle.url}" style="color:var(--fg-dim);text-decoration:none;padding:4px 10px;border:1px solid var(--fg-faint);border-radius:4px;">${data.nav.langToggle.label}</a>
+  const navHTML = `<div class="page-nav">
+    <a href="${lang === 'fr' ? '/fr/blog/' : '/blog/'}" class="nav-blog-btn">${data.nav.blog}</a>
+    <div class="lang-switch">
+      <a href="/" class="lang-opt${lang === 'en' ? ' active' : ''}" aria-label="English"><img src="/flag-en.png" alt="" />EN</a>
+      <a href="/fr/" class="lang-opt${lang === 'fr' ? ' active' : ''}" aria-label="Français"><img src="/flag-fr.png" alt="" />FR</a>
+    </div>
   </div>`;
   html = html.replace(
     /<div class="page">/,
@@ -2324,7 +2330,7 @@ async function build() {
   }
 
   // Copy static assets (images, favicon)
-  const staticFiles = ['profile.png', 'favicon.png', 'apple-touch-icon.png', 'loader-avatar.png', 'fez-icon.png', 'video.mp4'];
+  const staticFiles = ['profile.png', 'favicon.png', 'apple-touch-icon.png', 'loader-avatar.png', 'fez-icon.png', 'video.mp4', 'flag-en.png', 'flag-fr.png'];
   for (const f of staticFiles) {
     const src = path.join(__dirname, f);
     if (fs.existsSync(src)) {

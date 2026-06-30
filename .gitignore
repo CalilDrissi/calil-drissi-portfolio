@@ -5,6 +5,8 @@ node_modules/
 !profile.png
 !favicon.png
 !apple-touch-icon.png
+!flag-en.png
+!flag-fr.png
 test-win.js
 .env
 test-results/

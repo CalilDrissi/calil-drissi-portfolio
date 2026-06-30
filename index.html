@@ -363,15 +363,16 @@
       margin-top: clamp(4px, 0.6vh, 8px);
       line-height: 1.5;
     }
+    .intro-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 9px; margin-top: clamp(8px, 1.2vh, 14px); }
     .ask-ai-pill {
-      display: inline-flex; align-items: center; gap: 8px; margin-top: clamp(8px, 1.2vh, 14px);
-      background: rgba(56,189,248,0.10); border: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(124,77,255,0.10); border: none;
       color: var(--fg); font-family: var(--mono); font-size: var(--grid-text); text-transform: uppercase;
       letter-spacing: 0.04em; padding: clamp(6px, 0.9vh, 9px) clamp(13px, 1.1vw, 18px); border-radius: 9999px; cursor: pointer;
-      box-shadow: 0 4px 16px rgba(56,189,248,0.25), 0 1px 2px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 16px rgba(124,77,255,0.30), 0 1px 2px rgba(0,0,0,0.4);
       transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
     }
-    .ask-ai-pill:hover { background: rgba(56,189,248,0.18); box-shadow: 0 6px 24px rgba(56,189,248,0.4), 0 1px 2px rgba(0,0,0,0.4); transform: translateY(-1px); }
+    .ask-ai-pill:hover { background: rgba(124,77,255,0.18); box-shadow: 0 6px 24px rgba(124,77,255,0.5), 0 1px 2px rgba(0,0,0,0.4); transform: translateY(-1px); }
     .ask-ai-orb {
       width: 10px; height: 10px; border-radius: 50%; flex: none;
       background: radial-gradient(circle at 35% 30%, #bae6fd, #38bdf8 45%, #6366f1 100%);
@@ -381,6 +382,39 @@
       0%, 100% { box-shadow: 0 0 5px rgba(56,189,248,0.5); transform: scale(1); }
       50% { box-shadow: 0 0 13px rgba(56,189,248,0.9), 0 0 22px rgba(99,102,241,0.5); transform: scale(1.14); }
     }
+    .contact-me-btn {
+      display: inline-flex; align-items: center; border: none; cursor: pointer;
+      font-family: var(--mono); font-size: var(--grid-text); text-transform: uppercase; letter-spacing: 0.04em;
+      color: #fff; background: var(--accent); border-radius: 9999px;
+      padding: clamp(6px, 0.9vh, 9px) clamp(13px, 1.1vw, 18px);
+      box-shadow: 0 4px 16px rgba(124,77,255,0.35);
+      transition: filter 0.2s, box-shadow 0.2s, transform 0.15s;
+    }
+    .contact-me-btn:hover { filter: brightness(1.12); box-shadow: 0 6px 22px rgba(124,77,255,0.55); transform: translateY(-1px); }
+    /* Top-right page nav: accent blog button + flag language switcher */
+    .page-nav {
+      position: fixed; top: 12px; right: 20px; z-index: 200;
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .page-nav .nav-blog-btn {
+      color: var(--accent); text-decoration: none; padding: 5px 11px;
+      border: 1px solid var(--accent); border-radius: 4px; background: rgba(124,77,255,0.12);
+      transition: background 0.2s, color 0.2s;
+    }
+    .page-nav .nav-blog-btn:hover { background: var(--accent); color: #fff; }
+    .lang-switch { display: flex; gap: 4px; }
+    .lang-opt {
+      display: inline-flex; align-items: center; gap: 5px;
+      color: var(--fg-dim); text-decoration: none; padding: 4px 8px;
+      border: 1px solid var(--fg-faint); border-radius: 4px; opacity: 0.5;
+      transition: opacity 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .lang-opt img { width: 16px; height: 16px; object-fit: contain; display: block; }
+    .lang-opt:hover { opacity: 0.85; }
+    .lang-opt.active { opacity: 1; border-color: var(--accent); color: var(--fg); }
+    .meta-tz { display: inline-flex; align-items: center; gap: 6px; }
+    .tz-icon { opacity: 0.7; flex: none; }
     .intro-stats {
       margin-top: clamp(4px, 0.6vh, 8px);
       color: #fff;
@@ -3486,6 +3520,13 @@
     if (ct) ct.classList.add('active');
     if (cp) cp.classList.add('active');
     const ci = document.getElementById('chatInput'); if (ci) setTimeout(() => ci.focus(), 60);
+  });
+
+  // "Contact me" intro button -> open the Leave a Message popup
+  const askContactBtn = document.getElementById('askContactBtn');
+  if (askContactBtn) askContactBtn.addEventListener('click', () => {
+    const opener = document.getElementById('openMessageBtn');
+    if (opener) opener.click();
   });
 
   // ESC closes focused window
