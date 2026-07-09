@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Arcade Controller</title>
+<style>
+  :root{
+    --bg:#0d0d10; --txt:#ffffff;
+    /* raised key surface: radial gradient reads as a domed, light key on the near-black bg */
+    --key:radial-gradient(circle at 50% 32%, #6a6a76, #34343e 78%);
+    --edge:rgba(255,255,255,0.55);
+    --tri:#4ade80; --cir:#f87171; --cro:#7dd3fc; --squ:#f0abfc; --accent:#7c4dff;
+    --raise:0 4px 10px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.35),
+            inset 0 2px 3px rgba(255,255,255,.35), inset 0 -4px 8px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--txt);
+    font-family:system-ui,-apple-system,sans-serif; touch-action:none; overscroll-behavior:none;}
+  #status{position:fixed;top:0;left:0;right:0;height:30px;display:flex;align-items:center;
+    justify-content:center;gap:8px;font-size:12px;letter-spacing:.04em;color:#d0d0d8;z-index:5;
+    padding-top:env(safe-area-inset-top);}
+  #dot{width:8px;height:8px;border-radius:50%;background:#f87171;transition:background .2s;}
+  #status.on #dot{background:#4ade80;}
+  #sysName{font-weight:800;color:#fff;}
+  #sysName:empty{display:none;}
+
+  /* ---- Controller: landscape-first, full viewport, no scroll ---- */
+  .pad{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:space-between;
+    padding:calc(clamp(26px,7vh,40px) + env(safe-area-inset-top)) calc(clamp(12px,2.4vw,26px) + env(safe-area-inset-right))
+            calc(clamp(8px,2vh,18px) + env(safe-area-inset-bottom)) calc(clamp(12px,2.4vw,26px) + env(safe-area-inset-left));
+    gap:clamp(4px,1.4vh,10px);
+    /* Everything scales from these; internal parts use % / calc() of them. */
+    --dpad:clamp(104px,37vh,168px);    /* D-pad — smaller so the arrows aren't oversized */
+    --stick:clamp(128px,47vh,192px);   /* joystick — larger + prominent */
+    --face:clamp(120px,44vh,190px);
+    --sh-w:clamp(78px,19vw,148px); --sh-h:clamp(42px,12vh,60px);}
+
+  /* Base key: domed light surface + bright edge + outer shadow = distinct raised key */
+  .btn{background:var(--key);border:2px solid var(--edge);border-radius:16px;color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;line-height:1;
+    box-shadow:var(--raise);
+    transition:transform .05s, background .1s, box-shadow .1s; touch-action:none;}
+  .btn.press{background:radial-gradient(circle at 50% 40%, #9a7bff, var(--accent) 80%);
+    border-color:rgba(255,255,255,.9);
+    box-shadow:0 0 22px rgba(124,77,255,.85), inset 0 0 10px rgba(255,255,255,.35);
+    transform:scale(.9);color:#fff;text-shadow:none;}
+
+  /* Shoulders across the very top corners — bigger tabs */
+  .shoulders{display:flex;justify-content:space-between;align-items:flex-start;}
+  .sh-group{display:flex;gap:clamp(8px,1.6vw,16px);}
+  .shoulder{width:var(--sh-w);height:var(--sh-h);font-size:clamp(13px,2vh,18px);letter-spacing:.06em;border-radius:14px 14px 20px 20px;}
+
+  /* Middle band: left cluster (D-pad raised + stick low), meta center, face right */
+  .mid{flex:1;min-height:0;display:flex;align-items:flex-end;justify-content:space-between;
+    gap:clamp(6px,2vw,16px);padding:0 clamp(4px,1.5vw,12px) clamp(4px,1.5vh,10px);}
+
+  /* Left cluster: D-pad + analog stick side by side, stick low and the D-pad raised
+     for a DualShock diagonal. Flex + relative sizes = adapts to any width, no overlap. */
+  .left-cluster{display:flex;align-items:flex-end;gap:clamp(10px,2.6vw,28px);flex:none;}
+  .left-cluster .dpad{margin-bottom:calc(var(--stick) * 0.26);}   /* raise the D-pad */
+  .left-cluster.no-stick .dpad{margin-bottom:0;}
+
+  /* D-pad: a single connected cross with 4 pressable arms */
+  .dpad{position:relative;width:var(--dpad);height:var(--dpad);flex:none;}
+  .dpad .cross{position:absolute;inset:0;background:var(--key);
+    /* one plus/cross shape; arm thickness = 1/3 of the box */
+    clip-path:polygon(33.33% 0,66.67% 0,66.67% 33.33%,100% 33.33%,100% 66.67%,
+      66.67% 66.67%,66.67% 100%,33.33% 100%,33.33% 66.67%,0 66.67%,0 33.33%,33.33% 33.33%);
+    filter:drop-shadow(0 4px 7px rgba(0,0,0,.6)) drop-shadow(0 1px 0 rgba(255,255,255,.25));}
+  .dpad .btn{position:absolute;background:transparent;border:none;box-shadow:none;
+    width:33.33%;height:33.33%;color:rgba(255,255,255,.9);
+    font-size:calc(var(--dpad) * 0.145);text-shadow:0 1px 2px rgba(0,0,0,.6);}
+  .d-up{top:0;left:33.33%;align-items:flex-start;padding-top:8%;}
+  .d-down{bottom:0;left:33.33%;align-items:flex-end;padding-bottom:8%;}
+  .d-left{left:0;top:33.33%;justify-content:flex-start;padding-left:8%;}
+  .d-right{right:0;top:33.33%;justify-content:flex-end;padding-right:8%;}
+  .dpad .btn.press{background:radial-gradient(circle at 50% 50%, rgba(124,77,255,.6), transparent 72%);
+    color:#fff;text-shadow:0 0 10px rgba(124,77,255,.9);}
+
+  /* Analog stick: concave base with a raised, draggable nub */
+  .stick{position:relative;width:var(--stick);height:var(--stick);flex:none;border-radius:50%;
+    background:radial-gradient(circle at 50% 42%, #23232b, #15151a 58%, #2c2c34 100%);
+    box-shadow:inset 0 7px 16px rgba(0,0,0,.75), inset 0 -3px 6px rgba(255,255,255,.05),
+      0 3px 8px rgba(0,0,0,.5), 0 0 0 2px rgba(255,255,255,.06);
+    touch-action:none;}
+  .stick .nub{position:absolute;left:26%;top:26%;width:48%;height:48%;
+    border-radius:50%;background:var(--key);border:2px solid var(--edge);
+    box-shadow:var(--raise);transition:transform .07s ease-out;}
+  .stick.active .nub{transition:none;}
+  .stick .nub.glow{border-color:rgba(255,255,255,.9);
+    box-shadow:0 0 20px rgba(124,77,255,.8), var(--raise);}
+
+  /* Face buttons (bottom-right, where the right thumb rests) — diamond of keys */
+  .face{position:relative;width:var(--face);height:var(--face);flex:none;align-self:flex-end;margin-bottom:2%;}
+  .face .btn{position:absolute;width:39%;height:39%;border-radius:50%;
+    font-size:calc(var(--face) * 0.18);line-height:1;}   /* glyph tied to the key size — ✕ can't clip */
+  .face .btn.pos-top{top:0;left:30.5%;}
+  .face .btn.pos-right{right:0;top:30.5%;}
+  .face .btn.pos-bottom{bottom:0;left:30.5%;}
+  .face .btn.pos-left{left:0;top:30.5%;}
+  /* PlayStation symbol colors — bright glowing glyph + matching edge on the light key */
+  .face .btn.tri{color:var(--tri);border-color:var(--tri);text-shadow:0 0 10px currentColor;}
+  .face .btn.cir{color:var(--cir);border-color:var(--cir);text-shadow:0 0 10px currentColor;}
+  .face .btn.cro{color:var(--cro);border-color:var(--cro);text-shadow:0 0 10px currentColor;}
+  .face .btn.squ{color:var(--squ);border-color:var(--squ);text-shadow:0 0 10px currentColor;}
+  .face .btn.press{color:#fff;border-color:rgba(255,255,255,.9);text-shadow:none;}
+
+  /* Start / Select — small capsules centered between the clusters */
+  .center-col{align-self:flex-end;display:flex;flex-direction:column;justify-content:center;
+    margin:0 clamp(2px,1vw,8px) clamp(16px,7vh,42px);}
+  .meta{display:flex;flex-direction:column;justify-content:center;gap:clamp(10px,2.4vh,18px);}
+  .meta .btn{height:clamp(38px,10vh,50px);padding:0 clamp(16px,3vw,26px);border-radius:26px;
+    font-size:clamp(11px,1.7vh,13px);letter-spacing:.08em;text-transform:uppercase;color:#fff;}
+
+  /* Rotate-to-play overlay (portrait only) */
+  #rotate{display:none;position:fixed;inset:0;z-index:20;align-items:center;justify-content:center;
+    flex-direction:column;gap:14px;background:var(--bg);color:#e6e6ee;text-align:center;padding:24px;}
+  #rotate .icon{font-size:56px;line-height:1;animation:spin 2.4s ease-in-out infinite;}
+  #rotate .msg{font-size:17px;font-weight:700;letter-spacing:.02em;}
+  @keyframes spin{0%,60%{transform:rotate(0)}80%,100%{transform:rotate(90deg)}}
+  @media (orientation:portrait){
+    .pad,#status{display:none;}
+    #rotate{display:flex;}
+  }
+
+  #hint{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(13,13,16,.96);z-index:30;text-align:center;padding:24px;font-size:15px;line-height:1.5;color:#c8c8d0;}
+  #hint[hidden]{display:none;}   /* the [hidden] attr must win over display:flex — otherwise this dark layer covers the pad */
+  #hint b{color:#fff;}
+</style>
+</head>
+<body>
+<div id="status"><span id="dot"></span><span id="sysName"></span><span id="statusText">connecting…</span></div>
+
+<div class="pad">
+  <!-- .shoulders is populated per-console by JS (removed entirely for gb/nes) -->
+  <div class="shoulders"></div>
+
+  <div class="mid">
+  <div class="left-cluster">
+    <!-- D-pad: one connected cross with 4 pressable arms -->
+    <div class="dpad">
+      <div class="cross"></div>
+      <div class="btn d-up" data-b="4">▲</div>
+      <div class="btn d-down" data-b="5">▼</div>
+      <div class="btn d-left" data-b="6">◀</div>
+      <div class="btn d-right" data-b="7">▶</div>
+    </div>
+
+    <!-- Analog stick (removed by JS for gb/nes) -->
+    <div class="stick"><div class="nub"></div></div>
+  </div>
+
+  <div class="center-col">
+    <div class="meta">
+      <div class="btn" data-b="2">Select</div>
+      <div class="btn" data-b="3">Start</div>
+    </div>
+  </div>
+
+  <!-- .face is populated per-console by JS -->
+  <div class="face"></div>
+  </div>
+</div>
+
+<div id="rotate">
+  <div class="icon">↻</div>
+  <div class="msg">Rotate your phone to play</div>
+</div>
+
+<div id="hint" hidden></div>
+
+<script>
+(function(){
+  var params = new URLSearchParams(location.search);
+  var room = params.get('room');
+  var statusEl = document.getElementById('status');
+  var statusText = document.getElementById('statusText');
+  var hint = document.getElementById('hint');
+
+  /* ---- Per-console button layout (RetroArch indices) ---------------------
+     D-pad UP=4 DOWN=5 LEFT=6 RIGHT=7, START=3, SELECT=2 are static in markup.
+     Each config supplies the .face buttons and the .shoulders for that system. */
+  var LAYOUTS = {
+    gb:  { name:'Game Boy',
+      shoulders:{ left:[], right:[] },
+      face:[ {b:0,l:'B',pos:'bottom'}, {b:8,l:'A',pos:'right'} ] },
+    nes: { name:'NES',
+      shoulders:{ left:[], right:[] },
+      face:[ {b:0,l:'B',pos:'bottom'}, {b:8,l:'A',pos:'right'} ] },
+    gba: { name:'Game Boy Advance',
+      shoulders:{ left:[{b:10,l:'L'}], right:[{b:11,l:'R'}] },
+      face:[ {b:0,l:'B',pos:'bottom'}, {b:8,l:'A',pos:'right'} ] },
+    snes:{ name:'Super Nintendo',
+      shoulders:{ left:[{b:10,l:'L'}], right:[{b:11,l:'R'}] },
+      face:[ {b:0,l:'B',pos:'bottom'}, {b:8,l:'A',pos:'right'},
+             {b:1,l:'Y',pos:'left'},  {b:9,l:'X',pos:'top'} ] },
+    nds: { name:'Nintendo DS',
+      shoulders:{ left:[{b:10,l:'L'}], right:[{b:11,l:'R'}] },
+      face:[ {b:0,l:'B',pos:'bottom'}, {b:8,l:'A',pos:'right'},
+             {b:1,l:'Y',pos:'left'},  {b:9,l:'X',pos:'top'} ] },
+    psx: { name:'PlayStation',
+      shoulders:{ left:[{b:10,l:'L1'},{b:12,l:'L2'}], right:[{b:13,l:'R2'},{b:11,l:'R1'}] },
+      face:[ {b:0,l:'✕',pos:'bottom',c:'cro'}, {b:8,l:'○',pos:'right',c:'cir'},
+             {b:1,l:'□',pos:'left',c:'squ'},   {b:9,l:'△',pos:'top',c:'tri'} ] }
+  };
+
+  var sys = (params.get('sys') || 'psx').toLowerCase();
+  var cfg = LAYOUTS[sys] || LAYOUTS.psx;
+
+  function makeBtn(item, extraCls){
+    var el = document.createElement('div');
+    el.className = 'btn' + (extraCls ? ' ' + extraCls : '');
+    el.setAttribute('data-b', item.b);
+    el.textContent = item.l;
+    return el;
+  }
+
+  // Face cluster
+  var faceEl = document.querySelector('.face');
+  cfg.face.forEach(function(f){
+    faceEl.appendChild(makeBtn(f, 'pos-' + f.pos + (f.c ? ' ' + f.c : '')));
+  });
+
+  // Shoulders — remove the row entirely when the console has none
+  var shEl = document.querySelector('.shoulders');
+  var sh = cfg.shoulders, hasShoulders = sh.left.length || sh.right.length;
+  if (!hasShoulders) {
+    shEl.parentNode.removeChild(shEl);
+  } else {
+    var lg = document.createElement('div'); lg.className = 'sh-group left';
+    var rg = document.createElement('div'); rg.className = 'sh-group right';
+    sh.left.forEach(function(s){ lg.appendChild(makeBtn(s, 'shoulder')); });
+    sh.right.forEach(function(s){ rg.appendChild(makeBtn(s, 'shoulder')); });
+    shEl.appendChild(lg); shEl.appendChild(rg);
+  }
+
+  // Analog stick only for consoles that actually have one — just the PlayStation
+  // (DualShock). Every other console here (GB/NES/GBA/SNES/DS) is D-pad only, so
+  // the pad drops the D-pad to the thumb-rest position instead of adding a stick.
+  var hasStick = (sys === 'psx');
+  var stickEl = document.querySelector('.stick');
+  if (!hasStick && stickEl) {
+    stickEl.parentNode.removeChild(stickEl); stickEl = null;
+    var lc = document.querySelector('.left-cluster'); if (lc) lc.classList.add('no-stick');
+  }
+
+  // Show console name in the status bar
+  var sysNameEl = document.getElementById('sysName');
+  if (sysNameEl) sysNameEl.textContent = cfg.name;
+  document.title = cfg.name + ' Controller';
+
+  if (!room) {
+    hint.hidden = false;
+    hint.innerHTML = 'No room code.<br>Open the <b>Phone controller</b> QR from a game on the desktop and scan it.';
+    return;
+  }
+
+  var url = 'wss://khalil-arcade-relay.khalil-drissi.workers.dev/?room=' +
+            encodeURIComponent(room) + '&role=controller';
+  var ws, retry = 0, closed = false;
+
+  function setState(on, text){ statusEl.classList.toggle('on', !!on); statusText.textContent = text; }
+
+  function connect(){
+    setState(false, 'connecting…');
+    ws = new WebSocket(url);
+    ws.onopen = function(){ retry = 0; setState(true, 'connected — room ' + room); };
+    ws.onclose = function(){ if (closed) return; setState(false, 'reconnecting…');
+      retry = Math.min(retry + 1, 6); setTimeout(connect, 400 * retry); };
+    ws.onerror = function(){ try{ ws.close(); }catch(_){} };
+    ws.onmessage = function(){ /* host->controller messages unused for now */ };
+  }
+  connect();
+  window.addEventListener('pagehide', function(){ closed = true; try{ ws.close(); }catch(_){} });
+
+  function send(i, v){
+    if (ws && ws.readyState === 1) { try { ws.send(JSON.stringify({ t:'b', i:i, v:v })); } catch(_){} }
+  }
+
+  // Track which pointer is on which button so multi-touch works and a finger
+  // sliding off the button still releases it.
+  var pointerBtn = {};   // pointerId -> button element
+  // Haptics — short vibration pulses (Android/Chrome; no-op on iOS, which has no
+  // web Vibration API). Face buttons get a punchier pulse than the D-pad.
+  function haptic(ms){ if (navigator.vibrate){ try { navigator.vibrate(ms); } catch(_){} } }
+  function press(btn){ if (btn.classList.contains('press')) return;
+    btn.classList.add('press'); send(+btn.dataset.b, 1);
+    var isFace = btn.parentNode && btn.parentNode.classList.contains('face');
+    haptic(isFace ? 16 : 11); }
+  function release(btn){ if (!btn.classList.contains('press')) return;
+    btn.classList.remove('press'); send(+btn.dataset.b, 0); }
+
+  // Event delegation on .pad — works for the JS-generated buttons too.
+  var pad = document.querySelector('.pad');
+  pad.addEventListener('pointerdown', function(e){
+    var btn = e.target.closest('.btn'); if (!btn) return;
+    e.preventDefault(); pointerBtn[e.pointerId] = btn; press(btn);
+  }, { passive:false });
+  pad.addEventListener('pointermove', function(e){
+    if (!(e.pointerId in pointerBtn)) return;
+    var over = document.elementFromPoint(e.clientX, e.clientY);
+    var btn = over && over.closest ? over.closest('.btn') : null;
+    var cur = pointerBtn[e.pointerId];
+    if (btn !== cur) { if (cur) release(cur); if (btn){ pointerBtn[e.pointerId]=btn; press(btn); }
+      else delete pointerBtn[e.pointerId]; }
+  }, { passive:false });
+  function up(e){ var btn = pointerBtn[e.pointerId]; if (btn) release(btn); delete pointerBtn[e.pointerId]; }
+  pad.addEventListener('pointerup', up);
+  pad.addEventListener('pointercancel', up);
+
+  // ---- Analog joystick: DIGITAL 8-way over the existing D-pad indices ----
+  // Drag the nub; past a deadzone we resolve an octant and send UP=4/DOWN=5/
+  // LEFT=6/RIGHT=7 via the same send(). Diagonals send two directions. On
+  // release the nub recenters and every direction it held is released.
+  // The stick lives inside .pad but is not a .btn, so the delegated handlers
+  // above ignore it (closest('.btn') === null); its own handlers own it.
+  if (stickEl) {
+    var nub = stickEl.querySelector('.nub');
+    var stickHeld = {4:false,5:false,6:false,7:false};
+    var stickPid = null, cx = 0, cy = 0, maxT = 0;
+    var DEAD = 0.34; // fraction of max travel before any direction registers
+
+    function stickApply(dir){
+      [4,5,6,7].forEach(function(i){
+        if (dir[i] && !stickHeld[i]) { stickHeld[i] = true; send(i, 1); haptic(7); }
+        else if (!dir[i] && stickHeld[i]) { stickHeld[i] = false; send(i, 0); }
+      });
+      var any = stickHeld[4] || stickHeld[5] || stickHeld[6] || stickHeld[7];
+      nub.classList.toggle('glow', any);
+    }
+    function stickMove(clientX, clientY){
+      var dx = clientX - cx, dy = clientY - cy;
+      var dist = Math.hypot(dx, dy);
+      if (dist > maxT && dist > 0) { dx *= maxT / dist; dy *= maxT / dist; dist = maxT; }
+      nub.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+      var dir = {4:false,5:false,6:false,7:false};
+      if (dist >= maxT * DEAD) {
+        var a = Math.atan2(-dy, dx) * 180 / Math.PI; if (a < 0) a += 360;
+        var oct = Math.round(a / 45) % 8; // 0=E,1=NE,2=N,3=NW,4=W,5=SW,6=S,7=SE
+        if (oct === 1 || oct === 2 || oct === 3) dir[4] = true; // up
+        if (oct === 5 || oct === 6 || oct === 7) dir[5] = true; // down
+        if (oct === 3 || oct === 4 || oct === 5) dir[6] = true; // left
+        if (oct === 7 || oct === 0 || oct === 1) dir[7] = true; // right
+      }
+      stickApply(dir);
+    }
+    function stickEnd(){
+      stickPid = null; stickEl.classList.remove('active');
+      nub.style.transform = '';
+      stickApply({4:false,5:false,6:false,7:false});
+    }
+    stickEl.addEventListener('pointerdown', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var r = stickEl.getBoundingClientRect();
+      cx = r.left + r.width / 2; cy = r.top + r.height / 2;
+      maxT = r.width * 0.26;              // keep the raised nub (48% wide) inside the base
+      stickPid = e.pointerId; stickEl.classList.add('active');
+      try { stickEl.setPointerCapture(e.pointerId); } catch(_){}
+      stickMove(e.clientX, e.clientY);
+    }, { passive:false });
+    stickEl.addEventListener('pointermove', function(e){
+      if (e.pointerId !== stickPid) return;
+      e.preventDefault(); stickMove(e.clientX, e.clientY);
+    }, { passive:false });
+    stickEl.addEventListener('pointerup', function(e){ if (e.pointerId === stickPid) { e.stopPropagation(); stickEnd(); } });
+    stickEl.addEventListener('pointercancel', function(e){ if (e.pointerId === stickPid) stickEnd(); });
+  }
+
+  // Kill iOS double-tap zoom / long-press menus.
+  document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+})();
+</script>
+</body>
+</html>

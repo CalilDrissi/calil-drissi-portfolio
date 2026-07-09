@@ -192,8 +192,12 @@ function render(template, data, lang, featuredPosts, ghData) {
       <div class="intro-what">${data.intro.whatIDo}</div>
       <div class="intro-desc">${data.intro.whatIDoDesc}</div>
       <div class="intro-actions">
-        <button class="ask-ai-pill" id="askAiPill" type="button"><span class="ask-ai-orb"></span>${lang === 'fr' ? 'Discuter avec mon IA' : 'Ask my AI'}</button>
         <button class="contact-me-btn" id="askContactBtn" type="button">${lang === 'fr' ? 'Me contacter' : 'Contact me'}</button>
+        <button class="ask-ai-pill" id="askAiPill" type="button"><span class="ask-ai-orb" aria-hidden="true"></span>${lang === 'fr' ? 'Demander à mon IA' : 'Ask my AI'}</button>
+        <button class="games-btn" id="openGamesBtn" type="button" onclick="window.WM&&window.WM.openArcadeWindow()"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="6"/><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15.5" y1="13" x2="15.51" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/></svg>${lang === 'fr' ? 'Jouer' : 'Play Games'}</button>
+        <button class="games-btn" id="openTVBtn" type="button" onclick="window.WM&&window.WM.openTVWindow()"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="13" rx="2"/><path d="m8 3 4 4 4-4"/></svg>${lang === 'fr' ? 'Télévision' : 'Watch TV'}</button>
+        <button class="games-btn" id="openMusicBtn" type="button" onclick="window.WM&&window.WM.openMusicWindow()"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>${lang === 'fr' ? 'Musique' : 'Music'}</button>
+        <button class="games-btn" id="openRadioBtn" type="button" onclick="window.WM&&window.WM.openRadioWindow()"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l14-7"/><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="8" cy="16" r="2"/><line x1="16" y1="14" x2="16" y2="14.01"/><line x1="16" y1="18" x2="16" y2="18.01"/></svg>${lang === 'fr' ? 'Radio' : 'Radio'}</button>
       </div>
     </div>
 `
@@ -1835,51 +1839,55 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     var WP_URL = '${wpUrl}';
     var I18N = ${JSON.stringify(i18n)};
 
-    // ---- Listen (TTS) ----
+    // ---- Listen (self-hosted Kokoro neural TTS — voice.khalildrissi.com) ----
     (function() {
-      var synth = window.speechSynthesis;
-      if (!synth) { document.getElementById('listenPlayer').style.display = 'none'; return; }
+      var TTS_URL = 'https://voice.khalildrissi.com/v1/audio/speech';
+      var TTS_MODEL = 'speaches-ai/Kokoro-82M-v1.0-ONNX';
+      var TTS_VOICE = '${lang === 'fr' ? 'ff_siwis' : 'bm_george'}';
 
       var btn = document.getElementById('listenBtn');
       var icon = document.getElementById('listenIcon');
       var progress = document.getElementById('listenProgress');
-      var progressWrap = document.getElementById('listenProgressWrap');
       var timeEl = document.getElementById('listenTime');
       var speedBtn = document.getElementById('listenSpeed');
       var titleEl = document.querySelector('.listen-title');
 
-      var playing = false, paused = false, utterance = null;
-      var speeds = [1, 1.25, 1.5, 1.75, 2];
-      var speedIdx = 0;
-      var startTime = 0, elapsed = 0, totalEstimate = 0;
-      var tickInterval = null;
-      var keepAliveInterval = null;
-      var textContent = '';
-      var voicesReady = false;
-
-      // Wait for voices to load (Chrome loads them async)
-      function ensureVoices(cb) {
-        var voices = synth.getVoices();
-        if (voices.length > 0) { voicesReady = true; cb(); return; }
-        synth.addEventListener('voiceschanged', function handler() {
-          voicesReady = true;
-          synth.removeEventListener('voiceschanged', handler);
-          cb();
-        });
-        // Fallback: try anyway after 1s even if no voices event
-        setTimeout(function() { if (!voicesReady) { voicesReady = true; cb(); } }, 1000);
-      }
-
       // Extract plain text from article
+      var textContent = '';
       var body = document.querySelector('.post-body');
       if (body) {
         textContent = body.innerText || body.textContent || '';
         textContent = textContent.replace(/\\s+/g, ' ').trim();
       }
+      if (!textContent) { document.getElementById('listenPlayer').style.display = 'none'; return; }
 
-      // Estimate reading time in seconds (150 words per min at 1x)
+      // Small sentence-grouped chunks so the FIRST chunk synthesizes in ~1-2s and
+      // playback starts fast; the next chunk is prefetched while one plays.
+      var maxLen = 320;
+      var chunks = [];
+      var sentences = textContent.match(/[^.!?…]+[.!?…]+(\\s|$)|.+$/g) || [textContent];
+      var chunk = '';
+      for (var i = 0; i < sentences.length; i++) {
+        var s = sentences[i].trim();
+        if (!s) continue;
+        if ((chunk + ' ' + s).length > maxLen && chunk) { chunks.push(chunk); chunk = s; }
+        else { chunk = chunk ? chunk + ' ' + s : s; }
+      }
+      if (chunk) chunks.push(chunk);
+      var chunkLens = chunks.map(function(c) { return c.length; });
+      var totalLen = chunkLens.reduce(function(a, b) { return a + b; }, 0) || 1;
+
+      // Reading-time estimate (150 wpm) drives the time label.
       var wordCount = textContent.split(/\\s+/).length;
-      totalEstimate = Math.round((wordCount / 150) * 60);
+      var totalEstimate = Math.round((wordCount / 150) * 60);
+
+      var speeds = [1, 1.25, 1.5, 1.75, 2];
+      var speedIdx = 0;
+      var playing = false, paused = false, loading = false;
+      var curIdx = 0, doneLen = 0, generation = 0;
+      var curURL = null;
+      var audio = new Audio();
+      audio.preload = 'auto';
 
       function fmt(secs) {
         var m = Math.floor(secs / 60);
@@ -1892,132 +1900,102 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
       var playPath = '<polygon points="6,4 20,12 6,20" />';
       var pausePath = '<rect x="5" y="4" width="4" height="16" /><rect x="13" y="4" width="4" height="16" />';
 
-      function tick() {
-        if (!playing || paused) return;
-        elapsed = (Date.now() - startTime) / 1000;
-        var pct = Math.min(100, (elapsed / (totalEstimate / speeds[speedIdx])) * 100);
+      audio.addEventListener('timeupdate', function() {
+        if (!audio.duration || !isFinite(audio.duration)) return;
+        var frac = audio.currentTime / audio.duration;
+        var pct = Math.min(100, ((doneLen + chunkLens[curIdx] * frac) / totalLen) * 100);
         progress.style.width = pct + '%';
-        var remaining = Math.max(0, (totalEstimate / speeds[speedIdx]) - elapsed);
-        timeEl.textContent = fmt(remaining);
-      }
+        timeEl.textContent = fmt(Math.max(0, totalEstimate * (1 - pct / 100)));
+      });
 
-      // Pre-split text into chunks (smaller for reliability)
-      var chunks = [];
-      var maxLen = 160;
-      var words = textContent.split(' ');
-      var chunk = '';
-      for (var i = 0; i < words.length; i++) {
-        if ((chunk + ' ' + words[i]).length > maxLen && chunk) {
-          chunks.push(chunk);
-          chunk = words[i];
-        } else {
-          chunk = chunk ? chunk + ' ' + words[i] : words[i];
+      audio.addEventListener('ended', function() {
+        doneLen += chunkLens[curIdx];
+        curIdx++;
+        if (curIdx >= chunks.length) { stopSpeech(); return; }
+        playChunk(curIdx);
+      });
+
+      // Cache TTS blobs by chunk index so the NEXT chunk can be prefetched while
+      // the current one plays (gapless, and the first chunk is small = fast start).
+      var blobCache = {};
+      function fetchChunk(idx) {
+        if (idx < 0 || idx >= chunks.length) return null;
+        if (!blobCache[idx]) {
+          blobCache[idx] = fetch(TTS_URL, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: TTS_MODEL, voice: TTS_VOICE, input: chunks[idx], response_format: 'mp3' })
+          }).then(function(r) { if (!r.ok) throw new Error('tts ' + r.status); return r.blob(); });
         }
+        return blobCache[idx];
       }
-      if (chunk) chunks.push(chunk);
-      var currentChunk = 0;
-      var speakGeneration = 0;
-
-      // Chrome bug workaround: synth stops after ~15s of continuous speech.
-      // Periodically pause/resume to keep it alive.
-      function startKeepAlive() {
-        stopKeepAlive();
-        keepAliveInterval = setInterval(function() {
-          if (synth.speaking && !synth.paused && playing && !paused) {
-            synth.pause();
-            synth.resume();
-          }
-        }, 10000);
-      }
-      function stopKeepAlive() {
-        if (keepAliveInterval) { clearInterval(keepAliveInterval); keepAliveInterval = null; }
-      }
-
-      function speakFrom(idx) {
-        synth.cancel();
-        currentChunk = idx;
-        var gen = ++speakGeneration;
-        startKeepAlive();
-        function speakNext() {
-          if (gen !== speakGeneration) return;
-          if (currentChunk >= chunks.length) {
-            stopSpeech();
-            return;
-          }
-          utterance = new SpeechSynthesisUtterance(chunks[currentChunk]);
-          utterance.lang = '${lang === 'fr' ? 'fr-FR' : 'en-US'}';
-          utterance.rate = speeds[speedIdx];
-          utterance.onend = function() {
-            if (gen !== speakGeneration) return;
-            currentChunk++;
-            speakNext();
-          };
-          utterance.onerror = function(e) {
-            if (gen !== speakGeneration) return;
-            if (e.error !== 'canceled' && e.error !== 'interrupted') stopSpeech();
-          };
-          synth.speak(utterance);
-        }
-        speakNext();
-      }
-
-      function startSpeech() {
-        ensureVoices(function() {
-          totalEstimate = Math.round((wordCount / 150) * 60);
-          playing = true; paused = false;
-          startTime = Date.now();
-          elapsed = 0;
-          icon.innerHTML = pausePath;
+      function playChunk(idx) {
+        var gen = generation;
+        loading = true;
+        var p = fetchChunk(idx);
+        fetchChunk(idx + 1);        // prefetch the next chunk while this one plays
+        return p.then(function(blob) {
+          if (gen !== generation) return;
+          loading = false;
+          if (curURL) URL.revokeObjectURL(curURL);
+          curURL = URL.createObjectURL(blob);
+          audio.src = curURL;
+          audio.playbackRate = speeds[speedIdx];
           titleEl.textContent = '${lang === 'fr' ? 'Lecture en cours...' : 'Playing...'}';
-          tickInterval = setInterval(tick, 250);
-          speakFrom(0);
+          return audio.play();
+        }).catch(function() {
+          if (gen !== generation) return;
+          loading = false;
+          titleEl.textContent = '${lang === 'fr' ? 'Erreur audio' : 'Playback error'}';
+          stopSpeech();
         });
       }
 
+      function startSpeech() {
+        generation++;
+        playing = true; paused = false;
+        curIdx = 0; doneLen = 0;
+        icon.innerHTML = pausePath;
+        titleEl.textContent = '${lang === 'fr' ? 'Chargement...' : 'Loading...'}';
+        progress.style.width = '0%';
+        playChunk(0);
+      }
+
       function stopSpeech() {
-        synth.cancel();
-        stopKeepAlive();
-        playing = false; paused = false;
+        generation++;
+        playing = false; paused = false; loading = false;
+        audio.pause();
+        audio.removeAttribute('src');
+        if (curURL) { URL.revokeObjectURL(curURL); curURL = null; }
         icon.innerHTML = playPath;
         progress.style.width = '0%';
         timeEl.textContent = fmt(totalEstimate);
         titleEl.textContent = '${lang === 'fr' ? "Écouter l\\'article" : 'Listen to article'}';
-        if (tickInterval) clearInterval(tickInterval);
       }
 
       btn.addEventListener('click', function() {
         if (!playing) {
           startSpeech();
         } else if (!paused) {
-          synth.pause();
           paused = true;
-          stopKeepAlive();
+          if (!loading) audio.pause();
           icon.innerHTML = playPath;
           titleEl.textContent = '${lang === 'fr' ? 'En pause' : 'Paused'}';
-          if (tickInterval) clearInterval(tickInterval);
         } else {
-          synth.resume();
           paused = false;
-          startKeepAlive();
           icon.innerHTML = pausePath;
           titleEl.textContent = '${lang === 'fr' ? 'Lecture en cours...' : 'Playing...'}';
-          startTime = Date.now() - (elapsed * 1000);
-          tickInterval = setInterval(tick, 250);
+          if (!loading) audio.play();
         }
       });
 
       speedBtn.addEventListener('click', function() {
-        var oldSpeed = speeds[speedIdx];
         speedIdx = (speedIdx + 1) % speeds.length;
         speedBtn.textContent = speeds[speedIdx] + '\\u00d7';
-        if (playing && !paused) {
-          speakFrom(currentChunk);
-          startTime = Date.now() - (elapsed * 1000 * (oldSpeed / speeds[speedIdx]));
-        }
+        audio.playbackRate = speeds[speedIdx];
       });
 
       // Cleanup on navigate away
-      window.addEventListener('beforeunload', function() { synth.cancel(); stopKeepAlive(); });
+      window.addEventListener('beforeunload', function() { audio.pause(); });
     })();
 
     // ---- TOC ----
@@ -2329,8 +2307,55 @@ async function build() {
     console.log('  ✓ /_redirects');
   }
 
+  // Copy _headers (Cloudflare Pages — arcade cross-origin isolation, scoped to /arcade/*)
+  const headersSrc = path.join(__dirname, '_headers');
+  if (fs.existsSync(headersSrc)) {
+    fs.copyFileSync(headersSrc, path.join(DIST, '_headers'));
+    console.log('  ✓ /_headers');
+  }
+
+  // Copy the PS1 arcade front-end (player/catalogue/pad/sw + covers) -> /arcade/.
+  // ROMs are NOT vendored — they stream from R2 (see catalogue.html game URLs).
+  const arcadeSrc = path.join(__dirname, 'arcade');
+  if (fs.existsSync(arcadeSrc)) {
+    fs.cpSync(arcadeSrc, path.join(DIST, 'arcade'), {
+      recursive: true,
+      filter: (src) => !/[\\/]roms([\\/]|$)/.test(src),  // never ship local ROM symlinks
+    });
+    console.log('  ✓ /arcade/');
+  }
+
+  // Copy the Live TV app -> /tv/ (player + channels + add-playlist).
+  const tvSrc = path.join(__dirname, 'tv');
+  if (fs.existsSync(tvSrc)) {
+    fs.cpSync(tvSrc, path.join(DIST, 'tv'), { recursive: true });
+    console.log('  ✓ /tv/');
+  }
+
+  // Copy the Radio app -> /radio/ (Radio-Browser directory + favorites).
+  const radioSrc = path.join(__dirname, 'radio');
+  if (fs.existsSync(radioSrc)) {
+    fs.cpSync(radioSrc, path.join(DIST, 'radio'), { recursive: true });
+    console.log('  ✓ /radio/');
+  }
+
+  // Copy the custom Music player -> /music/ (Navidrome Subsonic API client).
+  const musicSrc = path.join(__dirname, 'music');
+  if (fs.existsSync(musicSrc)) {
+    fs.cpSync(musicSrc, path.join(DIST, 'music'), { recursive: true });
+    console.log('  ✓ /music/');
+  }
+
+  // Copy the browser voice-agent client bundle (ESM) -> /voice-client.js.
+  // The Dynamic Island in index.html imports it at runtime.
+  const voiceClientSrc = path.join(__dirname, 'voice-client.js');
+  if (fs.existsSync(voiceClientSrc)) {
+    fs.copyFileSync(voiceClientSrc, path.join(DIST, 'voice-client.js'));
+    console.log('  ✓ /voice-client.js');
+  }
+
   // Copy static assets (images, favicon)
-  const staticFiles = ['profile.png', 'favicon.png', 'apple-touch-icon.png', 'loader-avatar.png', 'fez-icon.png', 'video.mp4', 'flag-en.png', 'flag-fr.png'];
+  const staticFiles = ['profile.png', 'favicon.png', 'apple-touch-icon.png', 'loader-avatar.png', 'fez-icon.png', 'video.mp4', 'flag-en.png', 'flag-fr.png', 'arcade-icon-192.png', 'arcade-icon-512.png', 'arcade-app.webmanifest', 'app-sw.js', 'site.webmanifest', 'icon-192.png', 'icon-512.png'];
   for (const f of staticFiles) {
     const src = path.join(__dirname, f);
     if (fs.existsSync(src)) {

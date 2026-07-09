@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>khalildrissi.com — Project Handoff &amp; Continuation Guide</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#161922; --panel2:#1c2029; --line:#2a2f3a;
+    --fg:#e8eaf0; --dim:#aab2c2; --faint:#7c8598; --accent:#7c4dff; --accent2:#38bdf8;
+    --ok:#3ecf8e; --warn:#ffb454; --bad:#ff6b81;
+    --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.6}
+  .wrap{max-width:940px;margin:0 auto;padding:40px 22px 120px}
+  header.hero{border:1px solid var(--line);border-radius:14px;background:linear-gradient(160deg,#1a1e29,#12151d);padding:28px 30px;margin-bottom:26px}
+  header.hero h1{margin:0 0 6px;font-size:26px;letter-spacing:-.01em}
+  header.hero .sub{color:var(--dim);font-size:14px}
+  .badges{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+  .badge{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:var(--dim)}
+  .badge.accent{border-color:rgba(124,77,255,.5);color:#c9b8ff;background:rgba(124,77,255,.12)}
+  h2{margin:38px 0 12px;font-size:20px;padding-bottom:8px;border-bottom:1px solid var(--line);scroll-margin-top:16px}
+  h2 .n{color:var(--accent);font-family:var(--mono);font-size:15px;margin-right:8px}
+  h3{margin:22px 0 8px;font-size:15.5px;color:#fff}
+  p{margin:8px 0}
+  a{color:var(--accent2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:var(--mono);font-size:.88em;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:#e5d9ff}
+  pre{background:#0b0d12;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;margin:12px 0}
+  pre code{background:none;border:none;padding:0;color:#cdd3e0;font-size:12.5px;line-height:1.7}
+  ul,ol{margin:8px 0 8px 4px;padding-left:22px}
+  li{margin:5px 0}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:8px;columns:2;column-gap:30px}
+  .toc a{display:block;color:var(--dim);font-size:13.5px;padding:3px 0;break-inside:avoid}
+  .toc a:hover{color:#fff}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--faint);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  td code{white-space:nowrap}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:14px 0}
+  .note{border-left:3px solid var(--accent2);background:rgba(56,189,248,.07);padding:10px 16px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px}
+  .warn{border-left:3px solid var(--warn);background:rgba(255,180,84,.08);padding:10px 16px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px}
+  .danger{border-left:3px solid var(--bad);background:rgba(255,107,129,.08);padding:10px 16px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px}
+  .ok{color:var(--ok)} .bad{color:var(--bad)} .warnc{color:var(--warn)} .dim{color:var(--dim)}
+  .kv{font-family:var(--mono);font-size:12.5px;color:var(--accent2)}
+  footer{margin-top:50px;padding-top:18px;border-top:1px solid var(--line);color:var(--faint);font-size:12.5px}
+  @media(max-width:640px){.toc{columns:1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>khalildrissi.com — Handoff &amp; Continuation Guide</h1>
+  <div class="sub">Everything needed to continue this project with Claude Code on another machine. Generated from the codebase, git history, <code>.env</code>, project memory, and our working session — no assumptions.</div>
+  <div class="badges">
+    <span class="badge accent">Personal portfolio + blog</span>
+    <span class="badge">Static site generator (Node)</span>
+    <span class="badge">Cloudflare Pages</span>
+    <span class="badge">Headless WordPress CMS</span>
+    <span class="badge">Last commit: 205e8b8</span>
+    <span class="badge">Branch: main</span>
+  </div>
+</header>
+
+<div class="note"><strong>How to use this doc:</strong> Unzip the transfer, open the project in Claude Code on the new machine, and paste/point it at this file for full context (the per-machine memory does <em>not</em> travel — this HTML is the context bridge). A copy also lives inside the project at <code>v2/HANDOFF.html</code>.</div>
+
+<nav class="toc">
+  <a href="#quickstart">1 · Quick start on the new machine</a>
+  <a href="#overview">2 · Project overview &amp; live URLs</a>
+  <a href="#deploy">3 · Architecture &amp; deploy pipeline</a>
+  <a href="#files">4 · Key files &amp; structure</a>
+  <a href="#systems">5 · Systems in detail</a>
+  <a href="#session">6 · What we did this session</a>
+  <a href="#secrets">7 · Credentials &amp; secrets inventory</a>
+  <a href="#issues">8 · Known issues &amp; gotchas</a>
+  <a href="#todo">9 · Pending work / TODO</a>
+  <a href="#graphify">10 · graphify knowledge graph</a>
+  <a href="#claudecode">11 · Continuing with Claude Code</a>
+  <a href="#zip">12 · What's in the zip</a>
+</nav>
+
+<h2 id="quickstart"><span class="n">1</span>Quick start on the new machine</h2>
+<div class="card">
+<p><strong>Prerequisites:</strong> Node.js (CI uses <span class="kv">Node 20</span>), Git, and Claude Code. Optional: Homebrew + Python 3.12+ for the graphify tooling.</p>
+<pre><code># 1. Unzip the transfer, then enter the project (git root is v2/)
+cd calil-drissi.dev/v2
+
+# 2. Install dev deps (@playwright/test). Browsers only needed if you run tests:
+npm install
+npx playwright install        # optional, for tests/
+
+# 3. .env is INCLUDED in the zip (WP_URL, WP_USER, WP_APP_PASSWORD, PEXELS_KEY) — verify:
+cat .env | sed 's/=.*/=<set>/'
+
+# 4. Build the static site -> dist/
+node build.js
+
+# 5. Preview locally
+cd dist &amp;&amp; python3 -m http.server 8080   # then open http://localhost:8080
+
+# 6. Deploy: just push to main (see §3). No manual deploy step.
+</code></pre>
+</div>
+<div class="warn"><strong>Git remote is SSH:</strong> <code>git@github.com:CalilDrissi/calil-drissi-portfolio.git</code>. On the new machine either add your SSH key to GitHub, or switch to HTTPS + a Personal Access Token:
+<pre><code>git remote set-url origin https://github.com/CalilDrissi/calil-drissi-portfolio.git</code></pre></div>
+
+<h2 id="overview"><span class="n">2</span>Project overview &amp; live URLs</h2>
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>What</td><td>Personal portfolio + technical blog for Khalil Drissi (bilingual EN/FR)</td></tr>
+  <tr><td>Live (EN)</td><td><a href="https://khalildrissi.com">https://khalildrissi.com</a></td></tr>
+  <tr><td>Live (FR)</td><td><a href="https://khalildrissi.com/fr/">https://khalildrissi.com/fr/</a></td></tr>
+  <tr><td>Repo</td><td><code>github.com/CalilDrissi/calil-drissi-portfolio</code> · branch <code>main</code></td></tr>
+  <tr><td>Hosting</td><td>Cloudflare Pages (auto-deploy on push to <code>main</code>)</td></tr>
+  <tr><td>CMS</td><td>Headless WordPress at <a href="https://cms.drissi.xyz">https://cms.drissi.xyz</a> — blog content pulled via REST API at build time</td></tr>
+  <tr><td>Build</td><td><code>node build.js</code> — static site generator, outputs to <code>dist/</code></td></tr>
+  <tr><td>Working dir</td><td>Everything is in the <code>v2/</code> subfolder (the git repo root is <code>v2/</code>)</td></tr>
+</table>
+
+<h2 id="deploy"><span class="n">3</span>Architecture &amp; deploy pipeline</h2>
+<p><code>build.js</code> reads the <code>index.html</code> template + <code>content/en.json</code> / <code>content/fr.json</code>, fetches published blog posts from WordPress, and renders <code>dist/</code>: EN at <code>/</code>, FR at <code>/fr/</code>, plus blog listing + post pages. It also copies static assets and the Cloudflare Functions.</p>
+<h3>Two ways a deploy is triggered</h3>
+<ol>
+  <li><strong>Code push:</strong> <code>git push origin main</code> → GitHub Actions (<code>.github/workflows/deploy.yml</code>, Node 20) runs <code>node build.js</code> → deploys <code>dist/</code> to Cloudflare Pages via <code>wrangler-action</code>.</li>
+  <li><strong>WordPress publish:</strong> a WP publish fires the "Khalil Deploy Hook" plugin → <code>POST /api/webhook</code> (<code>functions/api/webhook.js</code>) → GitHub <code>repository_dispatch</code> (event <code>wordpress_publish</code>) → same Actions build → deploy. So new blog posts go live without a manual push.</li>
+</ol>
+<div class="note"><strong>Bulk-insert tip (from experience):</strong> when creating many posts via the CLI, temporarily <code>gh workflow disable "Build &amp; Deploy"</code>, insert, then re-enable + one push for a single clean deploy (avoids a deploy storm).</div>
+
+<h2 id="files"><span class="n">4</span>Key files &amp; structure</h2>
+<table>
+  <tr><th>Path</th><th>Purpose</th></tr>
+  <tr><td><code>build.js</code></td><td>Static site generator: fetches WP posts, renders EN/FR + blog, injects PROJECTS_DATA, copies assets (incl. <code>flag-en.png</code>, <code>flag-fr.png</code>, videos, collab forms, PDFs)</td></tr>
+  <tr><td><code>index.html</code></td><td>Main single-page template (~6,500 lines). Contains all inline CSS/JS: intro, projects carousel, AI chat + voice orb, window manager (<code>WM</code>), repo browser, terminal easter-egg, contact/message forms, language switcher</td></tr>
+  <tr><td><code>content/en.json</code>, <code>content/fr.json</code></td><td>Portfolio data: intro, position, ventures, projects, nav, <code>chat.greeting</code>. <strong>Edit these, not index.html</strong> — build.js overwrites from JSON</td></tr>
+  <tr><td><code>content/blog/</code></td><td>Blog-related content assets</td></tr>
+  <tr><td><code>functions/api/chat.js</code></td><td>AI assistant → Ollama Cloud (Gemma). See §5</td></tr>
+  <tr><td><code>functions/api/message.js</code></td><td>Contact forms → Contact Form 7 on WordPress. See §5</td></tr>
+  <tr><td><code>functions/api/save-content.js</code></td><td>Admin panel → GitHub API (commits content, triggers deploy)</td></tr>
+  <tr><td><code>functions/api/webhook.js</code></td><td>WP publish → GitHub <code>repository_dispatch</code></td></tr>
+  <tr><td><code>functions/api/file/[id].js</code></td><td>Serves message attachments from Cloudflare KV (90-day expiry)</td></tr>
+  <tr><td><code>functions/api/views/[slug].js</code>, <code>views/index.js</code></td><td>Blog view counter (Cloudflare KV <code>VIEWS</code>)</td></tr>
+  <tr><td><code>functions/_middleware.js</code></td><td>Cloudflare Pages middleware</td></tr>
+  <tr><td><code>admin/index.html</code></td><td>CMS admin panel — edits <code>content/*.json</code>, saves via <code>/api/save-content</code></td></tr>
+  <tr><td><code>cli/</code> (29 scripts)</td><td><code>blog.js</code> (WP blog CLI), <code>create-*-posts.js</code>, <code>content-*.js</code> (post bodies), <code>add/update-featured-*.js</code> (images/tags). Use WP REST API; read creds from <code>.env</code></td></tr>
+  <tr><td><code>collab-form.html</code> / <code>collab-form-fr.html</code></td><td>Standalone "Work Offer Intake" pages at <code>/collab-form</code> (email + PDF), EN + FR</td></tr>
+  <tr><td><code>work-offer-intake*-print.html</code> + <code>*.pdf</code></td><td>Printable single-page PDF versions of the intake form</td></tr>
+  <tr><td><code>tests/</code></td><td>Playwright regression specs (layout, typography, interactive, blog phases)</td></tr>
+  <tr><td><code>.github/workflows/deploy.yml</code></td><td>CI/CD: push/dispatch → build → Cloudflare Pages</td></tr>
+  <tr><td><code>graphify-out/</code></td><td>Knowledge graph of the codebase (see §10)</td></tr>
+</table>
+
+<h2 id="systems"><span class="n">5</span>Systems in detail</h2>
+
+<h3>AI chat assistant</h3>
+<p><code>functions/api/chat.js</code> → Ollama Cloud (<code>https://ollama.com/api/chat</code>, model <span class="kv">gemma3:27b</span>, Bearer <code>OLLAMA_API_KEY</code> — a Cloudflare secret). System prompt carries Khalil's bio; the model replies in the visitor's language and in plain text (no emoji). If the API is unreachable, the client falls back to keyword-matched canned replies in <code>index.html</code>.</p>
+
+<h3>Voice layer (all browser-native, in <code>index.html</code>)</h3>
+<ul>
+  <li>Speech-to-text via Web Speech API; spoken replies via <code>speechSynthesis</code> (TTS); an audio-reactive orb via Web Audio.</li>
+  <li>Hands-free conversation loop: speak → 1.5s silence auto-sends → AI replies aloud → auto re-listens. Tap the orb to send now; the ✕ exits to text.</li>
+  <li>Speaks replies <strong>only</strong> for voice messages (typed messages stay silent). Audio stops when the chat window is closed/minimized (WM <code>onHide</code> hook).</li>
+  <li>Mobile: skips the orb's <code>getUserMedia</code> analyser (a parallel mic stream breaks SpeechRecognition on mobile) and uses <code>continuous=false</code>.</li>
+</ul>
+
+<h3>Contact forms (Leave a Message / Schedule a Call / Collaboration)</h3>
+<p>All three POST to <code>functions/api/message.js</code> → <strong>Contact Form 7</strong> (form ID <span class="kv">338</span>) on cms.drissi.xyz → Flamingo (stores every submission) + WP Mail SMTP (emails).</p>
+<ul>
+  <li>Public CF7 endpoint <code>/wp-json/contact-form-7/v1/contact-forms/338/feedback</code>. The Worker must send <code>Referer</code>/<code>Origin: https://khalildrissi.com</code> headers or CF7's spam check rejects the datacenter-IP request.</li>
+  <li>Treats CF7 <code>mail_sent</code> <em>and</em> <code>mail_failed</code> as success (Flamingo stores regardless — check WP Admin → Flamingo → Inbound).</li>
+  <li>Email: WP Mail SMTP via mailbox <code>portfolio@cms.drissi.xyz</code> (host mail.cms.drissi.xyz:465 SSL); CF7 "To" = <code>khalil@drissi.org</code>.</li>
+  <li>Attachments (voice/video/file) upload to Cloudflare KV (<code>MESSAGE_FILES</code>), served via <code>/api/file/{id}</code>; the link is appended to the message body.</li>
+  <li><span class="dim">History: FormSubmit was dropped (rate-limited) and replaced by this CF7 setup.</span></li>
+</ul>
+
+<h3>Blog</h3>
+<p>Content lives in WordPress (cms.drissi.xyz) and is pulled by <code>build.js</code> at build time. 42+ posts (21 topics × EN/FR) with Polylang. The <code>cli/</code> scripts create and manage posts via the WP REST API (auth <code>Basic base64(user:app_password)</code>; Polylang <code>lang</code> param; featured media upload; category/tag handling).</p>
+
+<h3>Admin CMS panel</h3>
+<p><code>/admin/index.html</code> edits the portfolio JSON and saves via <code>/api/save-content</code> → GitHub API → commit → deploy.</p>
+
+<h2 id="session"><span class="n">6</span>What we did this session</h2>
+<p>Chronological log of changes made and shipped (all committed &amp; deployed):</p>
+<ul>
+  <li><strong>Voice chat overhaul:</strong> fixed premature submit (<code>continuous=true</code> + 1.5s silence timer); audio-reactive pulsing orb; live transcript while speaking; mic hides while listening (orb is the control); ✕ exit-to-text button; hands-free conversation loop; speak replies only for voice messages; stop audio on window close/minimize; mobile fixes.</li>
+  <li><strong>Mobile popup UX:</strong> full-screen popups (fixed page bleed-through caused by a <code>max-height: calc(100dvh - 40px)</code> cap); keyboard-safe input via <code>interactive-widget=resizes-content</code>; compact one-row titlebar (ellipsis, no dot collision); safe-area insets.</li>
+  <li><strong>Intro pill:</strong> "Ask my AI" pill opens About → chat tab; harmonized its type to the site scale; accent-color glow shadow.</li>
+  <li><strong>"Contact me" button</strong> (accent) added under the pill → opens Leave a Message.</li>
+  <li><strong>Top nav:</strong> accent "Blog" button; language switcher now uses real PNG flags (<code>flag-en.png</code> UK, <code>flag-fr.png</code> FR); timezone 🌐 emoji replaced with an SVG globe icon.</li>
+  <li><strong>Bug fixes:</strong> corrupted 👋 emoji (mojibake) in the EN <code>chat.greeting</code> in <code>content/en.json</code> was showing as tofu rectangles — stripped it; added emoji font fallbacks (kept <em>after</em> the generic family so <code>↗</code> arrows stay plain text).</li>
+  <li><strong>FR polish:</strong> "Derniers Repos" (repo title); localized voice orb labels (À l'écoute / Réflexion / Réponse); intro line "Je transforme les problèmes complexes en solutions simples."</li>
+  <li><strong>Contrast + typography audit</strong> (Playwright, WCAG) — <em>recommendations produced, not yet implemented</em> (see §9).</li>
+  <li><strong>graphify knowledge graph</strong> installed and built (see §10).</li>
+</ul>
+
+<h2 id="secrets"><span class="n">7</span>Credentials &amp; secrets inventory</h2>
+<div class="danger"><strong>Deliberate choice:</strong> raw secret <em>values</em> are NOT printed in this HTML (it could be shared/opened insecurely). They travel in the included <code>.env</code> and live in the Cloudflare / WordPress dashboards. This section is the <em>inventory</em> — what exists and where to find it. Keep this doc and the zip private.</div>
+<table>
+  <tr><th>Secret</th><th>Where it lives</th><th>Used by</th></tr>
+  <tr><td><code>WP_URL</code>, <code>WP_USER</code>, <code>WP_APP_PASSWORD</code></td><td>Local <code>.env</code> (in the zip)</td><td><code>build.js</code> + <code>cli/</code> — WordPress REST API</td></tr>
+  <tr><td><code>PEXELS_KEY</code></td><td>Local <code>.env</code> (in the zip)</td><td>Blog featured-image fetching (CLI)</td></tr>
+  <tr><td><code>OLLAMA_API_KEY</code> (+ optional <code>OLLAMA_MODEL</code>)</td><td>Cloudflare Pages → Settings → Environment variables (server-side; already set)</td><td><code>functions/api/chat.js</code></td></tr>
+  <tr><td>GitHub token</td><td>Cloudflare Pages secret (server-side)</td><td><code>functions/api/save-content.js</code> (admin → GitHub commits)</td></tr>
+  <tr><td>KV bindings <code>VIEWS</code>, <code>MESSAGE_FILES</code></td><td>Cloudflare Pages → Functions → KV bindings</td><td>Blog views counter; message attachments</td></tr>
+  <tr><td>WordPress admin login</td><td><a href="https://cms.drissi.xyz/wp-admin">cms.drissi.xyz/wp-admin</a> — user <code>khalil</code>; password in your password manager</td><td>Managing CMS, CF7, Flamingo, WP Mail SMTP</td></tr>
+  <tr><td>Mailbox <code>portfolio@cms.drissi.xyz</code></td><td>Host mail.cms.drissi.xyz — webmail; password in your records</td><td>SMTP relay for form emails</td></tr>
+</table>
+<div class="note">For normal local development on the new machine you only need the included <code>.env</code> (WordPress + Pexels). The Cloudflare secrets are already set server-side, so the deployed Functions keep working without any local setup.</div>
+
+<h2 id="issues"><span class="n">8</span>Known issues &amp; gotchas</h2>
+<ul>
+  <li><strong>UTF-8 / mojibake:</strong> <code>save-content.js</code> must decode base64→string with <code>TextDecoder('utf-8')</code> + <code>Uint8Array</code>, <em>not</em> <code>atob()</code> (which corrupts UTF-8). A stray 👋 emoji in <code>content/en.json</code> once corrupted into tofu rectangles — watch emoji in JSON content.</li>
+  <li><strong>Ribbon / homepage data</strong> is edited via <code>content/{lang}.json</code>, never in <code>index.html</code> (build.js regenerates from JSON).</li>
+  <li><strong>Emoji fonts must be LAST</strong> in the <code>--mono</code> / <code>--sans</code> font stacks — otherwise dual-presentation chars like <code>↗</code> (U+2197) render as colored emoji tiles instead of text arrows.</li>
+  <li><strong>Image sources:</strong> Picsum and <code>source.unsplash.com</code> both return 503/405 — use LoremFlickr / Pexels.</li>
+  <li><strong>CF7 spam check</strong> rejects requests without <code>Referer</code>/<code>Origin</code> headers (see §5).</li>
+</ul>
+
+<h2 id="todo"><span class="n">9</span>Pending work / TODO</h2>
+<h3>Contrast &amp; typography (from this session's audit — measured, not implemented)</h3>
+<ul>
+  <li><span class="warnc">P1</span> <code>--fg-faint</code> is <code>rgba(255,255,255,0.30)</code> ≈ <strong>2.6:1</strong> (fails WCAG AA) yet is used for real content (GitHub stats, usernames, repo langs). Split it: keep 0.30 for hairlines only, add a text-muted token ≈ <code>0.6</code> (~6:1).</li>
+  <li><span class="warnc">P1</span> Accent <code>#7c4dff</code> as small text ≈ <strong>3.5:1</strong> (fails). Add a lighter violet (≈ <code>#a78bfa</code>) for accent <em>text/links</em>; keep <code>#7c4dff</code> for fills/shadows.</li>
+  <li><span class="warnc">P2</span> Fonts too small (desktop dominated by 10–11px; a 6px and a 4px element exist). Raise <code>--grid-text</code> floor 10→12px, <code>--body</code> 12→14px; hard ~11px minimum. Consolidate to one mono (IBM Plex Mono — a stray JetBrains Mono appears on the terminal timer). Loosen line-height on reading blocks.</li>
+  <li><span class="warnc">P3</span> Weak hierarchy — section headers are the same size as content; make them larger/brighter.</li>
+</ul>
+<h3>Features (from <code>TODO.md</code> / project memory)</h3>
+<ul>
+  <li><strong>Alfred AI chat + RAG:</strong> the LLM is now connected (Ollama/Gemma) — the remaining piece is RAG / a vector store over portfolio data. <span class="dim">(Note: <code>TODO.md</code> still says "hardcoded keyword-matching" — that's stale; it's live via <code>functions/api/chat.js</code>.)</span></li>
+  <li><strong>NotebookLM podcast videos</strong> for blog posts — Playwright automation of NotebookLM + FFmpeg (audio+cover→mp4), CLI <code>cli/generate-podcast.js</code> to be built. Prereqs: <code>brew install ffmpeg</code>, Google login session.</li>
+  <li><strong>Performance:</strong> <code>defer</code> GSAP scripts, preload main font, lazy-load videos/below-fold images, inline critical CSS.</li>
+</ul>
+
+<h2 id="graphify"><span class="n">10</span>graphify knowledge graph</h2>
+<p>A queryable knowledge graph of this codebase was built at <code>v2/graphify-out/</code>: <strong>324 nodes · 369 edges · 56 communities</strong> from the code (AST) + docs (incl. <code>index.html</code>). Videos, images and PDFs were intentionally excluded.</p>
+<table>
+  <tr><th>File</th><th>What</th></tr>
+  <tr><td><code>graphify-out/graph.html</code></td><td>Interactive graph — open in any browser, no server</td></tr>
+  <tr><td><code>graphify-out/GRAPH_REPORT.md</code></td><td>Audit report (god nodes, communities, surprising connections)</td></tr>
+  <tr><td><code>graphify-out/graph.json</code></td><td>Raw graph data (GraphRAG-ready)</td></tr>
+  <tr><td><code>graphify-out/manifest.json</code></td><td>Enables fast incremental <code>graphify update .</code></td></tr>
+</table>
+<p><strong>On the new machine</strong>, install the tool and use it:</p>
+<pre><code>brew install pipx &amp;&amp; pipx install graphifyy      # one-time
+graphify query   "how does the voice chat loop work?"
+graphify explain "WM.register"
+graphify path    "AI Chat &amp; Voice Assistant" "Repo Browser &amp; Projects UI"
+graphify update  .                                 # after code changes (AST-only, free)</code></pre>
+<div class="note"><strong>Claude Code hooks are wired in:</strong> the top-level <code>.claude/settings.json</code> has PreToolUse hooks that nudge Claude to run <code>graphify query</code> before grepping/reading source (only active when <code>graphify-out/graph.json</code> exists), and the top-level <code>CLAUDE.md</code> carries the graphify rules. Both are in the zip.</div>
+<div class="warn"><strong>graphify install caveat (Mac):</strong> this machine's Python couldn't reach PyPI directly for a while (only <code>curl</code>/<code>git</code>/<code>brew</code> had egress). If <code>pipx install</code> times out on the new machine, it's likely a firewall (e.g., Little Snitch) blocking the <code>python3</code> binary — allow it and retry. Also: <code>graphifyy</code> needs Python 3.10+ and pulls ~30 tree-sitter grammar packages; on very new Pythons prefer <code>pipx install graphifyy --python "$(brew --prefix python@3.12)/bin/python3.12"</code>.</div>
+
+<h2 id="claudecode"><span class="n">11</span>Continuing with Claude Code on the new machine</h2>
+<ol>
+  <li>Install Claude Code and open the unzipped <code>calil-drissi.dev/</code> folder.</li>
+  <li>Claude Code auto-reads the top-level <code>CLAUDE.md</code> (graphify rules). It does <strong>not</strong> read this HTML automatically — paste it (or its key sections) into the first message so the new session has full context.</li>
+  <li><span class="bad">Important:</span> the assistant's <em>persistent memory</em> (project overview, credentials, blog content notes, known-issue fixes) lives in <code>~/.claude/…/memory/</code> on <em>this</em> machine and does not transfer. <strong>This HTML is that memory, serialized.</strong></li>
+  <li>Optional but recommended: install graphify (§10) so the codebase-query workflow works.</li>
+  <li>Verify the toolchain: <code>node build.js</code> should produce <code>dist/</code> cleanly before you start changing things.</li>
+</ol>
+
+<h2 id="zip"><span class="n">12</span>What's in the zip</h2>
+<table>
+  <tr><th></th><th>Included</th><th>Notes</th></tr>
+  <tr><td class="ok">✓</td><td>Full project (<code>calil-drissi.dev/</code> → top-level <code>CLAUDE.md</code>, <code>.claude/</code> hooks, <code>.github/</code>, and all of <code>v2/</code>)</td><td>Code, <code>content/</code>, <code>functions/</code>, <code>admin/</code>, <code>cli/</code>, <code>tests/</code>, HTML/PDF forms, media (<code>video*.mp4</code>)</td></tr>
+  <tr><td class="ok">✓</td><td><code>v2/.env</code></td><td>WordPress + Pexels secrets — needed to build/run CLI</td></tr>
+  <tr><td class="ok">✓</td><td><code>v2/.git</code></td><td>Full history + remote config, so you can push/pull immediately (SSH remote — see §1)</td></tr>
+  <tr><td class="ok">✓</td><td><code>v2/graphify-out/</code></td><td>The knowledge graph — no need to rebuild</td></tr>
+  <tr><td class="ok">✓</td><td><code>v2/HANDOFF.html</code></td><td>A copy of this document, inside the project</td></tr>
+  <tr><td class="bad">✗</td><td><code>v2/dist/</code></td><td>Generated output — regenerate with <code>node build.js</code></td></tr>
+  <tr><td class="bad">✗</td><td><code>node_modules/</code></td><td>Run <code>npm install</code></td></tr>
+  <tr><td class="bad">✗</td><td><code>.DS_Store</code></td><td>macOS cruft</td></tr>
+</table>
+
+<footer>
+  Generated for a machine-to-machine handoff of the khalildrissi.com project. All facts sourced from the codebase, git history, <code>.env</code> keys, project memory, and the working session — nothing assumed. Keep this file and the accompanying zip private (they reference credential locations and include <code>.env</code>).
+</footer>
+
+</div>
+</body>
+</html>

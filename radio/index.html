@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Radio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0e0e0e; --fg:#fff; --fg-dim:rgba(255,255,255,.72); --fg-faint:rgba(255,255,255,.34);
+    --accent:#7c4dff; --border:rgba(255,255,255,.12); --mono:'IBM Plex Mono','Courier New',monospace; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:var(--bg); color:var(--fg); font-family:var(--mono); }
+  body{ display:flex; flex-direction:column; height:100vh; overflow:hidden; -webkit-font-smoothing:antialiased; }
+  ::selection{ background:var(--accent); color:#fff; }
+  button,input,select{ font-family:var(--mono); }
+  ::-webkit-scrollbar{ width:9px; } ::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.16); border-radius:6px; }
+
+  .head{ display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid var(--border); flex:none; }
+  .brand{ font-size:11px; text-transform:uppercase; letter-spacing:.14em; color:var(--fg-faint); }
+  .pill{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#fff; background:rgba(255,255,255,.05);
+    border:1px solid var(--border); border-radius:9999px; padding:8px 14px; cursor:pointer; transition:.15s; white-space:nowrap; }
+  .pill:hover{ border-color:var(--accent); background:rgba(124,77,255,.16); }
+  .pill.on{ background:var(--accent); border-color:var(--accent); }
+  .tabs{ display:flex; gap:6px; margin-left:auto; }
+
+  .bar{ display:flex; gap:8px; padding:10px 14px; border-bottom:1px solid var(--border); flex:none; }
+  .bar input{ flex:1; background:rgba(255,255,255,.04); border:1px solid var(--border); color:var(--fg);
+    border-radius:9999px; padding:9px 14px; font-size:12px; outline:none; }
+  .bar input:focus{ border-color:var(--accent); }
+
+  .list{ flex:1; overflow-y:auto; }
+  .st{ display:flex; align-items:center; gap:11px; padding:10px 14px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,.05); transition:background .12s; }
+  .st:hover{ background:rgba(255,255,255,.05); }
+  .st.active{ background:rgba(124,77,255,.16); }
+  .st .ico{ width:34px; height:34px; border-radius:7px; object-fit:contain; padding:3px; background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.06); flex:none; }
+  .st .meta{ min-width:0; flex:1; }
+  .st .nm{ font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .st .sub{ font-size:10px; color:var(--fg-faint); text-transform:uppercase; letter-spacing:.04em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .st .fav{ color:var(--fg-faint); font-size:15px; padding:3px 6px; border-radius:6px; flex:none; }
+  .st .fav.on{ color:var(--accent); }
+  .st .fav:hover{ color:#fff; }
+  .empty{ padding:22px; color:var(--fg-faint); font-size:12px; text-align:center; }
+
+  .player{ display:flex; align-items:center; gap:12px; padding:12px 14px; border-top:1px solid var(--border); flex:none; background:#0c0c0c; }
+  .play-btn{ width:44px; height:44px; border-radius:50%; border:1px solid var(--border); background:var(--accent);
+    color:#fff; cursor:pointer; flex:none; display:flex; align-items:center; justify-content:center; transition:filter .15s; }
+  .play-btn:hover{ filter:brightness(1.12); }
+  .now{ min-width:0; flex:1; }
+  .now .t{ font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .now .s{ font-size:10px; color:var(--fg-faint); }
+  .now .s.err{ color:#ff8a8a; }
+  .vol{ width:90px; accent-color:var(--accent); }
+  .live{ display:none; align-items:center; gap:5px; font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:#ff6a6a; flex:none; }
+  .live.on{ display:inline-flex; }
+  .live::before{ content:''; width:7px; height:7px; border-radius:50%; background:#ff3b3b; box-shadow:0 0 8px #ff3b3b; animation:p 1.6s ease-in-out infinite; }
+  @keyframes p{ 0%,100%{opacity:1} 50%{opacity:.35} }
+</style>
+</head>
+<body>
+<div class="head">
+  <span class="brand">Radio</span>
+  <div class="tabs">
+    <button class="pill on" id="tabBrowse">Browse</button>
+    <button class="pill" id="tabFav">My stations</button>
+  </div>
+</div>
+<div class="bar">
+  <input id="q" type="search" placeholder="Search stations, e.g. jazz, france, bbc…">
+</div>
+<div class="list" id="list"><div class="empty">Loading popular stations…</div></div>
+<div class="player">
+  <button class="play-btn" id="playBtn" aria-label="Play/pause">
+    <svg id="playIcon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+  </button>
+  <div class="now"><div class="t" id="nowName">Pick a station</div><div class="s" id="nowSub"></div></div>
+  <span class="live" id="live">Live</span>
+  <input class="vol" id="vol" type="range" min="0" max="1" step="0.05" value="0.9">
+</div>
+<audio id="audio"></audio>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+<script>
+(function(){
+  'use strict';
+  // Radio-Browser: open, free, public directory (no key). Stream audio through the
+  // VPS proxy so HTTP-only stations play on the HTTPS site (mixed content) + CORS.
+  var API = 'https://de1.api.radio-browser.info/json';
+  var PROXY = 'https://tvproxy.khalildrissi.com/?url=';
+  var proxied = function(u){ return PROXY + encodeURIComponent(u); };
+  var FAV_KEY = 'radio:favorites';
+
+  var listEl = document.getElementById('list');
+  var qEl = document.getElementById('q');
+  var audio = document.getElementById('audio');
+  var nowName = document.getElementById('nowName');
+  var nowSub = document.getElementById('nowSub');
+  var live = document.getElementById('live');
+  var playBtn = document.getElementById('playBtn');
+  var playIcon = document.getElementById('playIcon');
+  var volEl = document.getElementById('vol');
+  var tabBrowse = document.getElementById('tabBrowse');
+  var tabFav = document.getElementById('tabFav');
+
+  var stations = [], current = null, hls = null, view = 'browse';
+  audio.volume = +volEl.value;
+  volEl.addEventListener('input', function(){ audio.volume = +volEl.value; });
+
+  // Unique per-station id — Radio-Browser lists many stations that share the same
+  // stream url, so identity/active-state MUST key on stationuuid, not url.
+  function sid(s){ return s.stationuuid || s.url_resolved || s.url; }
+  function favs(){ try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); } catch(_){ return []; } }
+  function saveFavs(f){ try { localStorage.setItem(FAV_KEY, JSON.stringify(f)); } catch(_){} }
+  function isFav(s){ return favs().some(function(x){ return sid(x) === sid(s); }); }
+  function toggleFav(s){
+    var f = favs();
+    if (isFav(s)) f = f.filter(function(x){ return sid(x) !== sid(s); });
+    else f.unshift({ name:s.name, url:s.url, url_resolved:s.url_resolved, stationuuid:s.stationuuid, favicon:s.favicon, country:s.country, tags:s.tags, bitrate:s.bitrate });
+    saveFavs(f);
+    if (view === 'fav') render(f); else render(stations);
+  }
+
+  function ICON(s){ return s.favicon || ''; }
+  function render(arr){
+    listEl.innerHTML = '';
+    if (!arr.length){ listEl.innerHTML = '<div class="empty">' + (view==='fav' ? 'No saved stations yet. Tap the star on any station.' : 'No stations found.') + '</div>'; return; }
+    arr.slice(0, 400).forEach(function(s){
+      var row = document.createElement('div');
+      row.className = 'st' + (current && sid(s) === sid(current) ? ' active' : '');
+      row.innerHTML =
+        (ICON(s) ? '<img class="ico" src="'+ICON(s)+'" onerror="this.style.visibility=\'hidden\'">' : '<div class="ico"></div>') +
+        '<div class="meta"><div class="nm"></div><div class="sub"></div></div>' +
+        '<span class="fav'+(isFav(s)?' on':'')+'" title="Save">'+(isFav(s)?'★':'☆')+'</span>';
+      row.querySelector('.nm').textContent = s.name || 'Station';
+      row.querySelector('.sub').textContent = [s.country, (s.tags||'').split(',')[0], s.bitrate?s.bitrate+'k':''].filter(Boolean).join(' · ');
+      row.addEventListener('click', function(e){
+        if (e.target.classList.contains('fav')){ e.stopPropagation(); toggleFav(s); return; }
+        playStation(s);
+      });
+      listEl.appendChild(row);
+    });
+  }
+
+  function setStatus(msg, err){ nowSub.textContent = msg; nowSub.classList.toggle('err', !!err); }
+  function setPlayIcon(playing){
+    playIcon.innerHTML = playing ? '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>' : '<path d="M8 5v14l11-7z"/>';
+  }
+
+  function stopAudio(){ try { audio.pause(); } catch(_){} if (hls){ try{ hls.destroy(); }catch(_){} hls=null; } }
+  function playStation(s){
+    current = s; nowName.textContent = s.name; live.classList.remove('on');
+    setStatus('Connecting…'); render(view==='fav'?favs():stations);
+    stopAudio();
+    var raw = s.url_resolved || s.url;
+    var src = proxied(raw);
+    if (/\.m3u8($|\?)/i.test(raw) && window.Hls && Hls.isSupported()){
+      hls = new Hls(); hls.loadSource(src); hls.attachMedia(audio);
+      hls.on(Hls.Events.MANIFEST_PARSED, function(){ audio.play().catch(function(){}); });
+      hls.on(Hls.Events.ERROR, function(_, d){ if (d.fatal) setStatus('Could not play this station.', true); });
+    } else {
+      audio.src = src; audio.play().catch(function(){ setStatus('Could not play this station.', true); });
+    }
+  }
+  function postNow(){ try { parent.postMessage({ type:'media-now', title: current ? current.name : '', playing: !audio.paused }, '*'); } catch(_){} }
+  audio.addEventListener('playing', function(){ setStatus('Playing'); live.classList.add('on'); setPlayIcon(true); postNow(); });
+  audio.addEventListener('pause', function(){ setPlayIcon(false); live.classList.remove('on'); postNow(); });
+  audio.addEventListener('waiting', function(){ setStatus('Buffering…'); });
+  audio.addEventListener('error', function(){ if (current) setStatus('Stream unavailable — try another.', true); });
+  playBtn.addEventListener('click', function(){
+    if (!current) return;
+    if (audio.paused){ audio.play().catch(function(){}); } else { audio.pause(); }
+  });
+  // Window manager: close pauses; minimize keeps playing; taskbar pill can toggle.
+  window.addEventListener('message', function(e){
+    if (!e.data) return;
+    if (e.data.type === 'media-hide'){ try { audio.pause(); } catch(_){} }
+    else if (e.data.type === 'media-show'){ if (current && audio.paused){ audio.play().catch(function(){}); } }
+    else if (e.data.type === 'media-toggle'){ if (!current) return; if (audio.paused) audio.play().catch(function(){}); else audio.pause(); }
+  });
+
+  // ---- data ----
+  function fetchJSON(url){ return fetch(url, { headers:{ 'Content-Type':'application/json' } }).then(function(r){ return r.json(); }); }
+  function loadPopular(){
+    setListLoading();
+    fetchJSON(API + '/stations/topvote/150?hidebroken=true')
+      .then(function(d){ stations = d || []; if (view==='browse') render(stations); })
+      .catch(function(){ if (view==='browse') listEl.innerHTML = '<div class="empty">Could not reach the station directory.</div>'; });
+  }
+  function search(q){
+    setListLoading();
+    fetchJSON(API + '/stations/search?limit=200&hidebroken=true&order=votes&reverse=true&name=' + encodeURIComponent(q))
+      .then(function(d){ stations = d || []; if (view==='browse') render(stations); })
+      .catch(function(){ if (view==='browse') listEl.innerHTML = '<div class="empty">Search failed.</div>'; });
+  }
+  function setListLoading(){ if (view==='browse') listEl.innerHTML = '<div class="empty">Loading…</div>'; }
+
+  var t;
+  qEl.addEventListener('input', function(){
+    clearTimeout(t);
+    var q = qEl.value.trim();
+    t = setTimeout(function(){ if (view!=='browse'){ setBrowse(); } if (q) search(q); else loadPopular(); }, 350);
+  });
+
+  function setBrowse(){ view='browse'; tabBrowse.classList.add('on'); tabFav.classList.remove('on'); render(stations); }
+  function setFav(){ view='fav'; tabFav.classList.add('on'); tabBrowse.classList.remove('on'); render(favs()); }
+  tabBrowse.addEventListener('click', setBrowse);
+  tabFav.addEventListener('click', setFav);
+
+  loadPopular();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Live TV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0e0e0e; --fg:#fff; --fg-dim:rgba(255,255,255,.72); --fg-faint:rgba(255,255,255,.34);
+    --accent:#7c4dff; --border:rgba(255,255,255,.12); --mono:'IBM Plex Mono','Courier New',monospace; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:var(--bg); color:var(--fg); font-family:var(--mono); }
+  body{ display:flex; flex-direction:column; height:100vh; overflow:hidden; -webkit-font-smoothing:antialiased; }
+  ::selection{ background:var(--accent); color:#fff; }
+  button,input,select{ font-family:var(--mono); }
+  ::-webkit-scrollbar{ width:9px; } ::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.16); border-radius:6px; }
+
+  .tv-head{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--border); flex:none; }
+  .tv-head .brand{ font-size:11px; text-transform:uppercase; letter-spacing:.14em; color:var(--fg-faint); }
+  .tv-head .now{ font-size:12px; color:var(--fg-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+  .tv-head .add{ margin-left:auto; }
+  .pill{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#fff; background:rgba(255,255,255,.05);
+    border:1px solid var(--border); border-radius:9999px; padding:8px 14px; cursor:pointer; transition:.15s; white-space:nowrap; }
+  .pill:hover{ border-color:var(--accent); background:rgba(124,77,255,.16); }
+  .pill.on{ background:var(--accent); border-color:var(--accent); }
+  /* Collection selector — custom chevron with room from the edge. */
+  select.pill.coll{ appearance:none; -webkit-appearance:none; -moz-appearance:none;
+    background:rgba(255,255,255,.05) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%23ffffff' stroke-opacity='0.6' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 1.75 6 6.25l4.5-4.5'/%3E%3C/svg%3E") no-repeat right 13px center;
+    padding:8px 34px 8px 14px; }
+  select.pill.coll option{ background:#17171b; text-transform:none; }
+
+  .tv-body{ flex:1; display:flex; min-height:0; }
+  .tv-main{ flex:1; display:flex; flex-direction:column; min-width:0; background:#000; position:relative; }
+  .screen{ flex:1; min-height:0; position:relative; background:#000; }
+  video{ width:100%; height:100%; background:#000; object-fit:contain; display:block; }
+  /* Poster shown until a channel is picked. */
+  .poster{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+    background:radial-gradient(circle at 50% 38%, #191920, #0a0a0c 72%); color:var(--fg-faint); text-align:center; padding:20px; z-index:2; }
+  .poster.hide{ display:none; }
+  .poster svg{ opacity:.45; }
+  .poster .t{ font-size:13px; letter-spacing:.04em; } .poster .s{ font-size:11px; color:var(--fg-faint); }
+  /* Buffering spinner overlay. */
+  .spin{ position:absolute; top:12px; left:12px; z-index:3; width:22px; height:22px; border:2px solid rgba(255,255,255,.25);
+    border-top-color:var(--accent); border-radius:50%; animation:rot .8s linear infinite; display:none; }
+  .spin.show{ display:block; } @keyframes rot{ to{ transform:rotate(360deg); } }
+  /* Custom video controls — site-styled, replace the browser default bar. Fade in on hover. */
+  .ctrls{ position:absolute; left:0; right:0; bottom:0; z-index:4; display:flex; align-items:center; gap:12px;
+    padding:14px 16px 12px; background:linear-gradient(to top, rgba(0,0,0,.78), rgba(0,0,0,0));
+    opacity:0; transform:translateY(6px); transition:opacity .2s, transform .2s; pointer-events:none; }
+  .screen:hover .ctrls, .ctrls:focus-within{ opacity:1; transform:none; pointer-events:auto; }
+  .cbtn{ background:transparent; border:0; color:#fff; cursor:pointer; padding:4px; border-radius:8px; display:flex;
+    align-items:center; justify-content:center; opacity:.9; transition:opacity .15s, background .15s; }
+  .cbtn:hover{ opacity:1; background:rgba(255,255,255,.12); }
+  .cvol{ width:92px; accent-color:var(--accent); cursor:pointer; }
+  .cspacer{ flex:1; }
+  .clive{ display:none; align-items:center; gap:5px; font-size:10px; text-transform:uppercase; letter-spacing:.12em; color:#ff6a6a; }
+  .clive.on{ display:inline-flex; }
+  .clive::before{ content:''; width:7px; height:7px; border-radius:50%; background:#ff3b3b; box-shadow:0 0 8px #ff3b3b; animation:pulse 1.6s ease-in-out infinite; }
+  .tv-status{ padding:8px 14px; font-size:11px; color:var(--fg-faint); border-top:1px solid var(--border); min-height:32px;
+    display:flex; align-items:center; gap:8px; background:#0c0c0c; }
+  .tv-status.err{ color:#ff8a8a; }
+
+  /* Now-playing (header): channel logo + name + LIVE badge. */
+  .now{ display:flex; align-items:center; gap:9px; flex:1; min-width:0; }
+  .now-logo{ width:24px; height:24px; object-fit:contain; border-radius:4px; flex:none; display:none; }
+  .now-logo.show{ display:block; }
+  .now-name{ font-size:12px; color:var(--fg); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .live{ display:none; align-items:center; gap:5px; font-size:10px; text-transform:uppercase; letter-spacing:.12em; color:#ff6a6a; flex:none; }
+  .live.show{ display:inline-flex; }
+  .live::before{ content:''; width:7px; height:7px; border-radius:50%; background:#ff3b3b; box-shadow:0 0 8px #ff3b3b; animation:pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
+
+  .tv-side{ width:288px; flex:none; border-left:1px solid var(--border); display:flex; flex-direction:column; min-height:0; background:#0c0c0c; }
+  .tv-side .bar{ padding:10px; display:flex; gap:8px; border-bottom:1px solid var(--border); flex:none; }
+  .tv-side input.search{ flex:1; background:rgba(255,255,255,.04); border:1px solid var(--border); color:var(--fg);
+    border-radius:9999px; padding:8px 12px; font-size:12px; outline:none; }
+  .tv-side input.search:focus{ border-color:var(--accent); }
+  .chan-list{ flex:1; overflow-y:auto; }
+
+  /* Mobile: stack vertically — video on top, scrollable channel list below. */
+  @media (max-width: 760px), (pointer: coarse){
+    .tv-body{ flex-direction:column; }
+    .tv-main{ flex:0 0 40vh; min-height:0; }
+    .tv-side{ width:100%; flex:1 1 auto; border-left:0; border-top:1px solid var(--border); }
+    .tv-head{ flex-wrap:wrap; }
+    .tv-head .now{ order:3; flex-basis:100%; }
+    .ctrls{ opacity:1; transform:none; pointer-events:auto; }  /* controls always visible on touch */
+  }
+  .chan{ display:flex; align-items:center; gap:10px; padding:9px 12px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,.05);
+    transition:background .12s; }
+  .chan:hover{ background:rgba(255,255,255,.05); }
+  .chan.active{ background:rgba(124,77,255,.16); }
+  .chan .logo{ width:34px; height:34px; border-radius:7px; object-fit:contain; padding:3px;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.06); flex:none; }
+  .chan .meta{ min-width:0; }
+  .chan .name{ font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .chan .grp{ font-size:10px; color:var(--fg-faint); text-transform:uppercase; letter-spacing:.05em; }
+  .chan .fav{ margin-left:auto; color:var(--fg-faint); font-size:15px; padding:2px 6px; border-radius:6px; }
+  .chan .fav.on{ color:var(--accent); }
+  .chan .fav:hover{ color:#fff; }
+  .chan .rm{ color:var(--fg-faint); font-size:14px; padding:2px 6px; border-radius:6px; }
+  .chan .rm:hover{ color:#ff8a8a; }
+  .cbtn.on{ color:var(--accent); opacity:1; }
+  .empty{ padding:18px; color:var(--fg-faint); font-size:12px; text-align:center; }
+
+  /* Add-source modal */
+  .modal{ position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.6); padding:20px; }
+  .modal.show{ display:flex; }
+  .sheet{ width:min(440px,94vw); background:#131316; border:1px solid var(--border); border-radius:14px; padding:18px; max-height:90vh; overflow:auto; }
+  .sheet h3{ margin:0 0 4px; font-size:14px; }
+  .sheet p{ margin:0 0 14px; font-size:11px; color:var(--fg-faint); line-height:1.5; }
+  .tabs{ display:flex; gap:6px; margin-bottom:14px; }
+  .tabs .pill{ flex:1; text-align:center; }
+  .field{ display:none; flex-direction:column; gap:10px; }
+  .field.show{ display:flex; }
+  .field label{ font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--fg-faint); }
+  .field input, .field textarea{ width:100%; background:rgba(255,255,255,.04); border:1px solid var(--border); color:var(--fg);
+    border-radius:8px; padding:10px 12px; font-size:12px; outline:none; }
+  .field input:focus, .field textarea:focus{ border-color:var(--accent); }
+  .field textarea{ min-height:120px; resize:vertical; }
+  .sheet-msg{ font-size:12px; margin-top:12px; min-height:16px; color:var(--fg-dim); display:flex; align-items:center; gap:8px; line-height:1.4; }
+  .sheet-msg.err{ color:#ff8a8a; } .sheet-msg.ok{ color:#7fdca0; }
+  .sheet-msg .msgspin{ width:13px; height:13px; flex:none; border:2px solid rgba(255,255,255,.25); border-top-color:var(--accent); border-radius:50%; animation:rot .8s linear infinite; }
+  .sheet-actions{ display:flex; gap:8px; margin-top:14px; }
+  .sheet-actions .pill[disabled]{ opacity:.55; cursor:default; }
+  .sheet-actions .pill{ flex:1; text-align:center; padding:11px; }
+  .pill.primary{ background:var(--accent); border-color:var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="tv-head">
+  <span class="brand">Live TV</span>
+  <div class="now" id="tvNow">
+    <img class="now-logo" id="nowLogo" alt="">
+    <span class="now-name" id="nowName">Pick a channel →</span>
+    <span class="live" id="nowLive">Live</span>
+  </div>
+  <button class="pill add" id="btnAdd">My playlist</button>
+</div>
+
+<div class="tv-body">
+  <div class="tv-main">
+    <div class="screen" id="tvScreen">
+      <video id="tvVideo" autoplay playsinline></video>
+      <div class="spin" id="tvSpin"></div>
+      <div class="poster" id="tvPoster">
+        <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="13" rx="2"/><path d="m8 3 4 4 4-4"/></svg>
+        <div><div class="t">Live TV</div><div class="s">Pick a channel from the list →</div></div>
+      </div>
+      <!-- Site-styled custom controls (native ones replaced). -->
+      <div class="ctrls" id="tvCtrls">
+        <button class="cbtn" id="cPlay" aria-label="Play/pause"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+        <button class="cbtn" id="cMute" aria-label="Mute"><svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3z"/><path d="M16 8a5 5 0 0 1 0 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <input class="cvol" id="cVol" type="range" min="0" max="1" step="0.05" value="1">
+        <span class="clive" id="cLive">Live</span>
+        <span class="cspacer"></span>
+        <button class="cbtn" id="cCC" aria-label="Captions" title="Subtitles / captions"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M9 10.5a2 2 0 1 0 0 3M17 10.5a2 2 0 1 0 0 3" stroke-linecap="round"/></svg></button>
+        <button class="cbtn" id="cFull" aria-label="Fullscreen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+      </div>
+    </div>
+    <div class="tv-status" id="tvStatus">Ready.</div>
+  </div>
+  <aside class="tv-side">
+    <div class="bar">
+      <input class="search" id="tvSearch" type="search" placeholder="Search channels…">
+    </div>
+    <div class="chan-list" id="tvList"></div>
+  </aside>
+</div>
+
+<!-- Add-source modal -->
+<div class="modal" id="tvModal">
+  <div class="sheet">
+    <h3>My playlist</h3>
+    <div class="field show" id="pvLock">
+      <p style="margin:0 0 8px">Private, owner only. Enter the password to load and manage your playlist.</p>
+      <label>Password</label>
+      <input id="pvPass" type="password" placeholder="Password" autocomplete="off">
+    </div>
+    <div id="pvPanel" style="display:none">
+      <div class="tabs">
+        <button class="pill on" data-m="url">M3U URL</button>
+        <button class="pill" data-m="paste">Paste M3U</button>
+        <button class="pill" data-m="xtream">Xtream login</button>
+        <button class="pill" data-m="file">Upload file</button>
+      </div>
+      <div class="field show" data-mf="url">
+        <label>M3U / M3U8 URL</label>
+        <input id="pvUrl" type="text" placeholder="https://example.com/playlist.m3u" autocomplete="off">
+      </div>
+      <div class="field" data-mf="paste">
+        <label>Paste M3U content</label>
+        <textarea id="pvText" placeholder="#EXTM3U ..."></textarea>
+      </div>
+      <div class="field" data-mf="xtream">
+        <label>Server (http://host:port)</label>
+        <input id="pvXhost" type="text" placeholder="http://server.example.com:8080" autocomplete="off">
+        <label>Username</label>
+        <input id="pvXuser" type="text" placeholder="username" autocomplete="off">
+        <label>Password</label>
+        <input id="pvXpass" type="password" placeholder="password" autocomplete="off">
+      </div>
+      <div class="field" data-mf="file">
+        <label>Upload an .m3u / .m3u8 file</label>
+        <input id="pvFile" type="file" accept=".m3u,.m3u8,audio/x-mpegurl,application/vnd.apple.mpegurl">
+      </div>
+    </div>
+    <div class="sheet-msg" id="tvMsg"></div>
+    <div class="sheet-actions">
+      <button class="pill" id="btnCancel">Cancel</button>
+      <button class="pill primary" id="btnUnlock">Unlock</button>
+      <button class="pill primary" id="btnSaveLoad" style="display:none">Save and load</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+<script>
+(function(){
+  'use strict';
+  // VPS proxy (regular IP, reaches far more IPTV than Cloudflare's blocked egress).
+  var PROXY = 'https://tvproxy.khalildrissi.com/?url=';
+  var proxied = function(u){ return PROXY + encodeURIComponent(u); };
+
+  // ---- Ready-to-watch free channels (public free-to-air HLS). Played through
+  //      the proxy so CORS is handled. Some may be geo-limited or occasionally down. ----
+  // Channels — every one CONTENT-VERIFIED (returns a real playable HLS stream
+  // through the VPS proxy), curated to official public broadcasters. No dead
+  // links, no session/redirect fakes. Grouped for the category filter.
+  var READY = [
+    // News (international)
+    { name:'France 24 English', group:'News', logo:'logos/france24.png', url:'https://static.france24.com/live/F24_EN_LO_HLS/live_web.m3u8' },
+    { name:'France 24 Français', group:'News', logo:'logos/france24.png', url:'https://live.france24.com/hls/live/2037179-b/F24_FR_HI_HLS/master_5000.m3u8' },
+    { name:'France 24 Español', group:'News', logo:'logos/france24.png', url:'https://live.france24.com/hls/live/2037220-b/F24_ES_HI_HLS/master_5000.m3u8' },
+    { name:'DW English', group:'News', logo:'logos/dw.png', url:'https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8' },
+    { name:'DW Español', group:'News', logo:'logos/dw.png', url:'https://dwamdstream104.akamaized.net/hls/live/2015530/dwstream104/master.m3u8' },
+    { name:'CGTN English', group:'News', logo:'logos/cgtn.png', url:'https://news.cgtn.com/resource/live/english/cgtn-news.m3u8' },
+    { name:'CGTN Français', group:'News', logo:'logos/cgtn.png', url:'https://news.cgtn.com/resource/live/french/cgtn-f.m3u8' },
+    { name:'Al Jazeera Arabic', group:'News', logo:'', url:'https://live-hls-web-aja.getaj.net/AJA/index.m3u8' },
+    { name:'Al Jazeera Mubasher', group:'News', logo:'', url:'https://live-hls-web-ajm.getaj.net/AJM/index.m3u8' },
+    { name:'TRT World', group:'News', logo:'logos/trtworld.png', url:'https://tv-trtworld.medya.trt.com.tr/master.m3u8' },
+    { name:'i24NEWS Français', group:'News', logo:'logos/i24news.png', url:'https://i24newsfrench-cdn.encoders.immergo.tv/master.m3u8' },
+    { name:'Africanews Français', group:'News', logo:'logos/africanews.png', url:'https://cdn-euronews.akamaized.net/live/eds/africanews-fr/25050/index.m3u8' },
+    { name:'TV5Monde Info', group:'News', logo:'logos/tv5monde.png', url:'https://ott.tv5monde.com/Content/HLS/Live/channel(info)/variant.m3u8' },
+    // USA (official broadcaster streams)
+    { name:'ABC News Live', group:'USA', logo:'logos/abcnews.png', url:'https://abcnews-streams.akamaized.net/hls/live/2023560/abcnewshudson1/master.m3u8' },
+    { name:'CBS News', group:'USA', logo:'logos/cbsnews.png', url:'https://cbsn-ny.cbsnstream.cbsnews.com/out/v1/ec3897d58a9b45129a77d67aa247d136/master.m3u8' },
+    { name:'Bloomberg', group:'USA', logo:'logos/bloomberg.png', url:'https://bloomberg.com/media-manifest/streams/qt.m3u8' },
+    { name:'PBS World', group:'USA', logo:'logos/pbs.svg', url:'https://world.lls.pbs.org/index.m3u8' },
+    { name:'VOA News', group:'USA', logo:'logos/voa.png', url:'https://voa-ingest.akamaized.net/hls/live/2033874/tvmc06/playlist.m3u8' },
+    { name:'Newsmax TV', group:'USA', logo:'logos/newsmax.png', url:'https://nmx1ota.akamaized.net/hls/live/2107010/Live_1/index.m3u8' },
+    { name:'Cheddar News', group:'USA', logo:'', url:'https://wurlcheddar.global.transmit.live/hls/689ceac9301c34d3919676f3/v1/Cheddar/samsung_us/latest/main/hls/playlist.m3u8' },
+    // Canada
+    { name:'CBC News', group:'Canada', logo:'logos/cbc.png', url:'https://d2ny9lo79ujali.cloudfront.net/CBC_News_International.m3u8' },
+    { name:'ICI RDI', group:'Canada', logo:'logos/radiocanada.png', url:'https://rcavlive.akamaized.net/hls/live/704025/xcanrdi/master.m3u8' },
+    // Ireland
+    { name:'TG4', group:'Ireland', logo:'logos/tg4.png', url:'https://fastly.live.brightcove.com/6384196213112/eu-west-1/1555966122001/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJob3N0IjoieDl2YzlnLmVncmVzcy55ODN1ZWIiLCJhY2NvdW50X2lkIjoiMTU1NTk2NjEyMjAwMSIsImVobiI6ImZhc3RseS5saXZlLmJyaWdodGNvdmUuY29tIiwiaXNzIjoiYmxpdmUtcGxheWJhY2stc291cmNlLWFwaSIsInN1YiI6InBhdGhtYXB0b2tlbiIsImF1ZCI6WyIxNTU1OTY2MTIyMDAxIl0sImp0aSI6IjYzODQxOTYyMTMxMTIifQ.Co2xR3kmJBoxTaFTpwU0b37lJ05vNt-y32-SwfM26EA/chunklist.m3u8' },
+    // MBC (official Shahid CDN — content-verified)
+    { name:'MBC 1', group:'Arabic', logo:'logos/mbc.png', url:'https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-1/15cf99af5de54063fdabfefe66adc075/index.m3u8' },
+    { name:'MBC 4', group:'Arabic', logo:'logos/mbc.png', url:'https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-4/24f134f1cd63db9346439e96b86ca6ed/index.m3u8' },
+    { name:'MBC 5', group:'Arabic', logo:'logos/mbc.png', url:'https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-5/ee6b000cee0629411b666ab26cb13e9b/index.m3u8' },
+    { name:'MBC Drama', group:'Arabic', logo:'logos/mbc.png', url:'https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-drama/2c28a458e2f3253e678b07ac7d13fe71/index.m3u8' },
+    { name:'MBC+ Drama', group:'Arabic', logo:'logos/mbc.png', url:'https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-plus-drama/e37251ec2aac8f6c98f75cd0fa37cd28/index.m3u8' },
+    { name:'MBC Bollywood', group:'Arabic', logo:'logos/mbc.png', url:'https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-bollywood/546eb40d7dcf9a209255dd2496903764/index.m3u8' },
+    { name:'MBC Masr', group:'Arabic', logo:'logos/mbc.png', url:'https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-masr/956eac069c78a35d47245db6cdbb1575/index.m3u8' },
+    { name:'MBC Masr 2', group:'Arabic', logo:'logos/mbc.png', url:'https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-masr-2/754931856515075b0aabf0e583495c68/index.m3u8' },
+    { name:'MBC Masr Drama', group:'Arabic', logo:'logos/mbc.png', url:'https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-masr-drama/567b703c19ede6598222de81b0e4508b/index.m3u8' },
+    { name:'MBC Iraq', group:'Arabic', logo:'logos/mbc.png', url:'https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-iraq/e38c44b1b43474e1c39cb5b90203691e/index.m3u8' },
+    { name:'MBC Mood', group:'Arabic', logo:'logos/mbc.png', url:'https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-mood/78367bf48ccdba501d0d014a10c21031/index.m3u8' },
+    // Germany
+    { name:'Das Erste', group:'Germany', logo:'logos/ard.png', url:'https://daserste-live.ard-mcdn.de/daserste/live/hls/int/master.m3u8' },
+    { name:'WDR Fernsehen', group:'Germany', logo:'logos/wdr.png', url:'https://wdr-live.ard-mcdn.de/wdr/live/hls/de/master.m3u8' },
+    { name:'ZDF', group:'Germany', logo:'logos/zdf.png', url:'https://zdf-hls-15.akamaized.net/hls/live/2016498/de/high/master.m3u8' },
+    { name:'ZDFneo', group:'Germany', logo:'logos/zdf.png', url:'https://zdf-hls-16.akamaized.net/hls/live/2016499/de/high/master.m3u8' },
+    { name:'ZDFinfo', group:'Germany', logo:'logos/zdf.png', url:'https://zdf-hls-17.akamaized.net/hls/live/2016500/de/high/master.m3u8' },
+    { name:'3sat', group:'Germany', logo:'logos/3sat.png', url:'https://zdf-hls-18.akamaized.net/hls/live/2016501/dach/high/master.m3u8' },
+    { name:'Phoenix', group:'Germany', logo:'logos/phoenix.png', url:'https://zdf-hls-19.akamaized.net/hls/live/2016502/de/high/master.m3u8' },
+    { name:'Tagesschau 24', group:'Germany', logo:'logos/tagesschau.png', url:'https://tagesschau.akamaized.net/hls/live/2020115/tagesschau/tagesschau_1/master.m3u8' },
+    { name:'ARTE Deutsch', group:'Germany', logo:'logos/arte.png', url:'https://artesimulcast.akamaized.net/hls/live/2030993/artelive_de/index.m3u8' },
+    // Spain
+    { name:'RTVE La 1', group:'Spain', logo:'logos/rtve.png', url:'https://ztnr.rtve.es/ztnr/1688877.m3u8' },
+    { name:'RTVE La 2', group:'Spain', logo:'logos/rtve.png', url:'https://ztnr.rtve.es/ztnr/1712295.m3u8' },
+    { name:'Canal 24 Horas', group:'Spain', logo:'logos/rtve.png', url:'https://ztnr.rtve.es/ztnr/1694255.m3u8' },
+    { name:'TVE Star', group:'Spain', logo:'logos/rtve.png', url:'https://rtvelivestream-rtveplayplus.rtve.es/rtvesec/int/star_main_1080.m3u8' },
+    // France
+    { name:'ARTE Français', group:'France', logo:'logos/arte.png', url:'https://artesimulcast.akamaized.net/hls/live/2031003/artelive_fr/index.m3u8' },
+    { name:'TV5Monde Chefs', group:'France', logo:'logos/tv5monde.png', url:'https://tvf-tv5ch.otteravision.com/tvf/tv5ch/tv5ch.m3u8' },
+    // Kids
+    { name:'Clan TVE', group:'Kids', logo:'logos/clan.png', url:'https://ztnr.rtve.es/ztnr/5466990.m3u8' },
+    { name:'TRT Çocuk', group:'Kids', logo:'logos/trt.png', url:'https://tv-trtcocuk.medya.trt.com.tr/master.m3u8' },
+    { name:'TRT Diyanet Çocuk', group:'Kids', logo:'logos/trt.png', url:'https://tv-trtdiyanetcocuk.medya.trt.com.tr/master.m3u8' },
+    // Sports
+    { name:'Red Bull TV', group:'Sports', logo:'logos/redbull.png', url:'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8' },
+    { name:'Teledeporte', group:'Sports', logo:'logos/rtve.png', url:'https://rtvelivestream.rtve.es/rtvesec/tdp/tdp_main.m3u8' },
+    // Science
+    { name:'NASA TV', group:'Science', logo:'logos/nasa.png', url:'https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8' },
+    { name:'NASA Media', group:'Science', logo:'logos/nasa.png', url:'https://ntv2.akamaized.net/hls/live/2013923/NASA-NTV2-HLS/master.m3u8' },
+    // Music
+    { name:'TRACE Urban', group:'Music', logo:'logos/trace.png', url:'https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8' }
+  ];
+
+  var video = document.getElementById('tvVideo');
+  var listEl = document.getElementById('tvList');
+  var searchEl = document.getElementById('tvSearch');
+  var nowName = document.getElementById('nowName');
+  var nowLogo = document.getElementById('nowLogo');
+  var nowLive = document.getElementById('nowLive');
+  var poster = document.getElementById('tvPoster');
+  var spin = document.getElementById('tvSpin');
+  var statusEl = document.getElementById('tvStatus');
+  var USER_KEY = 'tv:playlists';
+
+  function setStatus(msg, err){ statusEl.textContent = msg; statusEl.classList.toggle('err', !!err); }
+  function showSpin(on){ spin.classList.toggle('show', !!on); }
+
+  // ---- Custom video controls (site-styled, replaces native controls) ----
+  var screenEl = document.getElementById('tvScreen');
+  var cPlay = document.getElementById('cPlay'), cMute = document.getElementById('cMute'),
+      cVol = document.getElementById('cVol'), cLive = document.getElementById('cLive'), cFull = document.getElementById('cFull');
+  var ICON_PLAY = '<path d="M8 5v14l11-7z"/>', ICON_PAUSE = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
+  var ICON_VOL = '<path d="M3 10v4h4l5 5V5L7 10H3z"/><path d="M16 8a5 5 0 0 1 0 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+  var ICON_MUTE = '<path d="M3 10v4h4l5 5V5L7 10H3z"/><line x1="16" y1="9" x2="21" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="21" y1="9" x2="16" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+  function setPlayIcon(){ cPlay.querySelector('svg').innerHTML = video.paused ? ICON_PLAY : ICON_PAUSE; }
+  function setMuteIcon(){ cMute.querySelector('svg').innerHTML = (video.muted || video.volume === 0) ? ICON_MUTE : ICON_VOL; }
+  video.volume = +cVol.value;
+  cPlay.addEventListener('click', function(){ if (video.paused) video.play().catch(function(){}); else video.pause(); });
+  cMute.addEventListener('click', function(){ video.muted = !video.muted; setMuteIcon(); });
+  cVol.addEventListener('input', function(){ video.volume = +cVol.value; video.muted = (+cVol.value === 0); setMuteIcon(); });
+  cFull.addEventListener('click', function(){
+    if (document.fullscreenElement){ document.exitFullscreen(); }
+    else if (screenEl.requestFullscreen){ screenEl.requestFullscreen().catch(function(){}); }
+  });
+  // Captions/subtitles toggle — cycles the stream's text tracks (off if none exist).
+  var cCC = document.getElementById('cCC');
+  cCC.addEventListener('click', function(){
+    var tt = video.textTracks; if (!tt || !tt.length){ setStatus('No captions available for this channel.'); return; }
+    var showing = -1;
+    for (var i=0;i<tt.length;i++){ if (tt[i].mode === 'showing') showing = i; }
+    for (var j=0;j<tt.length;j++){ tt[j].mode = 'disabled'; }
+    var nextIdx = showing + 1;                          // off -> first -> ... -> off
+    if (nextIdx < tt.length){ tt[nextIdx].mode = 'showing'; cCC.classList.add('on'); }
+    else { cCC.classList.remove('on'); }
+  });
+  video.addEventListener('play', setPlayIcon);
+  video.addEventListener('pause', setPlayIcon);
+  video.addEventListener('volumechange', setMuteIcon);
+
+  video.addEventListener('playing', function(){ showSpin(false); nowLive.classList.add('show'); cLive.classList.add('on'); setPlayIcon(); });
+  video.addEventListener('waiting', function(){ showSpin(true); });
+  video.addEventListener('pause', function(){ cLive.classList.remove('on'); });
+  function postNow(){ try { parent.postMessage({ type:'media-now', title: nowName.textContent || 'Live TV', playing: !video.paused }, '*'); } catch(_){} }
+  video.addEventListener('play', postNow); video.addEventListener('pause', postNow);
+  // Window manager: close pauses; minimize keeps playing; taskbar pill can toggle.
+  window.addEventListener('message', function(e){
+    if (!e.data) return;
+    if (e.data.type === 'media-hide'){ try { video.pause(); } catch(_){} }
+    else if (e.data.type === 'media-show'){ if (video.src && video.paused){ video.play().catch(function(){}); } }
+    else if (e.data.type === 'media-toggle'){ if (!video.src) return; if (video.paused) video.play().catch(function(){}); else video.pause(); }
+  });
+
+  // Category display order (ZDF/Germany first, Arabic/MBC last).
+  var GROUP_ORDER = ['Germany','News','USA','Canada','Ireland','Spain','France','Kids','Sports','Science','Music','Arabic'];
+  function gpos(g){ var i = GROUP_ORDER.indexOf(g); return i < 0 ? 99 : i; }
+
+  // Favorites — the visitor's own starred channels (localStorage).
+  var FAV_KEY = 'tv:favorites';
+  function favs(){ try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); } catch(_){ return []; } }
+  function saveFavs(f){ try { localStorage.setItem(FAV_KEY, JSON.stringify(f)); } catch(_){} }
+  function isFav(c){ return favs().some(function(x){ return x.url === c.url; }); }
+  function toggleFav(c){
+    var f = favs();
+    if (isFav(c)) f = f.filter(function(x){ return x.url !== c.url; });
+    else f.unshift({ name:c.name, group:c.group, logo:c.logo, url:c.url });
+    saveFavs(f); render();
+  }
+
+  // channels = READY + user-loaded, tagged with source so user ones show a remove control.
+  function loadUser(){ try { return JSON.parse(localStorage.getItem(USER_KEY) || '[]'); } catch(_){ return []; } }
+  function saveUser(list){ try { localStorage.setItem(USER_KEY, JSON.stringify(list)); } catch(_){} }
+  var channels = [], privateChans = [];   // privateChans = password-loaded, transient (not saved per-browser)
+  function rebuild(){
+    channels = READY.map(function(c){ return Object.assign({ _src:'ready' }, c); })
+      .concat(privateChans);   // privateChans = password-unlocked, transient (watching stays private)
+    channels.sort(function(a,b){ return gpos(a.group) - gpos(b.group); });   // stable: keeps within-group order
+    render();
+  }
+
+  var activeUrl = null;
+  function render(){
+    var q = (searchEl.value||'').toLowerCase();
+    var shown = channels.filter(function(c){
+      return !q || (c.name||'').toLowerCase().indexOf(q) !== -1;
+    });
+    listEl.innerHTML = '';
+    if (!shown.length){ listEl.innerHTML = '<div class="empty">No channels. Add a playlist →</div>'; return; }
+    var capped = shown.length > 600, total = shown.length;
+    if (capped) shown = shown.slice(0, 600);
+    shown.forEach(function(c){
+      var row = document.createElement('div');
+      row.className = 'chan' + (c.url === activeUrl ? ' active' : '');
+      row.innerHTML =
+        (c.logo ? '<img class="logo" src="'+c.logo+'" onerror="this.style.visibility=\'hidden\'">' : '<div class="logo"></div>') +
+        '<div class="meta"><div class="name"></div><div class="grp"></div></div>' +
+        '<span class="fav'+(isFav(c)?' on':'')+'" title="Favorite">'+(isFav(c)?'★':'☆')+'</span>' +
+        (c._src === 'user' ? '<span class="rm" title="Remove">✕</span>' : '');
+      row.querySelector('.name').textContent = c.name || 'Channel';
+      row.querySelector('.grp').textContent = c.group || '';
+      row.addEventListener('click', function(e){
+        if (e.target.classList.contains('fav')){ e.stopPropagation(); toggleFav(c); return; }
+        if (e.target.classList.contains('rm')){ e.stopPropagation(); removeUser(c); return; }
+        play(c);
+      });
+      listEl.appendChild(row);
+    });
+    if (capped){
+      var note = document.createElement('div');
+      note.className = 'empty';
+      note.textContent = 'Showing 600 of ' + total + ' — search to narrow down.';
+      listEl.appendChild(note);
+    }
+  }
+  function removeUser(c){
+    var list = loadUser().filter(function(x){ return x.url !== c.url; });
+    saveUser(list); rebuild();
+  }
+
+  // ---- Playback (hls.js, all traffic via the proxy) ----
+  var hls = null;
+  function play(c){
+    activeUrl = c.url;
+    nowName.textContent = c.name;
+    if (c.logo){ nowLogo.src = c.logo; nowLogo.classList.add('show'); nowLogo.onerror = function(){ nowLogo.classList.remove('show'); }; }
+    else nowLogo.classList.remove('show');
+    nowLive.classList.remove('show');
+    poster.classList.add('hide'); showSpin(true);
+    setStatus('Loading ' + c.name + '…'); render();
+    if (hls){ try { hls.destroy(); } catch(_){} hls = null; }
+    var src = proxied(c.url);
+    var isHls = /\.m3u8($|\?)/i.test(c.url) || /get\.php|type=m3u/i.test(c.url) || true; // proxy serves m3u8 as hls
+    if (window.Hls && Hls.isSupported()){
+      hls = new Hls({ maxBufferLength: 20, manifestLoadingTimeOut: 15000, fragLoadingTimeOut: 25000 });
+      hls.loadSource(src);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function(){ video.play().catch(function(){}); setStatus('Playing ' + c.name); });
+      hls.on(Hls.Events.ERROR, function(_, data){
+        if (data.fatal){
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { showSpin(false); setStatus('Stream unreachable — it may be offline or region-locked.', true); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { try { hls.recoverMediaError(); } catch(_){} }
+          else { showSpin(false); setStatus('Could not play this channel.', true); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')){
+      video.src = src; video.play().catch(function(){}); setStatus('Playing ' + c.name);
+    } else {
+      setStatus('HLS not supported in this browser.', true);
+    }
+  }
+
+  // ---- M3U parsing ----
+  function parseM3U(text, groupFallback){
+    var lines = text.split(/\r?\n/), out = [], cur = null;
+    for (var i=0;i<lines.length;i++){
+      var ln = lines[i].trim();
+      if (ln.indexOf('#EXTINF') === 0){
+        var name = ln.substring(ln.lastIndexOf(',')+1).trim();
+        var logo = (ln.match(/tvg-logo="([^"]*)"/)||[])[1] || '';
+        var grp = (ln.match(/group-title="([^"]*)"/)||[])[1] || groupFallback || 'Playlist';
+        cur = { name:name||'Channel', logo:logo, group:grp };
+      } else if (ln && ln[0] !== '#'){
+        if (!cur) cur = { name:'Channel', logo:'', group:groupFallback||'Playlist' };
+        cur.url = ln; out.push(cur); cur = null;
+      }
+    }
+    return out;
+  }
+  // ---- My playlist: one password gate; owner-only; all input methods; watching is private too ----
+  var STORE = 'https://tvproxy.khalildrissi.com/tv-store';
+  var modal = document.getElementById('tvModal');
+  var msgEl = document.getElementById('tvMsg');
+  var pvLock = document.getElementById('pvLock'), pvPanel = document.getElementById('pvPanel');
+  var btnUnlock = document.getElementById('btnUnlock'), btnSaveLoad = document.getElementById('btnSaveLoad');
+  var pvPassEl = document.getElementById('pvPass');
+  var pvUrlEl = document.getElementById('pvUrl'), pvTextEl = document.getElementById('pvText');
+  var pvXhostEl = document.getElementById('pvXhost'), pvXuserEl = document.getElementById('pvXuser'), pvXpassEl = document.getElementById('pvXpass');
+  var pvFileEl = document.getElementById('pvFile');
+  var unlockedPass = '', curM = 'url';
+
+  function modalMsg(text, type){                        // in-modal feedback: loading | ok | err | ''
+    msgEl.className = 'sheet-msg' + (type === 'err' ? ' err' : type === 'ok' ? ' ok' : '');
+    msgEl.innerHTML = (type === 'loading' ? '<span class="msgspin"></span>' : '');
+    if (text){ var s = document.createElement('span'); s.textContent = text; msgEl.appendChild(s); }
+  }
+  function busy(btn, on, label){
+    btn.disabled = on;
+    if (on){ btn._label = btn._label || btn.textContent; btn.textContent = label || 'Working…'; }
+    else if (btn._label){ btn.textContent = btn._label; }
+  }
+  function setMethod(m){
+    curM = m;
+    [].forEach.call(pvPanel.querySelectorAll('.tabs .pill'), function(x){ x.classList.toggle('on', x.getAttribute('data-m') === m); });
+    [].forEach.call(pvPanel.querySelectorAll('.field[data-mf]'), function(f){ f.classList.toggle('show', f.getAttribute('data-mf') === m); });
+    modalMsg('');
+  }
+  [].forEach.call(pvPanel.querySelectorAll('.tabs .pill'), function(t){
+    t.addEventListener('click', function(){ setMethod(t.getAttribute('data-m')); });
+  });
+  function lockModal(){
+    unlockedPass = '';
+    pvLock.style.display = 'flex'; pvPanel.style.display = 'none';
+    btnUnlock.style.display = ''; btnSaveLoad.style.display = 'none';
+    pvPassEl.value = ''; pvUrlEl.value = ''; pvTextEl.value = '';
+    pvXhostEl.value = ''; pvXuserEl.value = ''; pvXpassEl.value = ''; pvFileEl.value = '';
+    setMethod('url');
+  }
+  function openModal(){ modal.classList.add('show'); lockModal(); pvPassEl.focus(); }
+  function closeModal(){ modal.classList.remove('show'); }
+  document.getElementById('btnAdd').addEventListener('click', openModal);
+  document.getElementById('btnCancel').addEventListener('click', closeModal);
+  modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
+  pvPassEl.addEventListener('keydown', function(e){ if (e.key === 'Enter') btnUnlock.click(); });
+
+  // Parse M3U text into privateChans — transient (cleared on reload, so watching stays private).
+  function applyPrivate(text){
+    var body = (text || '').trim();
+    if (!body || body.indexOf('#EXTINF') === -1) return 0;
+    privateChans = parseM3U(body, 'Private').map(function(c){ return Object.assign({ _src:'private' }, c); });
+    rebuild();
+    return privateChans.length;
+  }
+  function loadLink(u){                                  // fetch a link via the raw proxy, load its channels
+    modalMsg('Loading channels… (large lists can take a moment)', 'loading');
+    return fetch(proxied(u) + '&raw=1')
+      .then(function(r){ if (!r.ok) throw new Error('the server returned HTTP ' + r.status); return r.text(); })
+      .then(function(t){
+        var body = (t || '').trim();
+        if (!body) throw new Error('the server returned nothing — check the link/credentials (the account may block this server, or be expired)');
+        if (body.indexOf('#EXTINF') === -1) throw new Error("that link isn't a valid M3U playlist");
+        var n = applyPrivate(body);
+        if (!n) throw new Error('no channels found');
+        modalMsg(n + ' channel' + (n===1?'':'s') + ' loaded. Opening…', 'ok');
+        setStatus(n + ' private channels loaded.');
+        setTimeout(closeModal, 800);
+      });
+  }
+
+  btnUnlock.addEventListener('click', function(){
+    var pass = pvPassEl.value;
+    if (!pass){ modalMsg('Enter the password.', 'err'); return; }
+    modalMsg('Unlocking…', 'loading'); busy(btnUnlock, true, 'Unlocking…');
+    fetch(STORE + '?p=' + encodeURIComponent(pass))
+      .then(function(r){ if (r.status === 401) throw new Error('wrong password'); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(d){
+        busy(btnUnlock, false);
+        unlockedPass = pass;
+        pvLock.style.display = 'none'; pvPanel.style.display = 'block';
+        btnUnlock.style.display = 'none'; btnSaveLoad.style.display = '';
+        if (d && d.value){
+          if (d.kind === 'text'){ setMethod('paste'); pvTextEl.value = d.value; var n = applyPrivate(d.value); modalMsg(n + ' channels loaded — edit or close to watch.', 'ok'); setStatus(n + ' private channels loaded.'); }
+          else { setMethod('url'); pvUrlEl.value = d.value; loadLink(d.value).catch(function(e){ modalMsg('Saved link did not load: ' + e.message, 'err'); }); }
+        } else {
+          modalMsg('No playlist saved yet — pick a method below, then Save and load.', '');
+        }
+      })
+      .catch(function(e){ busy(btnUnlock, false); modalMsg(e.message === 'wrong password' ? 'Wrong password.' : ('Could not unlock: ' + e.message), 'err'); });
+  });
+
+  // Gather { kind, value } from the currently-selected method (file read is async).
+  function gatherSource(){
+    if (curM === 'url'){ var u = pvUrlEl.value.trim(); return u ? Promise.resolve({ kind:'url', value:u }) : Promise.reject(new Error('Enter an M3U URL.')); }
+    if (curM === 'paste'){ var t = pvTextEl.value.trim(); if (!t) return Promise.reject(new Error('Paste an M3U.')); if (t.indexOf('#EXTINF') === -1) return Promise.reject(new Error("That doesn't look like an M3U (no #EXTINF).")); return Promise.resolve({ kind:'text', value:t }); }
+    if (curM === 'xtream'){
+      var host = pvXhostEl.value.trim().replace(/\/+$/,''), user = pvXuserEl.value.trim(), pass = pvXpassEl.value.trim();
+      if (!host || !user || !pass) return Promise.reject(new Error('Fill server, username and password.'));
+      if (!/^https?:\/\//i.test(host)) return Promise.reject(new Error('Server must start with http:// or https://'));
+      return Promise.resolve({ kind:'url', value: host + '/get.php?username=' + encodeURIComponent(user) + '&password=' + encodeURIComponent(pass) + '&type=m3u_plus&output=ts' });
+    }
+    var f = pvFileEl.files && pvFileEl.files[0];
+    if (!f) return Promise.reject(new Error('Choose an .m3u file.'));
+    return f.text().then(function(t){ if ((t || '').indexOf('#EXTINF') === -1) throw new Error('That file is not a valid M3U.'); return { kind:'text', value:t }; });
+  }
+
+  btnSaveLoad.addEventListener('click', function(){
+    if (!unlockedPass){ modalMsg('Unlock first.', 'err'); return; }
+    modalMsg('Saving…', 'loading'); busy(btnSaveLoad, true, 'Saving…');
+    gatherSource().then(function(src){
+      return fetch(STORE, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: unlockedPass, kind: src.kind, value: src.value }) })
+        .then(function(r){ if (r.status === 401) throw new Error('wrong password'); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function(){
+          busy(btnSaveLoad, false);
+          if (src.kind === 'text'){ var n = applyPrivate(src.value); if (!n){ modalMsg('Saved, but no channels found in that M3U.', 'err'); return; } modalMsg(n + ' channels saved and loaded. Opening…', 'ok'); setStatus(n + ' private channels loaded.'); setTimeout(closeModal, 800); }
+          else { loadLink(src.value).catch(function(e){ modalMsg('Saved, but could not load: ' + e.message, 'err'); }); }
+        });
+    }).catch(function(e){ busy(btnSaveLoad, false); modalMsg(e.message, 'err'); });
+  });
+
+  searchEl.addEventListener('input', render);
+  rebuild();
+  setStatus('Ready — pick a channel, search, or add your own playlist.');
+})();
+</script>
+</body>
+</html>

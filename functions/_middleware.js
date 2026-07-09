@@ -15,6 +15,11 @@ export async function onRequest(context) {
     });
   }
 
+  // Arcade: pass through untouched. Re-wrapping the response would drop the
+  // WebSocket upgrade on /arcade/relay, and the arcade is intentionally noindex
+  // (set via _headers), so don't force the canonical index/follow header here.
+  if (url.pathname.startsWith('/arcade/')) return context.next();
+
   // On the custom domain, add canonical link header
   const response = await context.next();
   const canonical = `https://khalildrissi.com${url.pathname}`;

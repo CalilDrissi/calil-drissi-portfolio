@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "khalil-voice",
+  "account_id": "e7800e905e78a4a139f68b780cc1f2d4",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-04-16",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "ai": { "binding": "AI" },
+  "durable_objects": {
+    "bindings": [{ "name": "VoiceAgent", "class_name": "VoiceAgent" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["VoiceAgent"] }]
+}

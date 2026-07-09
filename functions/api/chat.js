@@ -59,12 +59,18 @@ export async function onRequestPost(context) {
   const message = (payload.message || '').toString().trim();
   if (!message) return json({ error: 'Empty message.' }, 400);
 
+  const wantStream = payload.stream === true;      // NDJSON token stream (voice mode)
+  const voiceMode = payload.voice === true;        // spoken: keep replies very short
+
   // Build conversation: system + recent history + new user turn.
   const history = Array.isArray(payload.history) ? payload.history.slice(-8) : [];
   const lang = (payload.lang || '').toString().toLowerCase();
   const messages = [{ role: 'system', content: SYSTEM_PROMPT }];
   if (lang === 'fr') {
     messages.push({ role: 'system', content: "The visitor is browsing the French version of the site. Reply in French unless they clearly write to you in English." });
+  }
+  if (voiceMode) {
+    messages.push({ role: 'system', content: 'VOICE MODE: your reply is spoken aloud. Answer in ONE or two short, natural spoken sentences. No lists, no markdown, no headings — just plain conversational speech.' });
   }
   for (const h of history) {
     if (h && (h.role === 'user' || h.role === 'assistant') && typeof h.content === 'string') {
@@ -81,12 +87,26 @@ export async function onRequestPost(context) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: env.OLLAMA_MODEL || DEFAULT_MODEL,
+        // A faster model can be set via OLLAMA_MODEL_FAST for voice turns.
+        model: (voiceMode && env.OLLAMA_MODEL_FAST) || env.OLLAMA_MODEL || DEFAULT_MODEL,
         messages,
-        stream: false,
+        stream: wantStream,
         options: { temperature: 0.6 },
       }),
     });
+
+    // Streaming path (voice): pass Ollama's NDJSON straight through so the client
+    // can start speaking the first sentence before the full reply is generated.
+    if (wantStream) {
+      if (!res.ok || !res.body) return json({ error: `Upstream error (${res.status})` }, 502);
+      return new Response(res.body, {
+        headers: {
+          'Content-Type': 'application/x-ndjson; charset=utf-8',
+          'Cache-Control': 'no-cache',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+    }
 
     const data = await res.json().catch(() => ({}));
 

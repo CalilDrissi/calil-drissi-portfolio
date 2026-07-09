@@ -8,6 +8,8 @@
   <link rel="canonical" href="https://khalildrissi.com/" />
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" id="appManifest" />
+  <meta name="theme-color" content="#0e0e0e" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Inter:wght@400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
@@ -97,7 +99,10 @@
       --article: clamp(10px, 0.76vw, 12px);
     }
 
-    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    /* height:100% (chained through body/.page) ties the layout to the actual
+       window, avoiding the vh/dvh under-report that left a black gap at the
+       bottom of the installed PWA. The dark background covers any residual area. */
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; height: 100%; background: var(--bg); }
 
     body {
       background: var(--bg);
@@ -108,8 +113,7 @@
       line-height: 1.2;
       letter-spacing: normal;
       overflow: hidden;
-      height: 100vh;
-      height: 100dvh;
+      height: 100%;
     }
 
     ::selection { background: var(--accent); color: #fff; }
@@ -117,12 +121,23 @@
     a:hover { text-decoration: underline; }
     img { display: block; max-width: 100%; }
 
+    /* Global select styling: custom chevron with room from the edge, applied to
+       EVERY <select> on the page so the native arrow never sits jammed against
+       the border again (uses background-image + !important so it composes over
+       any inline background-color). */
+    select {
+      appearance: none; -webkit-appearance: none; -moz-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%23ffffff' stroke-opacity='0.6' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 1.75 6 6.25l4.5-4.5'/%3E%3C/svg%3E") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 14px center !important;
+      padding-right: 38px !important;
+    }
+
     /* ---- LAYOUT ---- */
     .page {
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      height: 100dvh;
+      height: 100%;
       padding: var(--edge);
       padding-bottom: clamp(24px, 3.5vh, 36px); /* clears the fixed footer ribbon */
       gap: 0;
@@ -273,7 +288,7 @@
       pointer-events: none;
       z-index: 998;
       width: 200px;
-      border-radius: 12px;
+      border-radius: 8px;
       overflow: hidden;
       opacity: 0;
       transform: translate(16px, -50%) scale(0.85);
@@ -287,7 +302,7 @@
     .cursor-video-preview video {
       display: block;
       width: 100%;
-      border-radius: 12px;
+      border-radius: 8px;
     }
     .cursor-video-preview .cvp-label {
       position: absolute;
@@ -363,16 +378,16 @@
       margin-top: clamp(4px, 0.6vh, 8px);
       line-height: 1.5;
     }
-    .intro-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 9px; margin-top: clamp(8px, 1.2vh, 14px); }
+    .intro-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: clamp(8px, 1.2vh, 14px); max-width: 360px; }
+    .intro-actions > button { width: 100%; justify-content: center; }
     .ask-ai-pill {
       display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(124,77,255,0.10); border: none;
+      background: rgba(124,77,255,0.08); border: 1px solid rgba(124,77,255,0.5);
       color: var(--fg); font-family: var(--mono); font-size: var(--grid-text); text-transform: uppercase;
-      letter-spacing: 0.04em; padding: clamp(6px, 0.9vh, 9px) clamp(13px, 1.1vw, 18px); border-radius: 9999px; cursor: pointer;
-      box-shadow: 0 4px 16px rgba(124,77,255,0.30), 0 1px 2px rgba(0,0,0,0.4);
-      transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+      letter-spacing: 0.04em; padding: clamp(6px, 0.9vh, 9px) clamp(13px, 1.1vw, 18px); border-radius: 4px; cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
     }
-    .ask-ai-pill:hover { background: rgba(124,77,255,0.18); box-shadow: 0 6px 24px rgba(124,77,255,0.5), 0 1px 2px rgba(0,0,0,0.4); transform: translateY(-1px); }
+    .ask-ai-pill:hover { background: rgba(124,77,255,0.2); border-color: var(--accent); transform: translateY(-1px); }
     .ask-ai-orb {
       width: 10px; height: 10px; border-radius: 50%; flex: none;
       background: radial-gradient(circle at 35% 30%, #bae6fd, #38bdf8 45%, #6366f1 100%);
@@ -385,12 +400,24 @@
     .contact-me-btn {
       display: inline-flex; align-items: center; border: none; cursor: pointer;
       font-family: var(--mono); font-size: var(--grid-text); text-transform: uppercase; letter-spacing: 0.04em;
-      color: #fff; background: var(--accent); border-radius: 9999px;
+      color: #fff; background: var(--accent); border-radius: 4px;
       padding: clamp(6px, 0.9vh, 9px) clamp(13px, 1.1vw, 18px);
       box-shadow: 0 4px 16px rgba(124,77,255,0.35);
       transition: filter 0.2s, box-shadow 0.2s, transform 0.15s;
     }
     .contact-me-btn:hover { filter: brightness(1.12); box-shadow: 0 6px 22px rgba(124,77,255,0.55); transform: translateY(-1px); }
+    .games-btn {
+      display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(124,77,255,0.5);
+      cursor: pointer; font-family: var(--mono); font-size: var(--grid-text); text-transform: uppercase;
+      letter-spacing: 0.04em; color: #fff; background: rgba(124,77,255,0.08); border-radius: 4px;
+      padding: clamp(6px, 0.9vh, 9px) clamp(13px, 1.1vw, 18px);
+      transition: background 0.2s, transform 0.15s, border-color 0.2s;
+    }
+    .games-btn:hover { background: rgba(124,77,255,0.2); transform: translateY(-1px); border-color: var(--accent); }
+    .games-btn svg { flex: none; opacity: 0.9; }
+    /* Only the arcade is desktop-only (draggable window + phone pad); TV, Music
+       and Radio open as full-screen overlays on touch, so keep them on mobile. */
+    @media (pointer: coarse), (max-width: 640px) { #openGamesBtn { display: none !important; } }
     /* Top-right page nav: accent blog button + flag language switcher */
     .page-nav {
       position: fixed; top: 12px; right: 20px; z-index: 200;
@@ -415,6 +442,83 @@
     .lang-opt.active { opacity: 1; border-color: var(--accent); color: var(--fg); }
     .meta-tz { display: inline-flex; align-items: center; gap: 6px; }
     .tz-icon { opacity: 0.7; flex: none; }
+
+    /* ---- Dynamic Island: voice-assistant pill (fixed, top-center) ---- */
+    /* TODO(voice-island): temporarily hidden — bring the voice Dynamic Island
+       back later. Kept in the DOM (not deleted) so its module still creates the
+       shared VoiceClient the "Ask my AI" chat relies on. */
+    #voiceIsland { display: none !important; }
+    #voiceIsland {
+      position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+      z-index: 950;
+      display: inline-flex; align-items: center; gap: 8px;
+      max-width: min(210px, calc(100vw - 240px));
+      padding: 8px 16px;
+      /* frosted white glass so it clearly floats above the dark page */
+      /* liquid glass: SEE-THROUGH — the dark page blurs through it, light text on top */
+      background: linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.055));
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 9999px;
+      color: #ffffff; text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+      font-family: var(--mono); font-size: 11px; letter-spacing: 0.02em; font-weight: 500;
+      cursor: pointer; user-select: none; white-space: nowrap; overflow: hidden;
+      -webkit-backdrop-filter: blur(22px) saturate(1.9) brightness(1.15); backdrop-filter: blur(22px) saturate(1.9) brightness(1.15);
+      box-shadow: 0 14px 42px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.4),
+                  inset 0 1px 1px rgba(255,255,255,0.5), inset 0 -10px 20px rgba(255,255,255,0.05);
+      transition: max-width .5s cubic-bezier(.22,1,.36,1), padding .5s cubic-bezier(.22,1,.36,1),
+                  transform .5s cubic-bezier(.22,1,.36,1), box-shadow .4s ease, border-radius .5s cubic-bezier(.22,1,.36,1);
+    }
+    /* soft dark scrim behind — fades in on active states so content reads as "below/behind" */
+    #voiceIsland::before {
+      content: ''; position: fixed; top: -30px; left: 50%; transform: translateX(-50%);
+      width: 620px; height: 340px; z-index: -1; pointer-events: none;
+      background: radial-gradient(ellipse at 50% 24%, rgba(0,0,0,0.55), rgba(0,0,0,0) 60%);
+      opacity: 0; transition: opacity 0.5s ease;
+    }
+    #voiceIsland.vi-connecting::before, #voiceIsland.vi-listening::before, #voiceIsland.vi-speaking::before { opacity: 1; }
+    /* HOVER = grow (iPhone-style): widen, reveal hint, deepen the float shadow */
+    #voiceIsland:hover {
+      max-width: min(330px, calc(100vw - 120px)); transform: translateX(-50%) scale(1.035);
+      box-shadow: 0 18px 50px rgba(0,0,0,0.66), 0 5px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.95);
+    }
+    #voiceIsland:hover .vi-hint { max-width: 190px; opacity: 0.62; margin-left: 3px; }
+    #voiceIsland:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    #voiceIsland .vi-glyph { flex: none; width: 14px; height: 14px; display: inline-flex; color: var(--accent); }
+    #voiceIsland .vi-glyph svg { width: 100%; height: 100%; display: block; }
+    #voiceIsland .vi-label { overflow: hidden; text-overflow: ellipsis; color: #fff; }
+    #voiceIsland .vi-hint { max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap; color: rgba(255,255,255,0.72);
+      transition: max-width .5s cubic-bezier(.22,1,.36,1), opacity .35s ease, margin .5s; }
+    #voiceIsland .vi-wave { display: none; align-items: center; gap: 2px; height: 14px; flex: none; }
+    #voiceIsland .vi-wave i {
+      width: 2px; height: 4px; background: var(--accent); border-radius: 1px;
+      animation: vi-wave 1s ease-in-out infinite;
+    }
+    #voiceIsland .vi-wave i:nth-child(2) { animation-delay: 0.15s; }
+    #voiceIsland .vi-wave i:nth-child(3) { animation-delay: 0.3s; }
+    #voiceIsland .vi-wave i:nth-child(4) { animation-delay: 0.45s; }
+    #voiceIsland .vi-wave i:nth-child(5) { animation-delay: 0.6s; }
+    @keyframes vi-wave { 0%,100% { height: 4px; opacity: 0.6; } 50% { height: 14px; opacity: 1; } }
+    /* active states: expand into a rounded panel, show waveform */
+    #voiceIsland.vi-connecting, #voiceIsland.vi-listening, #voiceIsland.vi-speaking {
+      max-width: min(520px, calc(100vw - 40px)); padding: 11px 20px; border-radius: 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 6px 18px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.95);
+    }
+    #voiceIsland.vi-connecting .vi-glyph, #voiceIsland.vi-listening .vi-glyph, #voiceIsland.vi-speaking .vi-glyph,
+    #voiceIsland.vi-connecting .vi-hint, #voiceIsland.vi-listening .vi-hint, #voiceIsland.vi-speaking .vi-hint { display: none; }
+    #voiceIsland.vi-connecting .vi-wave, #voiceIsland.vi-listening .vi-wave, #voiceIsland.vi-speaking .vi-wave { display: inline-flex; }
+    #voiceIsland.vi-connecting .vi-wave i { animation-duration: 1.5s; opacity: 0.7; }
+    #voiceIsland.vi-speaking .vi-wave i { background: #17171b; }
+    @media (prefers-reduced-motion: reduce) {
+      #voiceIsland { transition: none; }
+      #voiceIsland .vi-wave i { animation: none !important; height: 9px; }
+    }
+    /* mobile / coarse pointers: compact, left-anchored so it clears the top-right nav */
+    @media (pointer: coarse), (max-width: 640px) {
+      #voiceIsland { top: 10px; left: 12px; transform: none; max-width: calc(100vw - 150px); font-size: 10px; padding: 7px 12px; }
+      #voiceIsland:hover { transform: none; }
+      #voiceIsland.vi-connecting, #voiceIsland.vi-listening, #voiceIsland.vi-speaking { max-width: calc(100vw - 24px); }
+    }
+
     .intro-stats {
       margin-top: clamp(4px, 0.6vh, 8px);
       color: #fff;
@@ -832,7 +936,7 @@
     .gh-month-tab {
       background: none;
       border: 1px solid transparent;
-      border-radius: 3px;
+      border-radius: 4px;
       padding: 1px 5px;
       font-family: var(--mono);
       font-size: calc(var(--label) - 2px);
@@ -1109,7 +1213,7 @@
     .rb-download {
       background: none;
       border: 1px solid var(--border);
-      border-radius: 3px;
+      border-radius: 4px;
       padding: 2px 8px;
       font-family: var(--mono);
       font-size: 10px;
@@ -1126,7 +1230,7 @@
       scrollbar-color: rgba(255,255,255,0.1) transparent;
     }
     .rb-code-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
-    .rb-code-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    .rb-code-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
     .rb-code-table { display: table; min-width: 100%; border-collapse: collapse; }
     .rb-code-row { display: table-row; }
     .rb-code-row:hover .rb-ln,
@@ -1291,7 +1395,7 @@
       font-family: var(--mono);
       font-size: 9px;
       padding: 2px 6px;
-      border-radius: 3px;
+      border-radius: 4px;
       border: 1px solid var(--border);
       color: var(--fg-dim);
     }
@@ -1367,7 +1471,7 @@
       top: 8px; right: 8px;
       background: rgba(0,0,0,0.7);
       padding: 2px 8px;
-      border-radius: 3px;
+      border-radius: 4px;
       font-size: var(--label);
       font-family: var(--mono);
       color: #fbbf24;
@@ -1747,7 +1851,7 @@
     .win-action-btn {
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 3px;
+      border-radius: 4px;
       padding: 3px 10px;
       font-family: var(--mono);
       font-size: 10px;
@@ -1888,6 +1992,23 @@
       background: rgba(255,255,255,0.12);
       color: var(--fg);
     }
+    /* Media pill: equalizer + title + play/pause (stays while minimized/playing). */
+    .win-taskbar-item.media-pill {
+      display: inline-flex; align-items: center; gap: 9px; padding: 6px 10px 6px 12px;
+      min-width: 170px; max-width: 260px; text-transform: none; letter-spacing: 0;
+      border-color: rgba(124,77,255,0.4);
+    }
+    .win-taskbar-item.media-pill:hover { border-color: var(--accent); }
+    .tb-eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; flex: none; }
+    .tb-eq i { width: 3px; height: 3px; background: var(--accent); border-radius: 1px; }
+    .tb-eq.on i { animation: tbEq 0.9s ease-in-out infinite; }
+    .tb-eq.on i:nth-child(2) { animation-delay: .18s; }
+    .tb-eq.on i:nth-child(3) { animation-delay: .36s; }
+    .tb-eq.on i:nth-child(4) { animation-delay: .54s; }
+    @keyframes tbEq { 0%,100% { height: 3px; } 50% { height: 14px; } }
+    .tb-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: var(--fg); text-transform: none; }
+    .tb-pp { background: transparent; border: 0; color: #fff; cursor: pointer; display: flex; padding: 2px; border-radius: 5px; flex: none; }
+    .tb-pp:hover { background: rgba(255,255,255,0.14); }
 
     /* ---- ABOUT ME POPUP (uses .win base) ---- */
     .about-tabs {
@@ -2004,7 +2125,7 @@
     .chat-msg {
       max-width: 80%;
       padding: 10px 14px;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 12px;
       line-height: 1.5;
     }
@@ -2037,7 +2158,7 @@
       margin: 0 0 14px 16px;
       padding: 10px 14px;
       background: rgba(255,255,255,0.06);
-      border-radius: 6px;
+      border-radius: 8px;
       border-bottom-left-radius: 2px;
       display: none;
       gap: 4px;
@@ -2119,7 +2240,7 @@
       font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,0.72); letter-spacing: 0.02em;
     }
     .chat-orb-close {
-      flex: none; width: 28px; height: 28px; border: none; border-radius: 6px;
+      flex: none; width: 28px; height: 28px; border: none; border-radius: 8px;
       background: rgba(255,255,255,0.08); color: var(--fg-dim); cursor: pointer;
       display: grid; place-items: center; transition: background 0.15s, color 0.15s;
     }
@@ -2275,7 +2396,7 @@
     .msg-record-btn.recording::after {
       width: 18px;
       height: 18px;
-      border-radius: 3px;
+      border-radius: 4px;
     }
     .msg-record-btn.recording {
       border-color: #ff4444;
@@ -2330,7 +2451,7 @@
     .custom-player {
       width: 100%;
       border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 6px;
+      border-radius: 8px;
       background: rgba(255,255,255,0.03);
       overflow: hidden;
     }
@@ -2420,7 +2541,7 @@
       color: var(--fg-dim);
       background: none;
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 3px;
+      border-radius: 4px;
       padding: 4px 10px;
       cursor: pointer;
       transition: color 0.15s, border-color 0.15s;
@@ -2447,7 +2568,7 @@
     }
     .msg-dropzone {
       border: 1px dashed rgba(255,255,255,0.12);
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 16px;
       text-align: center;
       cursor: pointer;
@@ -2486,7 +2607,7 @@
       justify-content: space-between;
       padding: 4px 8px;
       background: rgba(255,255,255,0.03);
-      border-radius: 3px;
+      border-radius: 4px;
       border: 1px solid rgba(255,255,255,0.06);
     }
     .msg-file-item-name {
@@ -2542,6 +2663,20 @@
   </style>
 </head>
 <body>
+
+<!-- DYNAMIC ISLAND — voice assistant (wired to Cloudflare VoiceAgent via /voice-client.js) -->
+<div id="voiceIsland" class="vi-idle" role="button" tabindex="0" aria-label="Ask me anything — start voice assistant" aria-live="polite">
+  <span class="vi-glyph" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="9" y="2" width="6" height="12" rx="3"></rect>
+      <path d="M5 10v1a7 7 0 0 0 14 0v-1"></path>
+      <line x1="12" y1="18" x2="12" y2="22"></line>
+    </svg>
+  </span>
+  <span class="vi-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+  <span class="vi-label">Ask me anything</span>
+  <span class="vi-hint">· say “open games”</span>
+</div>
 
 <div class="page">
 
@@ -3159,17 +3294,32 @@
         return;
       }
       this.taskbar.classList.add('visible');
+      const PLAY = '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+      const PAUSE = '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
       minimized.forEach(w => {
         const item = document.createElement('div');
-        item.className = 'win-taskbar-item';
-        item.textContent = w.title;
-        item.addEventListener('click', () => this.restore(w));
+        if (w.mediaWin) {
+          const now = w.mediaNow || { title: w.title, playing: false };
+          item.className = 'win-taskbar-item media-pill';
+          item.innerHTML =
+            '<span class="tb-eq' + (now.playing ? ' on' : '') + '"><i></i><i></i><i></i><i></i></span>' +
+            '<span class="tb-title"></span>' +
+            '<button class="tb-pp" aria-label="Play or pause">' + (now.playing ? PAUSE : PLAY) + '</button>';
+          item.querySelector('.tb-title').textContent = now.title;
+          item.querySelector('.tb-pp').addEventListener('click', (ev) => { ev.stopPropagation(); this._mediaPost(w, 'media-toggle'); });
+          item.addEventListener('click', () => this.restore(w));
+        } else {
+          item.className = 'win-taskbar-item';
+          item.textContent = w.title;
+          item.addEventListener('click', () => this.restore(w));
+        }
         this.taskbar.appendChild(item);
       });
     },
 
     close(win) {
       if (win.onHide) win.onHide();
+      if (win.mediaWin) this._mediaPost(win, 'media-hide');   // close stops playback (minimize keeps it playing)
       win.el.classList.remove('open', 'focused');
       win.closed = true;
       if (win.persistent) {
@@ -3177,6 +3327,9 @@
         win.minimized = false;
         win.maximized = false;
         win.el.classList.remove('maximized');
+        if (win === this._arcadeWin) {
+          try { sessionStorage.removeItem('arcade:winopen'); sessionStorage.removeItem('arcade:winmin'); localStorage.setItem('arcade:closed', '1'); } catch (_) {}
+        }
         this.updateTaskbar();
       } else {
         setTimeout(() => {
@@ -3189,18 +3342,34 @@
 
     minimize(win) {
       if (win.onHide) win.onHide();
+      if (win.mediaWin && win.pauseOnMinimize) this._mediaPost(win, 'media-hide');   // TV: don't background-play video
       win.minimized = true;
-      gsap.set(win.el, { clearProps: 'opacity,transform' });
-      win.el.classList.add('minimized');
+      if (win.keepAliveOnHide) {
+        // Windows holding a live iframe (arcade emulator, TV stream): the
+        // transform-based minimize animation makes the browser RELOAD the iframe;
+        // a plain inline display:none keeps it (and the game/stream) alive.
+        win.el.style.display = 'none';
+        if (win === this._arcadeWin) { try { sessionStorage.setItem('arcade:winmin', '1'); } catch (_) {} }
+      } else {
+        gsap.set(win.el, { clearProps: 'opacity,transform' });
+        win.el.classList.add('minimized');
+      }
       this.updateTaskbar();
     },
 
     restore(win) {
       win.minimized = false;
-      win.el.classList.remove('minimized');
-      gsap.set(win.el, { clearProps: 'opacity,transform' });
+      if (win.keepAliveOnHide) {
+        win.el.style.display = '';
+        if (win === this._arcadeWin) { try { sessionStorage.setItem('arcade:winmin', '0'); } catch (_) {} }
+      } else {
+        win.el.classList.remove('minimized');
+        gsap.set(win.el, { clearProps: 'opacity,transform' });
+      }
       this.focus(win);
       this.updateTaskbar();
+      if (win === this._arcadeWin) this._arcadePost('arcade-show');
+      if (win.mediaWin) this._mediaPost(win, 'media-show');
     },
 
     maximize(win) {
@@ -3371,8 +3540,236 @@
         this.focus(win);
       });
       return win;
-    }
+    },
+
+    // PS1 Arcade — embeds the same-origin emulator front-end (/arcade/) in a
+    // window. On touch devices the window fills the viewport (WM windows aren't
+    // drag-optimised for touch); the emulator shows its own on-screen controls.
+    _arcadePost(type) {
+      const aw = this._arcadeWin; if (!aw || !aw.el) return;
+      const f = aw.el.querySelector('iframe');
+      if (f && f.contentWindow) { try { f.contentWindow.postMessage({ type: type }, '*'); } catch (_) {} }
+    },
+    openArcadeWindow() {
+      try { sessionStorage.setItem('arcade:winopen', '1'); localStorage.removeItem('arcade:closed'); } catch (_) {}   // remember it's open (survive refresh); clear the "closed" flag
+      // Persistent window: closing/minimizing HIDES it (the game iframe + its
+      // state survive), so re-opening resumes the same game instead of restarting.
+      const existing = this._arcadeWin;
+      if (existing && existing.el && existing.el.isConnected) {
+        existing.closed = false;
+        existing.el.classList.add('open');
+        if (existing.minimized) { this.restore(existing); } else { this.focus(existing); }
+        this._arcadePost('arcade-show');
+        return existing;
+      }
+      const coarse = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 760;
+      const w = coarse ? window.innerWidth : Math.min(960, window.innerWidth - 60);
+      const h = coarse ? window.innerHeight : Math.min(680, window.innerHeight - 60);
+      const x = coarse ? 0 : Math.max(20, (window.innerWidth - w) / 2);
+      const y = coarse ? 0 : Math.max(20, (window.innerHeight - h) / 2);
+
+      const el = document.createElement('div');
+      el.className = 'win win-arcade' + (coarse ? ' win-arcade-full' : '');
+      el.style.cssText = `width:${w}px;height:${h}px;top:${y}px;left:${x}px;`;
+      el.innerHTML = `
+        <div class="win-resize win-resize-e"></div>
+        <div class="win-resize win-resize-w"></div>
+        <div class="win-resize win-resize-s"></div>
+        <div class="win-resize win-resize-n"></div>
+        <div class="win-resize win-resize-se"></div>
+        <div class="win-resize win-resize-sw"></div>
+        <div class="win-resize win-resize-ne"></div>
+        <div class="win-resize win-resize-nw"></div>
+        <div class="win-titlebar">
+          <div class="win-dots">
+            <span class="win-dot-close"></span>
+            <span class="win-dot-min"></span>
+            <span class="win-dot-max"></span>
+          </div>
+          <div class="win-titlebar-text" data-arcade-title>arcade</div>
+          <div class="win-titlebar-actions"></div>
+        </div>
+        <div class="win-body" style="padding:0;overflow:hidden;">
+          <iframe src="/arcade/catalogue.html" title="PS1 Arcade"
+                  style="width:100%;height:100%;border:0;background:#000;display:block;"
+                  allow="cross-origin-isolated; autoplay; fullscreen; gamepad; clipboard-write"></iframe>
+        </div>
+      `;
+      this.container.appendChild(el);
+      const win = this.register(el, 'Arcade');
+      win.persistent = true;                          // close hides (keeps the game)
+      win.keepAliveOnHide = true;                     // minimize via display:none (don't reload the iframe)
+      win.onHide = () => this._arcadePost('arcade-hide');   // pause the game while hidden
+      this._arcadeWin = win;
+      // The catalogue tells us the current game so the titlebar + taskbar show it.
+      if (!this._arcadeMsgBound) {
+        this._arcadeMsgBound = true;
+        window.addEventListener('message', (e) => {
+          if (!e.data || e.data.type !== 'arcade-title') return;
+          const aw = this._arcadeWin; if (!aw) return;
+          aw.title = e.data.title || 'Arcade';
+          const t = aw.el.querySelector('[data-arcade-title]');
+          if (t) t.textContent = (e.data.title || 'arcade').toLowerCase();
+          this.updateTaskbar();
+        });
+      }
+      requestAnimationFrame(() => { el.classList.add('open'); this.focus(win); });
+      return win;
+    },
+
+    openTVWindow() {
+      // Persistent window: closing/minimizing HIDES it so the stream keeps playing.
+      const existing = this._tvWin;
+      if (existing && existing.el && existing.el.isConnected) {
+        existing.closed = false;
+        existing.el.classList.add('open');
+        if (existing.minimized) { this.restore(existing); } else { this.focus(existing); }
+        this._mediaPost(existing, 'media-show');       // resume when reopened
+        return existing;
+      }
+      const coarse = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 760;
+      const w = coarse ? window.innerWidth : Math.min(1040, window.innerWidth - 60);
+      const h = coarse ? window.innerHeight : Math.min(660, window.innerHeight - 60);
+      const x = coarse ? 0 : Math.max(20, (window.innerWidth - w) / 2);
+      const y = coarse ? 0 : Math.max(20, (window.innerHeight - h) / 2);
+      const el = document.createElement('div');
+      el.className = 'win win-arcade' + (coarse ? ' win-arcade-full' : '');   // reuse arcade's display:none minimize (keeps the iframe alive)
+      el.style.cssText = `width:${w}px;height:${h}px;top:${y}px;left:${x}px;`;
+      el.innerHTML = `
+        <div class="win-resize win-resize-e"></div><div class="win-resize win-resize-w"></div>
+        <div class="win-resize win-resize-s"></div><div class="win-resize win-resize-n"></div>
+        <div class="win-resize win-resize-se"></div><div class="win-resize win-resize-sw"></div>
+        <div class="win-resize win-resize-ne"></div><div class="win-resize win-resize-nw"></div>
+        <div class="win-titlebar">
+          <div class="win-dots"><span class="win-dot-close"></span><span class="win-dot-min"></span><span class="win-dot-max"></span></div>
+          <div class="win-titlebar-text">live tv</div>
+          <div class="win-titlebar-actions"></div>
+        </div>
+        <div class="win-body" style="padding:0;overflow:hidden;">
+          <iframe src="/tv/" title="Live TV"
+                  style="width:100%;height:100%;border:0;background:#000;display:block;"
+                  allow="autoplay; fullscreen; encrypted-media"></iframe>
+        </div>`;
+      this.container.appendChild(el);
+      const win = this.register(el, 'Live TV');
+      win.persistent = true;                          // close hides (keeps the iframe; playback paused)
+      win.keepAliveOnHide = true;                     // minimize via display:none (don't reload the stream)
+      win.mediaWin = true;                            // close/minimize pause the video (see close/minimize)
+      win.pauseOnMinimize = true;                     // TV: don't background-play (radio/music DO keep playing)
+      this._tvWin = win;
+      requestAnimationFrame(() => { el.classList.add('open'); this.focus(win); });
+      return win;
+    },
+
+    _mediaPost(win, type) {
+      const f = win && win.el && win.el.querySelector('iframe');
+      if (f && f.contentWindow) { try { f.contentWindow.postMessage({ type }, '*'); } catch (_) {} }
+    },
+    _openMediaWindow(key, title, src, allow) {
+      const existing = this['_' + key + 'Win'];
+      if (existing && existing.el && existing.el.isConnected) {
+        existing.closed = false;
+        existing.el.classList.add('open');
+        if (existing.minimized) { this.restore(existing); } else { this.focus(existing); }
+        this._mediaPost(existing, 'media-show');       // resume when reopened
+        return existing;
+      }
+      const coarse = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 760;
+      const w = coarse ? window.innerWidth : Math.min(1040, window.innerWidth - 60);
+      const h = coarse ? window.innerHeight : Math.min(680, window.innerHeight - 60);
+      const x = coarse ? 0 : Math.max(20, (window.innerWidth - w) / 2);
+      const y = coarse ? 0 : Math.max(20, (window.innerHeight - h) / 2);
+      const el = document.createElement('div');
+      el.className = 'win win-arcade' + (coarse ? ' win-arcade-full' : '');
+      el.style.cssText = `width:${w}px;height:${h}px;top:${y}px;left:${x}px;`;
+      el.innerHTML = `
+        <div class="win-resize win-resize-e"></div><div class="win-resize win-resize-w"></div>
+        <div class="win-resize win-resize-s"></div><div class="win-resize win-resize-n"></div>
+        <div class="win-resize win-resize-se"></div><div class="win-resize win-resize-sw"></div>
+        <div class="win-resize win-resize-ne"></div><div class="win-resize win-resize-nw"></div>
+        <div class="win-titlebar">
+          <div class="win-dots"><span class="win-dot-close"></span><span class="win-dot-min"></span><span class="win-dot-max"></span></div>
+          <div class="win-titlebar-text">${title.toLowerCase()}</div>
+          <div class="win-titlebar-actions"></div>
+        </div>
+        <div class="win-body" style="padding:0;overflow:hidden;">
+          <iframe src="${src}" title="${title}"
+                  style="width:100%;height:100%;border:0;background:#0e0e0e;display:block;"
+                  allow="${allow}"></iframe>
+        </div>`;
+      this.container.appendChild(el);
+      const win = this.register(el, title);
+      win.persistent = true;                          // close hides (keeps the iframe/app alive)
+      win.keepAliveOnHide = true;                     // minimize via display:none (don't reload)
+      win.mediaWin = true;                            // minimize keeps playing; only close pauses (see close())
+      this['_' + key + 'Win'] = win;
+      requestAnimationFrame(() => { el.classList.add('open'); this.focus(win); });
+      return win;
+    },
+    openMusicWindow() { return this._openMediaWindow('music', 'Music', '/music/', 'autoplay; encrypted-media'); },
+    openRadioWindow() { return this._openMediaWindow('radio', 'Radio', '/radio/', 'autoplay'); }
   };
+  // Expose the window manager so the Dynamic Island (a separate ES module) can
+  // trigger app actions pushed by the voice agent (e.g. open_games -> Arcade).
+  window.WM = WM;
+
+  // Media apps (TV/Radio/Music) report now-playing so the minimized taskbar pill
+  // can show the title + a play/pause control (keeps playing while minimized).
+  window.addEventListener('message', (e) => {
+    if (!e.data || e.data.type !== 'media-now') return;
+    const win = WM.windows.find(w => { const f = w.el && w.el.querySelector('iframe'); return f && f.contentWindow === e.source; });
+    if (!win) return;
+    win.mediaNow = { title: e.data.title || win.title, playing: !!e.data.playing };
+    if (win.minimized) WM.updateTaskbar();
+  });
+
+  // ---- Install "Khalil's Arcade" as a PWA — from the homepage, no new tab ----
+  // Browsers only offer install on a top-level page (never inside an iframe), so
+  // the arcade's Install button (in the catalogue iframe) postMessages up here and
+  // we fire the deferred prompt. The manifest uses the site favicon as the icon.
+  // A service worker controlling the page is required for `beforeinstallprompt`
+  // to fire. Register a minimal root SW so the homepage is installable.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/app-sw.js', { scope: '/' }).catch(() => {});
+    });
+  }
+  let __deferredInstall = null;
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); __deferredInstall = e; });
+  window.addEventListener('appinstalled', () => { __deferredInstall = null; });
+  window.addEventListener('message', (e) => {
+    if (!e.data || e.data.type !== 'arcade-install') return;
+    // Unified app: installing anywhere installs the single "Khalil Drissi" site app
+    // (the arcade lives inside it). No manifest swap.
+    if (__deferredInstall) {
+      __deferredInstall.prompt();
+      __deferredInstall.userChoice.finally(() => { __deferredInstall = null; });
+    } else if (matchMedia('(display-mode: standalone)').matches) {
+      // already running as the installed app
+    } else {
+      // iOS/unsupported: no programmatic prompt — tell the user how
+      alert('To install: use your browser menu → "Add to Home Screen" / "Install app".');
+    }
+  });
+  // When launched from the installed app, jump straight into the arcade.
+  // Restore the arcade across a page refresh (it was open before), or when the
+  // page is launched as the installed app. If it was minimized, bring it back
+  // minimized (in the taskbar) so a refresh doesn't lose the running game.
+  const arcadeWasOpen = (() => { try { return sessionStorage.getItem('arcade:winopen') === '1'; } catch (_) { return false; } })();
+  const arcadeClosed = (() => { try { return localStorage.getItem('arcade:closed') === '1'; } catch (_) { return false; } })();
+  const isArcadeApp = /[?&]app=arcade/.test(location.search);   // launched as the installed Arcade app
+  // Open the arcade on load ONLY for the dedicated Arcade app, or to restore a
+  // session open before a refresh (and never if the visitor closed it). The normal
+  // site PWA (standalone, start_url "/") just opens the homepage.
+  if (isArcadeApp || (arcadeWasOpen && !arcadeClosed)) {
+    window.addEventListener('load', () => setTimeout(() => {
+      try {
+        const w = WM.openArcadeWindow();
+        let wasMin = false; try { wasMin = sessionStorage.getItem('arcade:winmin') === '1'; } catch (_) {}
+        if (wasMin && w) WM.minimize(w);
+      } catch (_) {}
+    }, 600));
+  }
 
   // ---- PROJECT DATA ----
   // Fallback for viewing the raw template; the built site uses localized PROJECTS_DATA injected at build time.
@@ -3447,6 +3844,7 @@
       if (!p) return;
       thumb.addEventListener('click', () => {
         if (dragDist > 5) return;
+        if (p.arcade) { WM.openArcadeWindow(); return; }
         WM.createProjectWindow(p, i);
       });
       thumb.addEventListener('mouseenter', e => { showTip(p); moveTip(e); });
@@ -3537,12 +3935,38 @@
     }
   });
 
-  // ---- CHAT (real AI via /api/chat → Ollama/Gemma; falls back to canned replies) ----
+  // ---- CHAT (real AI via the shared Cloudflare VoiceAgent client; falls back to canned replies) ----
   const chatInput = document.getElementById('chatInput');
   const chatSend = document.getElementById('chatSend');
   const chatMessages = document.getElementById('chatMessages');
   const chatTyping = document.getElementById('chatTyping');
   const chatHistory = [];
+
+  // Shared Cloudflare VoiceAgent connection — the Dynamic Island module script creates the
+  // single VoiceClient and stores it on window.__voiceClient. Chat + orb reuse that instance.
+  function getVoiceClient() { return window.__voiceClient || null; }
+  function whenClient(timeout = 6000) {
+    return new Promise((resolve) => {
+      const now = getVoiceClient();
+      if (now) return resolve(now);
+      const t0 = Date.now();
+      const iv = setInterval(() => {
+        const c = getVoiceClient();
+        if (c || Date.now() - t0 > timeout) { clearInterval(iv); resolve(c || null); }
+      }, 50);
+    });
+  }
+  function ensureConnected(client, timeout = 8000) {
+    return new Promise((resolve) => {
+      if (client.connected) return resolve(true);
+      client.connect();
+      const cleanup = () => { clearTimeout(t); if (client.removeEventListener) client.removeEventListener('connectionchange', on); };
+      const on = (v) => { if (v) { cleanup(); resolve(true); } };
+      const t = setTimeout(() => { cleanup(); resolve(!!client.connected); }, timeout);
+      client.addEventListener('connectionchange', on);
+    });
+  }
+  let lastAgentReply = ''; // guards against resolving on a stale assistant transcript entry
 
   const chatFallbacks = {
     stack: "Khalil works primarily with React, Next.js, and TypeScript on the frontend, paired with Node.js, Python, and PostgreSQL on the backend. He's also experienced with Go, Rust, Tailwind, GSAP, and cloud platforms.",
@@ -3570,6 +3994,25 @@
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
+  // Send a typed turn to the agent and resolve with its spoken/typed reply text (no mic).
+  function askAgent(client, text) {
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (t) => { if (settled) return; settled = true; cleanup(); resolve(t); };
+      const onT = (msgs) => {
+        if (!Array.isArray(msgs) || !msgs.length) return;
+        const last = msgs[msgs.length - 1];
+        if (last && last.role === 'assistant' && last.text && last.text !== lastAgentReply) {
+          lastAgentReply = last.text; finish(last.text);
+        }
+      };
+      const cleanup = () => { clearTimeout(timer); if (client.removeEventListener) client.removeEventListener('transcriptchange', onT); };
+      const timer = setTimeout(() => finish(''), 20000);
+      client.addEventListener('transcriptchange', onT);
+      try { client.sendText(text); } catch (e) { finish(''); }
+    });
+  }
+
   async function sendMessage() {
     const text = chatInput.value.trim();
     if (!text) return;
@@ -3583,63 +4026,47 @@
     chatMessages.scrollTop = chatMessages.scrollHeight;
     chatSend.disabled = true;
 
-    let reply;
+    // Text chat goes through the reliable HTTP endpoint (/api/chat → Gemma),
+    // not the real-time voice WebSocket (which is for the spoken/mic path).
+    let reply = '';
     try {
+      const lang = (typeof LANG !== 'undefined' && LANG === 'fr') ? 'fr' : 'en';
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history: chatHistory.slice(-8), lang: (typeof LANG !== 'undefined' ? LANG : 'en') }),
+        body: JSON.stringify({ message: text, history: chatHistory.slice(-8), lang })
       });
-      const data = await res.json().catch(() => ({}));
-      reply = (res.ok && data.reply) ? data.reply : fallbackResponse(text);
-    } catch {
-      reply = fallbackResponse(text);
-    }
+      if (res.ok) { const data = await res.json(); reply = (data && data.reply) ? data.reply : ''; }
+    } catch (_) { reply = ''; }
+    if (!reply) reply = fallbackResponse(text);   // endpoint unavailable → canned reply
 
     chatTyping.classList.remove('active');
     chatSend.disabled = false;
     appendBot(reply);
     chatHistory.push({ role: 'user', content: text }, { role: 'assistant', content: reply });
-    maybeSpeak(reply);
   }
 
-  chatSend.addEventListener('click', () => { lastMsgVoice = false; sendMessage(); });
+  chatSend.addEventListener('click', () => { sendMessage(); });
   chatInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { lastMsgVoice = false; sendMessage(); }
+    if (e.key === 'Enter') { sendMessage(); }
   });
 
-  // ---- Voice layer: speech-to-text input + spoken (TTS) replies, browser-native ----
-  const speechSR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const speechSynth = window.speechSynthesis;
+  // ---- Voice layer: real agent voice via the shared Cloudflare VoiceAgent client ----
   const chatMic = document.getElementById('chatMic');
   const chatVoiceToggle = document.getElementById('chatVoiceToggle');
-  const voiceLang = (typeof LANG !== 'undefined' && LANG === 'fr') ? 'fr-FR' : 'en-US';
-  // On mobile the speech recognizer needs exclusive mic access — a parallel getUserMedia
-  // (the orb analyser) steals the mic and breaks recognition, so we skip it there.
+  // On mobile a parallel getUserMedia (the orb analyser) can steal the mic from the agent
+  // call, so we skip the reactive analyser there and just let the orb breathe.
   const IS_MOBILE = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.matchMedia('(max-width: 640px)').matches;
   const ORB_T = (typeof LANG !== 'undefined' && LANG === 'fr')
     ? { listening: "À l'écoute…", thinking: 'Réflexion…', speaking: 'Réponse…' }
     : { listening: 'Listening…', thinking: 'Thinking…', speaking: 'Speaking…' };
-  let voiceReplyOn = true;
   let micListening = false;
-  let chatTtsVoice = null;
-
-  function pickChatVoice() {
-    if (!speechSynth) return;
-    const vs = speechSynth.getVoices();
-    const pfx = voiceLang.slice(0, 2);
-    chatTtsVoice = vs.find(v => v.lang && v.lang.toLowerCase().startsWith(pfx) && /google|natural|samantha|amelie|thomas|aurelie/i.test(v.name))
-      || vs.find(v => v.lang && v.lang.toLowerCase().startsWith(pfx)) || vs[0] || null;
-  }
-  if (speechSynth) { pickChatVoice(); speechSynth.onvoiceschanged = pickChatVoice; }
 
   // ---- orb visuals + hands-free conversation state ----
   const chatOrb = document.getElementById('chatOrb');
   const chatOrbCore = document.getElementById('chatOrbCore');
   const chatOrbText = document.getElementById('chatOrbText');
   let conversationMode = false, orbState = 'idle';
-  let lastMsgVoice = false;   // only speak replies to voice messages, not typed ones
-  let beginListenFn = null;
   let orbStream = null, orbCtx = null, orbAnalyser = null, orbData = null, orbRAF = null, orbLevel = 0, orbT = 0;
   const orbPrev = {};
   function setOrbText(s) { if (chatOrbText) chatOrbText.textContent = s; }
@@ -3682,7 +4109,7 @@
     if (chatMic && orbPrev.mic != null) chatMic.style.display = orbPrev.mic;
   }
   async function startUserAudio() {            // attaches mic analyser for reactivity (after orb is already shown)
-    if (IS_MOBILE) return;                      // skip on mobile: leave the mic free for SpeechRecognition
+    if (IS_MOBILE) return;                      // skip on mobile: leave the mic free for the agent call
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !AC) return;
     try {
@@ -3699,99 +4126,252 @@
     if (orbCtx) { orbCtx.close().catch(() => {}); orbCtx = null; }
     orbAnalyser = null; orbData = null; orbLevel = 0;
   }
-  function speakReply(text, onDone) {
-    if (!speechSynth) { if (onDone) onDone(); return; }
-    speechSynth.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    if (chatTtsVoice) u.voice = chatTtsVoice;
-    u.lang = voiceLang;
-    u.onstart = () => { orbState = 'speaking'; if (conversationMode) { showOrbUI(); setOrbText(ORB_T.speaking); } };
-    u.onend = () => { orbState = 'idle'; if (onDone) onDone(); };
-    u.onerror = () => { orbState = 'idle'; if (onDone) onDone(); };
-    speechSynth.speak(u);
+  // ---- Voice conversation: browser mic (STT) -> /api/chat (LLM) -> neural TTS,
+  // with a browser-speech fallback when the Workers AI voice quota is unavailable.
+  // Request/response replaces the real-time WebSocket call: it's reliable, and
+  // the LLM (Ollama via /api/chat) doesn't share the exhausted Workers AI budget.
+  // Self-hosted voice box (speaches: Kokoro TTS + whisper STT) — no quota, works
+  // in every browser. See voice.khalildrissi.com. TTS voice: British male
+  // (bm_george, JARVIS) for EN, French female (ff_siwis) for FR.
+  const VOICE_LANG = (typeof LANG !== 'undefined' && LANG === 'fr') ? 'fr' : 'en';
+  const VOICE_API = 'https://voice.khalildrissi.com';
+  const TTS_MODEL = 'speaches-ai/Kokoro-82M-v1.0-ONNX';
+  const STT_MODEL = 'Systran/faster-whisper-small';
+  const TTS_VOICE = VOICE_LANG === 'fr' ? 'ff_siwis' : 'bm_george';
+  let convoActive = false;
+  let voiceStream = null, voiceRec = null, voiceCtx = null, voiceAnalyser = null, voiceVADraf = 0, voiceAudio = null;
+
+  function browserSpeak(text, done) {            // fallback voice (only if the neural box is unreachable)
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = VOICE_LANG === 'fr' ? 'fr-FR' : 'en-US';
+      u.onend = done; u.onerror = done;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    } catch (_) { done(); }
   }
-  function maybeSpeak(text) {                  // after a reply: speak, then auto re-listen (hands-free)
-    const cont = () => { if (conversationMode && beginListenFn) beginListenFn(); };
-    if (lastMsgVoice && voiceReplyOn && speechSynth) speakReply(text, cont);
-    else cont();
-  }
-
-  if (speechSR && chatMic) {
-    const rec = new speechSR();
-    rec.lang = voiceLang;
-    rec.interimResults = true;
-    rec.continuous = !IS_MOBILE;   // mobile recognizers are unreliable in continuous mode; one utterance per turn
-    rec.maxAlternatives = 1;
-    const SILENCE_MS = 1500;        // auto-send after this much silence
-    let silenceTimer = null;
-
-    function beginListen() {                    // start (or auto-resume) a listening turn
-      micListening = true; orbState = 'listening';
-      showOrbUI(); setOrbText(ORB_T.listening);    // orb appears instantly on tap
-      chatInput.value = '';
-      try { rec.start(); } catch {}
-      startUserAudio();                          // mic analyser attaches when ready (reactivity)
+  // Gapless sentence player: synthesize each sentence as it arrives and play them
+  // in order, so speech STARTS on the first sentence instead of waiting for the
+  // whole reply to generate + synthesize. TTS fetches run concurrently (ahead of
+  // playback); a failed one falls back to the browser voice for that sentence.
+  function makeSpeaker() {
+    const parts = [];                 // { promise } in arrival order
+    let playIdx = 0, playing = false, finished = false, resolveDone;
+    const donePromise = new Promise((r) => { resolveDone = r; });
+    function ttsFetch(text) {
+      return fetch(VOICE_API + '/v1/audio/speech', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: TTS_MODEL, voice: TTS_VOICE, input: text, response_format: 'mp3' })
+      }).then((r) => { if (!r.ok) throw 0; return r.blob(); })
+        .then((blob) => ({ blob, text })).catch(() => ({ text }));   // no blob -> browser voice
     }
-    beginListenFn = beginListen;                 // let the conversation loop re-trigger listening
-
-    function finishListen(send) {
-      clearTimeout(silenceTimer);
-      if (!micListening) return;
-      micListening = false;
-      try { rec.stop(); } catch {}
-      stopUserAudio();
-      const text = chatInput.value.trim();
-      if (send && text) { lastMsgVoice = true; orbState = 'thinking'; setOrbText(ORB_T.thinking); sendMessage(); }
-      else { endConversation(); }                // nothing said -> end the hands-free loop
+    function playOne(it) {
+      return new Promise((res) => {
+        if (!it.blob) { browserSpeak(it.text, res); return; }
+        const url = URL.createObjectURL(it.blob); const a = new Audio(url); voiceAudio = a;
+        a.onended = () => { URL.revokeObjectURL(url); res(); };
+        a.onerror = () => { URL.revokeObjectURL(url); browserSpeak(it.text, res); };
+        a.play().catch(() => { URL.revokeObjectURL(url); browserSpeak(it.text, res); });
+      });
     }
-    function endConversation() {
-      conversationMode = false; micListening = false; orbState = 'idle';
-      clearTimeout(silenceTimer);
-      try { rec.stop(); } catch {}
-      if (speechSynth) speechSynth.cancel();
-      stopUserAudio(); hideOrbUI();
+    async function loop() {
+      playing = true;
+      while (playIdx < parts.length) {
+        const it = await parts[playIdx].promise; playIdx++;
+        if (!convoActive) break;
+        await playOne(it);
+      }
+      playing = false;
+      if (finished && playIdx >= parts.length) resolveDone();
     }
-    aboutWin.onHide = () => endConversation();   // closing/minimizing the window stops the AI audio + voice loop
-
-    rec.onresult = (e) => {
-      if (!micListening) return;
-      let interim = '', finalText = '';
-      for (const r of e.results) { if (r.isFinal) finalText += r[0].transcript + ' '; else interim += r[0].transcript; }
-      chatInput.value = (finalText + interim).trim();
-      setOrbText(chatInput.value || ORB_T.listening);
-      if (chatOrbText) chatOrbText.scrollLeft = chatOrbText.scrollWidth;
-      clearTimeout(silenceTimer);
-      silenceTimer = setTimeout(() => finishListen(true), SILENCE_MS);
+    return {
+      push(text) { const t = (text || '').trim(); if (!t) return; parts.push({ promise: ttsFetch(t) }); if (!playing) loop(); },
+      finish() { finished = true; if (!playing && playIdx >= parts.length) resolveDone(); },
+      done() { return donePromise; }
     };
-    rec.onend = () => { if (micListening) finishListen(true); };
-    rec.onerror = () => { clearTimeout(silenceTimer); if (micListening) { micListening = false; stopUserAudio(); endConversation(); } };
-
-    chatMic.addEventListener('click', () => {    // tap once to start a hands-free conversation
-      conversationMode = true;
-      if (speechSynth) speechSynth.cancel();
-      beginListen();
-    });
-    if (chatOrb) chatOrb.addEventListener('click', () => {
-      if (orbState === 'listening') finishListen(true);  // tap orb = send now
-      else endConversation();                            // tap during reply/thinking = stop
-    });
-    const chatOrbClose = document.getElementById('chatOrbClose');
-    if (chatOrbClose) chatOrbClose.addEventListener('click', (e) => { e.stopPropagation(); endConversation(); });  // back to text input anytime
-  } else if (chatMic) {
-    chatMic.style.display = 'none'; // STT unsupported (e.g. Firefox/Safari) — keep text input + TTS
+  }
+  function voiceMirror(role, text) {             // keep the spoken turns in the text chat log
+    if (!chatMessages) return;
+    const el = document.createElement('div');
+    el.className = 'chat-msg ' + (role === 'user' ? 'user' : 'bot');
+    if (role === 'user') el.textContent = text;
+    else el.innerHTML = '<div class="msg-sender">AI Assistant</div>' +
+      text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+      '<div class="msg-time">Just now</div>';
+    chatMessages.appendChild(el); chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+  async function handleVoiceTurn(said) {
+    setOrbText(said);                              // keep the visitor's OWN words on the orb caption
+    voiceMirror('user', said);
+    orbState = 'speaking';
+    const speaker = makeSpeaker();
+    let full = '', pending = '';
+    const flush = (force) => {
+      let m;                                        // emit each complete sentence as soon as it lands
+      while ((m = pending.match(/^[\s\S]*?[.!?…]+(\s|$)/))) { speaker.push(pending.slice(0, m[0].length)); pending = pending.slice(m[0].length); }
+      if (force && pending.trim()) { speaker.push(pending); pending = ''; }
+    };
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: said, history: chatHistory.slice(-8), lang: VOICE_LANG, voice: true, stream: true })
+      });
+      if (res.ok && res.body) {
+        const reader = res.body.getReader(); const dec = new TextDecoder(); let buf = '';
+        for (;;) {
+          const { value, done } = await reader.read(); if (done) break;
+          buf += dec.decode(value, { stream: true });
+          let nl;
+          while ((nl = buf.indexOf('\n')) >= 0) {
+            const line = buf.slice(0, nl).trim(); buf = buf.slice(nl + 1);
+            if (!line) continue;
+            try { const j = JSON.parse(line); const c = (j.message && j.message.content) || ''; if (c) { full += c; pending += c; flush(false); } } catch (_) {}
+          }
+        }
+      }
+    } catch (_) {}
+    flush(true);
+    if (!full.trim()) { full = fallbackResponse(said); speaker.push(full); }
+    speaker.finish();
+    chatHistory.push({ role: 'user', content: said }, { role: 'assistant', content: full });
+    voiceMirror('assistant', full);               // full reply to the chat log
+    await speaker.done();                          // wait until all sentences have been spoken
+    if (convoActive) listenTurn();                // hands-free: listen for the next turn
+  }
+  // Upload recorded speech to the self-hosted whisper endpoint (works in every browser).
+  async function transcribe(blob) {
+    try {
+      const fd = new FormData();
+      fd.append('file', blob, 'speech.webm');
+      fd.append('model', STT_MODEL);
+      fd.append('language', VOICE_LANG);
+      const r = await fetch(VOICE_API + '/v1/audio/transcriptions', { method: 'POST', body: fd });
+      if (!r.ok) return '';
+      const d = await r.json();
+      return (d && d.text ? d.text : '').trim();
+    } catch (_) { return ''; }
+  }
+  function pickMime() {
+    const opts = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'];
+    for (const m of opts) { if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m; }
+    return '';
+  }
+  async function ensureMic() {
+    if (voiceStream) return true;
+    try {
+      voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const AC = window.AudioContext || window.webkitAudioContext;
+      voiceCtx = new AC(); await voiceCtx.resume().catch(() => {});
+      voiceAnalyser = voiceCtx.createAnalyser(); voiceAnalyser.fftSize = 256;
+      voiceCtx.createMediaStreamSource(voiceStream).connect(voiceAnalyser);
+      return true;
+    } catch (_) { voiceStream = null; return false; }
+  }
+  // Record a turn, auto-stopping on trailing silence (simple VAD off the analyser),
+  // then transcribe via whisper and hand the text to the agent. Loops hands-free.
+  // Instant STT via the browser's native recognition (Chrome/Edge/Safari) — no
+  // record-upload-transcribe round trip. Falls back to whisper if unavailable/blocked.
+  function srListen(SR) {
+    orbState = 'listening'; setOrbText(ORB_T.listening);
+    const rec = new SR();
+    rec.lang = VOICE_LANG === 'fr' ? 'fr-FR' : 'en-US';
+    rec.interimResults = true; rec.continuous = false;
+    let finalText = '', ended = false;
+    rec.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i]; if (r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript; }
+      setOrbText(finalText || interim);
+    };
+    rec.onerror = (e) => { if (e && (e.error === 'not-allowed' || e.error === 'service-not-allowed' || e.error === 'language-not-supported')) window.__srBroken = true; };
+    rec.onend = () => {
+      if (ended || !convoActive) return; ended = true;
+      const said = finalText.trim();
+      if (said) handleVoiceTurn(said); else listenTurn();
+    };
+    try { rec.start(); } catch (_) { window.__srBroken = true; listenTurn(); }
   }
 
-  if (chatVoiceToggle) {
-    const SVG_ON = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
-    const SVG_OFF = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
-    if (!speechSynth) { chatVoiceToggle.style.display = 'none'; }
-    chatVoiceToggle.addEventListener('click', () => {
-      voiceReplyOn = !voiceReplyOn;
-      chatVoiceToggle.innerHTML = voiceReplyOn ? SVG_ON : SVG_OFF;
-      chatVoiceToggle.title = 'Voice reply: ' + (voiceReplyOn ? 'on' : 'off');
-      if (!voiceReplyOn && speechSynth) speechSynth.cancel();
+  function listenTurn() {
+    if (!convoActive) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SR && !window.__srBroken) { srListen(SR); return; }
+    ensureMic().then((ok) => {
+      if (!ok || !convoActive) {
+        if (convoActive) setOrbText(VOICE_LANG === 'fr' ? 'Micro indisponible' : 'Mic unavailable');
+        return;
+      }
+      orbState = 'listening'; setOrbText(ORB_T.listening);
+      const mime = pickMime(), chunks = [];
+      let rec; try { rec = new MediaRecorder(voiceStream, mime ? { mimeType: mime } : undefined); } catch (_) { return; }
+      voiceRec = rec;
+      rec.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+      rec.onstop = async () => {
+        cancelAnimationFrame(voiceVADraf);
+        if (!convoActive) return;
+        const blob = new Blob(chunks, { type: mime || 'audio/webm' });
+        if (blob.size < 1600) { listenTurn(); return; }        // basically silence → keep listening
+        orbState = 'speaking'; setOrbText(ORB_T.thinking);
+        const said = await transcribe(blob);
+        if (!convoActive) return;
+        if (said) handleVoiceTurn(said); else listenTurn();
+      };
+      rec.start();
+      const data = new Uint8Array(voiceAnalyser.frequencyBinCount);
+      let spoke = false, silenceSince = 0;
+      const t0 = performance.now();
+      const SPEAK = 0.045, SILENCE_MS = 1100, MAX_MS = 13000, PRESPEAK_MAX_MS = 8000;
+      const tick = () => {
+        if (!convoActive || !voiceRec || voiceRec.state !== 'recording') return;
+        voiceAnalyser.getByteFrequencyData(data);
+        let sum = 0; for (let i = 0; i < data.length; i++) sum += data[i];
+        const lvl = sum / data.length / 255, now = performance.now();
+        if (lvl > SPEAK) { spoke = true; silenceSince = 0; }
+        else if (spoke && !silenceSince) { silenceSince = now; }
+        const elapsed = now - t0;
+        const stop = (spoke && silenceSince && now - silenceSince > SILENCE_MS)
+          || elapsed > MAX_MS || (!spoke && elapsed > PRESPEAK_MAX_MS);
+        if (stop) { try { voiceRec.stop(); } catch (_) {} return; }
+        voiceVADraf = requestAnimationFrame(tick);
+      };
+      voiceVADraf = requestAnimationFrame(tick);
     });
   }
+  function endConversation() {                   // stop the conversation, return to text input
+    convoActive = false; conversationMode = false; micListening = false; orbState = 'idle';
+    cancelAnimationFrame(voiceVADraf);
+    try { if (voiceRec && voiceRec.state === 'recording') { voiceRec.onstop = null; voiceRec.stop(); } } catch (_) {}
+    voiceRec = null;
+    try { if (voiceStream) voiceStream.getTracks().forEach((t) => t.stop()); } catch (_) {}
+    voiceStream = null;
+    try { if (voiceCtx) voiceCtx.close(); } catch (_) {}
+    voiceCtx = null; voiceAnalyser = null;
+    try { speechSynthesis.cancel(); } catch (_) {}
+    try { if (voiceAudio) { voiceAudio.pause(); voiceAudio = null; } } catch (_) {}   // stop any speaking reply
+    stopUserAudio(); hideOrbUI();
+  }
+  aboutWin.onHide = () => endConversation();     // closing/minimizing the window stops the call
+
+  function startConversation() {                 // tap the mic: hands-free voice conversation
+    if (convoActive) return;
+    conversationMode = true; showOrbUI();
+    if (!navigator.mediaDevices || !window.MediaRecorder) {
+      setOrbText(VOICE_LANG === 'fr'
+        ? 'Micro non pris en charge — utilisez le clavier'
+        : 'Voice not supported — type instead');
+      return;
+    }
+    convoActive = true; orbState = 'listening'; setOrbText(ORB_T.listening);
+    listenTurn();
+  }
+
+  if (chatMic) {
+    chatMic.addEventListener('click', () => { startConversation(); });
+  }
+  if (chatOrb) chatOrb.addEventListener('click', () => { endConversation(); });  // tap orb = stop the call
+  const chatOrbClose = document.getElementById('chatOrbClose');
+  if (chatOrbClose) chatOrbClose.addEventListener('click', (e) => { e.stopPropagation(); endConversation(); });
+
+  // Browser TTS is gone (the agent speaks via Aura), so the "voice reply" toggle no longer applies.
+  if (chatVoiceToggle) chatVoiceToggle.style.display = 'none';
 
   // Reveal statement underlines after page load
   setTimeout(() => {
@@ -5250,7 +5830,7 @@
     color: rgba(255,255,255,0.3);
     letter-spacing: 0.1em;
     padding: 2px 6px;
-    border-radius: 3px;
+    border-radius: 4px;
     font-variant-numeric: tabular-nums;
   }
   .term-timer.running {
@@ -5260,7 +5840,7 @@
     font-size: 12px;
     background: none;
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 3px;
+    border-radius: 4px;
     color: rgba(255,255,255,0.4);
     cursor: pointer;
     padding: 2px 6px;
@@ -5301,7 +5881,7 @@
   }
   .term-output::-webkit-scrollbar { width: 5px; }
   .term-output::-webkit-scrollbar-track { background: transparent; }
-  .term-output::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+  .term-output::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
   .term-output::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.14); }
   .term-output .term-line { margin-bottom: 1px; }
   .term-output .term-line-green { color: rgba(255,255,255,0.85); }
@@ -5351,7 +5931,7 @@
     padding: 5px 12px;
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 3px;
+    border-radius: 4px;
     color: rgba(255,255,255,0.7);
     font-family: 'JetBrains Mono', var(--mono);
     font-size: 10px;
@@ -6539,6 +7119,146 @@
     }
   });
 })();
+</script>
+
+<!-- ---- DYNAMIC ISLAND wiring: Cloudflare VoiceAgent client + command bridge ---- -->
+<script type="module">
+  import { VoiceClient } from '/voice-client.js';
+
+  const island = document.getElementById('voiceIsland');
+  if (island) {
+    const labelEl = island.querySelector('.vi-label');
+    const IDLE_LABEL = 'Ask me anything';
+    const client = new VoiceClient({ agent: 'VoiceAgent', host: 'khalil-voice.khalil-drissi.workers.dev' });
+    // Share this single connection with the chat window + voice orb (see the main script's
+    // getVoiceClient()/whenClient() helpers). Never create a second VoiceClient/WS.
+    window.__voiceClient = client;
+
+    // The bundle exposes an EventTarget-style API (addEventListener); tolerate an .on alias too.
+    const sub = (ev, fn) => {
+      if (typeof client.addEventListener === 'function') client.addEventListener(ev, fn);
+      else if (typeof client.on === 'function') client.on(ev, fn);
+    };
+
+    let active = false;     // a call is in progress
+    let starting = false;   // guard while connecting / starting the mic
+
+    const setLabel = (t) => { if (labelEl) labelEl.textContent = t || IDLE_LABEL; };
+    function setState(s) {  // 'idle' | 'connecting' | 'listening' | 'speaking'
+      island.classList.remove('vi-idle', 'vi-connecting', 'vi-listening', 'vi-speaking');
+      island.classList.add('vi-' + s);
+      island.setAttribute('aria-label', s === 'idle'
+        ? 'Ask me anything — start voice assistant'
+        : 'Voice assistant active — click to stop');
+    }
+
+    function waitConnected(timeout = 8000) {
+      return new Promise((resolve, reject) => {
+        if (client.connected) return resolve();
+        const done = (ok) => {
+          if (typeof client.removeEventListener === 'function') client.removeEventListener('connectionchange', on);
+          ok ? resolve() : reject(new Error('connect timeout'));
+        };
+        const on = (v) => { if (v) { clearTimeout(t); done(true); } };
+        const t = setTimeout(() => done(false), timeout);
+        sub('connectionchange', on);
+      });
+    }
+
+    async function start() {
+      if (active || starting) return;
+      starting = true;
+      setState('connecting'); setLabel('Connecting…');
+      try {
+        client.connect();
+        await waitConnected();
+        await client.startCall();          // needs the click gesture + mic permission
+        active = true;
+        setState('listening'); setLabel('Listening…');
+      } catch (e) {
+        try { client.endCall(); } catch (_) {}
+        try { client.disconnect(); } catch (_) {}
+        active = false;
+        setState('idle'); setLabel('Mic unavailable');
+        setTimeout(() => { if (!active) setLabel(IDLE_LABEL); }, 2500);
+      } finally {
+        starting = false;
+      }
+    }
+
+    function stop() {
+      active = false; starting = false;
+      try { client.endCall(); } catch (_) {}
+      try { client.disconnect(); } catch (_) {}
+      setState('idle'); setLabel(IDLE_LABEL);
+    }
+
+    const toggle = () => { (active || starting) ? stop() : start(); };
+    island.addEventListener('click', toggle);
+    island.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); toggle(); }
+    });
+
+    // ---- feed transcript / interim text into the pill ----
+    sub('interimtranscript', (txt) => {
+      if (!active) return;
+      if (txt) { setState('listening'); setLabel(txt); }
+    });
+    sub('transcriptchange', (msgs) => {
+      if (!active || !Array.isArray(msgs) || !msgs.length) return;
+      const last = msgs[msgs.length - 1];
+      const text = last && last.text ? last.text : '';   // text lives in msg.text
+      if (!text) return;
+      if (last.role === 'assistant') { setState('speaking'); setLabel(text); }
+      else { setState('listening'); setLabel(text); }
+    });
+    sub('statuschange', (s) => {
+      if (!active) return;
+      const l = String(s || '').toLowerCase();
+      if (l.includes('speak')) setState('speaking');
+      else if (l.includes('listen')) setState('listening');
+    });
+    sub('error', (err) => {
+      if (!err) return;
+      setLabel('Error — tap to retry');
+      setTimeout(() => setLabel(active ? 'Listening…' : IDLE_LABEL), 2500);
+    });
+
+    // ---- COMMAND BRIDGE: agent pushes app actions via custommessage ----
+    // Only objects carrying an `.action` field are ours; ignore Cloudflare's cf_agent_* traffic.
+    const SECTION_SEL = {
+      projects: '#projectsStrip, .projects-strip, .projects-section',
+      blog:     '#articlesList, .articles-list',
+      about:    '#aboutBioPanel, .about-tabs',
+    };
+    function scrollToSection(section) {
+      if (!section || section === 'top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+      const sel = SECTION_SEL[section];
+      if (!sel) return;
+      const el = document.querySelector(sel);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    sub('custommessage', (msg) => {
+      if (!msg || typeof msg !== 'object' || !('action' in msg)) return;
+      switch (msg.action) {
+        case 'open_games':
+          if (window.WM && typeof window.WM.openArcadeWindow === 'function') window.WM.openArcadeWindow();
+          break;
+        case 'open_contact': {
+          const opener = document.getElementById('openMessageBtn');   // "Leave a Message" window
+          if (opener) opener.click();
+          break;
+        }
+        case 'scroll_to':
+          scrollToSection(msg.section);
+          break;
+        default:
+          break;
+      }
+    });
+
+    setState('idle');
+  }
 </script>
 
 </body>

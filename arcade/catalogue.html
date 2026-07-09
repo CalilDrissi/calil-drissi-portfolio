@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arcade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* Match the main site (khalildrissi.com): dark, IBM Plex Mono, purple accent. */
+  :root{
+    --bg:#0e0e0e; --fg:#fff; --fg-dim:rgba(255,255,255,.75); --fg-faint:rgba(255,255,255,.30);
+    --accent:#7c4dff; --border:rgba(255,255,255,.10);
+    --mono:'IBM Plex Mono','Courier New',monospace;
+  }
+  html,body{ margin:0; }
+  body{ background:var(--bg); color:var(--fg); font-family:var(--mono); font-size:13px;
+    padding:20px clamp(14px,3vw,28px) 28px; -webkit-font-smoothing:antialiased; }
+  .arcade-head{ margin:0 0 18px; font-size:11px; font-weight:400; text-transform:uppercase;
+    letter-spacing:.12em; color:var(--fg-faint); }
+  ::selection{ background:var(--accent); color:#fff; }
+  ::-webkit-scrollbar{ width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.14); border-radius:6px; }
+</style>
+</head>
+<body>
+
+<div class="arcade-head">Arcade — pick a game</div>
+
+<!-- =======================================================================
+     PSX CATALOGUE EMBED — START
+     Paste everything between START and END into any existing page.
+     The only external dependency is player.html (set data-player below).
+     ======================================================================= -->
+<div id="psx-catalogue" data-player="player.html"></div>
+
+<style>
+  /* Scoped, minimal, and colour-neutral: uses `inherit` and currentColor so it
+     picks up the host page's font and text colour. */
+  #psx-catalogue, #psx-catalogue * { box-sizing: border-box; }
+  #psx-catalogue { font: inherit; color: inherit; }
+  #psx-catalogue .psx-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 0 0 20px; }
+  #psx-catalogue .psx-bar input,
+  #psx-catalogue .psx-bar select { padding: 8px 13px; font: inherit; font-size: 12px; color: var(--fg);
+    background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 9999px; outline: none; }
+  #psx-catalogue .psx-bar input:focus,
+  #psx-catalogue .psx-bar select:focus { border-color: var(--accent); }
+  #psx-catalogue .psx-bar input { flex: 1 1 12rem; }
+  #psx-catalogue .psx-bar input::placeholder { color: var(--fg-faint); }
+  #psx-catalogue .psx-bar label { color: var(--fg-dim); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  #psx-catalogue .psx-bar option { background: #17171b; color: #fff; }
+  #psx-catalogue .psx-grid { display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  #psx-catalogue .psx-card { padding: 0; border: 0; background: transparent; color: inherit;
+    font: inherit; text-align: left; cursor: pointer; transition: transform .15s ease; }
+  #psx-catalogue .psx-card:hover { transform: translateY(-3px); }
+  #psx-catalogue .psx-card img,
+  #psx-catalogue .psx-noart { width: 100%; aspect-ratio: 3 / 4; border-radius: 10px;
+    object-fit: cover; background: rgba(255,255,255,.05); border: 1px solid var(--border); display: flex;
+    align-items: center; justify-content: center; transition: border-color .15s, box-shadow .15s; }
+  #psx-catalogue .psx-card:hover img,
+  #psx-catalogue .psx-card:hover .psx-noart { border-color: var(--accent); box-shadow: 0 8px 30px rgba(124,77,255,.28); }
+  #psx-catalogue .psx-noart { font-size: .72rem; color: var(--fg-faint); text-align: center; padding: .5rem;
+    text-transform: uppercase; letter-spacing: .06em; }
+  #psx-catalogue .psx-title { margin: .5rem 0 0; font-size: 12px; line-height: 1.3; text-transform: uppercase; letter-spacing: .03em; }
+  #psx-catalogue .psx-year { color: var(--fg-faint); font-size: 11px; margin-top: 2px; }
+  #psx-catalogue .psx-empty { color: var(--fg-dim); }
+  #psx-catalogue .psx-cached { color: var(--accent) !important; }
+  #psx-catalogue .psx-clear { margin-left: auto; color: var(--fg-dim); background: transparent;
+    border: 1px solid var(--border); border-radius: 9999px; padding: 8px 14px; font: inherit; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .06em; cursor: pointer; transition: border-color .2s, color .2s; }
+  #psx-catalogue .psx-clear:hover { border-color: var(--accent); color: #fff; }
+
+  /* Game overlay — appended to <body>, covers the viewport. Matches the site chrome. */
+  .psx-overlay { position: fixed; inset: 0; z-index: 2147483647; background: #0a0a0a;
+    display: flex; flex-direction: column; }
+  .psx-overlay .psx-top { display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+    border-bottom: 1px solid var(--border); background: #0e0e0e; }
+  .psx-overlay .psx-top .psx-name { color: var(--fg); font-family: var(--mono); font-size: 12px;
+    text-transform: uppercase; letter-spacing: .04em; flex: 1;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .psx-overlay select,
+  .psx-overlay button { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
+    padding: 8px 14px; border: 1px solid var(--border); border-radius: 9999px; cursor: pointer;
+    background: rgba(255,255,255,.04); color: var(--fg); transition: background .2s, border-color .2s, transform .15s; }
+  .psx-overlay select { text-transform: none; }
+
+  /* Custom dropdown chevron with comfortable spacing from the right edge — the
+     native select arrow sat jammed against the pill border. Applies to both the
+     catalogue's Graphics select and the in-game overlay select. */
+  #psx-catalogue .psx-bar select, .psx-overlay select {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%23ffffff' stroke-opacity='0.6' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 1.75 6 6.25l4.5-4.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 15px center;
+    padding-right: 40px;
+  }
+  .psx-overlay option { background: #17171b; }
+  .psx-overlay button:hover { border-color: var(--accent); background: rgba(124,77,255,.16); transform: translateY(-1px); }
+  .psx-overlay .psx-back { border-color: rgba(124,77,255,.55); background: rgba(124,77,255,.14); }
+  .psx-overlay iframe { flex: 1; width: 100%; border: 0; background: #000; }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---- Standalone guard ---------------------------------------------------
+  // The catalogue is meant to be embedded in the site's arcade popup (an iframe).
+  // If someone opens catalogue.html directly as a top-level page, gate it behind
+  // a password so it isn't a public, browsable game list. Embedded (iframe) use
+  // is never gated. NOTE: client-side gate — light privacy, not real security.
+  var GATE_PASS = 'calilcalil';   // <-- change this to your password
+  var EMBEDDED = window.top !== window.self;
+  if (!EMBEDDED && sessionStorage.getItem('arcade:unlocked') !== '1') {
+    document.body.innerHTML =
+      '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0e0e0e;">' +
+        '<form id="agate" style="display:flex;flex-direction:column;gap:14px;width:min(320px,86vw);text-align:center;">' +
+          '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.4);">Arcade — private</div>' +
+          '<input id="agp" type="password" autocomplete="off" placeholder="Enter password" ' +
+            'style="padding:12px 16px;font:14px/1 \'IBM Plex Mono\',monospace;color:#fff;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);border-radius:10px;outline:none;text-align:center;">' +
+          '<button type="submit" style="padding:11px 16px;font:12px/1 \'IBM Plex Mono\',monospace;text-transform:uppercase;letter-spacing:.06em;color:#fff;background:#7c4dff;border:0;border-radius:9999px;cursor:pointer;">Unlock</button>' +
+          '<div id="agerr" style="font-size:11px;color:#ff6b6b;min-height:14px;"></div>' +
+        '</form>' +
+      '</div>';
+    document.getElementById('agate').addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (document.getElementById('agp').value === GATE_PASS) {
+        try { sessionStorage.setItem('arcade:unlocked', '1'); } catch (_) {}
+        location.reload();
+      } else {
+        document.getElementById('agerr').textContent = 'Wrong password.';
+      }
+    });
+    document.getElementById('agp').focus();
+    return;   // don't build the catalogue for an unauthenticated top-level visitor
+  }
+
+  // ========================================================================
+  // 1) YOUR GAMES  —  edit this array. That's the only thing most sites touch.
+  //    cover + rom accept ABSOLUTE URLs so you can host ROMs/art on external
+  //    object storage or a CDN (nothing is bundled here).
+  //    core (optional):  ''                = auto-detect per device
+  //                      'pcsx_rearmed'    = force light/software core
+  //                      'mednafen_psx_hw' = force GPU/quality core
+  // ========================================================================
+  // ROMs stream from Cloudflare R2 (roms.khalildrissi.com). Publish a game with
+  // scripts/publish-rom.sh, then add/adjust its entry here (use the .chd URL it prints).
+  var ROMS = 'https://roms.khalildrissi.com';
+  var GAMES = [
+    { title: 'Gran Turismo 2', year: 1999, cover: 'covers/gran-turismo-2.jpg',
+      rom: ROMS + '/gran-turismo-2-disc2.chd', core: '' },
+    { title: 'Driver', year: 1999, cover: 'covers/driver.jpg',
+      rom: ROMS + '/driver-demo.chd', core: '' },
+    { title: 'Crash Bandicoot', year: 1996, cover: 'covers/crash.webp',
+      rom: ROMS + '/crash-bandicoot.chd', core: '' },
+  ];
+
+  // ========================================================================
+  // 2) CORE TIERS  —  the two cores served per device.
+  // ========================================================================
+  var PERFORMANCE_CORE = 'pcsx_rearmed';     // software, light — weak/mobile devices
+  var QUALITY_CORE     = 'mednafen_psx_hw';  // WebGL2 GPU renderer, upscaling + PGXP
+
+  // ---- boot ---------------------------------------------------------------
+  var root = document.getElementById('psx-catalogue');
+  if (!root) return;
+  var PLAYER_URL = root.getAttribute('data-player') || 'player.html';
+  var MODE_KEY   = 'psx-graphics-mode';   // localStorage: 'auto' | 'performance' | 'quality'
+  var DEFAULT_MODE = 'performance';       // used when nothing is stored yet (Quality needs a BIOS)
+
+  // ---- device heuristic ---------------------------------------------------
+  function hasWebGL2() {
+    try { return !!document.createElement('canvas').getContext('webgl2'); }
+    catch (e) { return false; }
+  }
+  function isMobile() {
+    return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+           (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform)); // iPadOS
+  }
+  // Returns 'quality' or 'performance'.
+  function detectTier() {
+    if (!hasWebGL2()) return 'performance';              // quality core needs WebGL2
+    if (isMobile())   return 'performance';
+    var cores = navigator.hardwareConcurrency || 2;
+    var mem   = navigator.deviceMemory;                  // undefined on Safari/Firefox
+    if (cores < 4) return 'performance';
+    if (mem !== undefined && mem < 4) return 'performance';
+    return 'quality';
+  }
+
+  function getMode() { return localStorage.getItem(MODE_KEY) || DEFAULT_MODE; }
+  function setMode(m) { try { localStorage.setItem(MODE_KEY, m); } catch (e) {} }
+
+  // Resolve the actual core for a game given the current graphics mode.
+  // Toggle (performance/quality) always wins; 'auto' honours a per-game pin,
+  // then falls back to the device heuristic.
+  function resolveCore(game) {
+    if (game && game.core) return game.core;   // explicit core (e.g. Game Boy 'gambatte') always wins
+    var m = getMode();
+    if (m === 'performance') return PERFORMANCE_CORE;
+    if (m === 'quality')     return QUALITY_CORE;
+    return detectTier() === 'quality' ? QUALITY_CORE : PERFORMANCE_CORE;
+  }
+
+  function playerSrc(game) {
+    return PLAYER_URL +
+      '?rom='  + encodeURIComponent(game.rom || '') +
+      '&name=' + encodeURIComponent(game.title || '') +
+      '&core=' + encodeURIComponent(resolveCore(game));
+  }
+
+  // ---- catalogue UI -------------------------------------------------------
+  var bar = document.createElement('div');
+  bar.className = 'psx-bar';
+
+  var search = document.createElement('input');
+  search.type = 'search';
+  search.placeholder = 'Search games…';
+
+  var gfxLabel = document.createElement('label');
+  gfxLabel.textContent = 'Graphics:';
+  var gfx = document.createElement('select');
+  [['auto', 'Auto'], ['performance', 'Performance'], ['quality', 'Quality']]
+    .forEach(function (o) {
+      var opt = document.createElement('option');
+      opt.value = o[0]; opt.textContent = o[1];
+      gfx.appendChild(opt);
+    });
+  gfx.value = getMode();
+
+  bar.appendChild(search);
+  bar.appendChild(gfxLabel);
+  bar.appendChild(gfx);
+
+  var grid = document.createElement('div');
+  grid.className = 'psx-grid';
+
+  root.appendChild(bar);
+  root.appendChild(grid);
+
+  function render(filter) {
+    filter = (filter || '').toLowerCase();
+    grid.textContent = '';
+    var shown = 0;
+    GAMES.forEach(function (game) {
+      if (filter && (game.title || '').toLowerCase().indexOf(filter) === -1) return;
+      shown++;
+      var card = document.createElement('button');
+      card.className = 'psx-card';
+      card.type = 'button';
+      // absolute ROM url (matches how the player fetches it) for cache lookup
+      try { card.setAttribute('data-rom', game.rom ? new URL(game.rom, location.href).href : ''); } catch (e) {}
+
+      if (game.cover) {
+        var img = document.createElement('img');
+        img.src = game.cover; img.alt = game.title || ''; img.loading = 'lazy';
+        card.appendChild(img);
+      } else {
+        var ph = document.createElement('div');
+        ph.className = 'psx-noart';
+        ph.textContent = game.title || 'No cover';
+        card.appendChild(ph);
+      }
+      var t = document.createElement('div');
+      t.className = 'psx-title'; t.textContent = game.title || 'Untitled';
+      var y = document.createElement('div');
+      y.className = 'psx-year'; y.textContent = game.year || '';
+      card.appendChild(t); card.appendChild(y);
+
+      card.addEventListener('click', function () { openPlayer(game); });
+      grid.appendChild(card);
+    });
+    if (!shown) {
+      var empty = document.createElement('p');
+      empty.className = 'psx-empty';
+      empty.textContent = 'No games found.';
+      grid.appendChild(empty);
+    }
+  }
+
+  // ---- overlay player -----------------------------------------------------
+  var overlay = null, current = null;
+
+  function openPlayer(game) {
+    if (!game.rom) { alert('This game has no ROM URL set yet.'); return; }
+    current = game;
+    if (overlay) closePlayer();
+
+    overlay = document.createElement('div');
+    overlay.className = 'psx-overlay';
+
+    var top = document.createElement('div');
+    top.className = 'psx-top';
+
+    var nameEl = document.createElement('span');
+    nameEl.className = 'psx-name';
+    nameEl.textContent = game.title || 'PlayStation Game';
+
+    // In-overlay graphics toggle: relaunches the current game with the chosen core.
+    var ovGfx = document.createElement('select');
+    [['auto', 'Auto'], ['performance', 'Performance'], ['quality', 'Quality']]
+      .forEach(function (o) {
+        var opt = document.createElement('option');
+        opt.value = o[0]; opt.textContent = 'Graphics: ' + o[1];
+        ovGfx.appendChild(opt);
+      });
+    ovGfx.value = getMode();
+    ovGfx.addEventListener('change', function () { changeMode(ovGfx.value); });
+
+    // Install the arcade as an app. Browsers only allow the install prompt on a
+    // top-level page, so ask the homepage (our parent) to fire it — no new tab.
+    var installBtn = document.createElement('button');
+    installBtn.textContent = 'Install app';
+    installBtn.title = 'Install the site as an app (the arcade is inside it)';
+    installBtn.addEventListener('click', function () {
+      try { window.top.postMessage({ type: 'arcade-install' }, '*'); } catch (e) {}
+    });
+
+    // Back to the game list (closes the running game, reveals the catalogue grid).
+    var backBtn = document.createElement('button');
+    backBtn.className = 'psx-back';
+    backBtn.textContent = '← Games';
+    backBtn.title = 'Back to the game list';
+    backBtn.addEventListener('click', closePlayer);
+
+    top.appendChild(backBtn);
+    top.appendChild(nameEl);
+    top.appendChild(ovGfx);
+    top.appendChild(installBtn);
+
+    var iframe = document.createElement('iframe');
+    iframe.src = playerSrc(game);
+    iframe.allow = 'cross-origin-isolated; autoplay; fullscreen; gamepad; xr-spatial-tracking';
+    iframe.allowFullscreen = true;
+    overlay.dataset.iframe = '1';
+
+    overlay.appendChild(top);
+    overlay.appendChild(iframe);
+    document.body.appendChild(overlay);
+    overlay._iframe = iframe;
+    // Tell the window manager which game is open (titlebar + taskbar label).
+    try { window.parent.postMessage({ type: 'arcade-title', title: game.title || 'Game' }, '*'); } catch (e) {}
+    // Remember what's playing so we can re-open it if the iframe gets reloaded.
+    try { sessionStorage.setItem('arcade:resume', game.rom || ''); } catch (e) {}
+    document.addEventListener('keydown', onEsc);
+  }
+
+  function relaunch() {
+    if (overlay && current) overlay._iframe.src = playerSrc(current);
+  }
+  function closePlayer() {
+    if (!overlay) return;
+    document.removeEventListener('keydown', onEsc);
+    overlay.remove(); overlay = null;
+    try { window.parent.postMessage({ type: 'arcade-title', title: 'Arcade' }, '*'); } catch (e) {}
+    try { sessionStorage.removeItem('arcade:resume'); } catch (e) {}
+  }
+  function onEsc(e) { if (e.key === 'Escape') closePlayer(); }
+
+  // Relay pause/resume from the window manager down into the running player.
+  window.addEventListener('message', function (e) {
+    if (!e.data || (e.data.type !== 'arcade-hide' && e.data.type !== 'arcade-show')) return;
+    if (overlay && overlay._iframe && overlay._iframe.contentWindow) {
+      try { overlay._iframe.contentWindow.postMessage(e.data, '*'); } catch (_) {}
+    }
+  });
+
+  // Changing mode anywhere updates both toggles + persists + relaunches.
+  function changeMode(m) {
+    setMode(m);
+    gfx.value = m;
+    if (overlay) { var s = overlay.querySelector('select'); if (s) s.value = m; }
+    relaunch();
+  }
+
+  // ---- Clear cache: wipe cached game data + any stale service worker -------
+  // ---- Per-game cache (ROMs stored by sw.js in the Cache Storage API) -------
+  // A cached game replays instantly and stays until you clear it — per game.
+  var ROM_CACHE = 'arcade-rom-cache-v1';
+  function cachedUrls() {
+    if (!window.caches) return Promise.resolve([]);
+    return caches.open(ROM_CACHE).then(function (c) { return c.keys(); })
+      .then(function (keys) { return keys.map(function (r) { return r.url; }); })
+      .catch(function () { return []; });
+  }
+  function hasSave(url) { try { return !!localStorage.getItem('arcade:state:' + url); } catch (_) { return false; } }
+  // Clear a game's cached ROM (small games, in Cache Storage) AND its saved
+  // progress (localStorage). NOTE: big PS1 discs live in the browser's HTTP cache
+  // (immutable), which JS can't purge — those re-download only via the browser's
+  // own "clear cache". So this frees saves + small-game ROMs.
+  function clearOne(url) {
+    var p = window.caches ? caches.open(ROM_CACHE).then(function (c) { return c.delete(url); }).catch(function () {}) : Promise.resolve();
+    return p.then(function () { try { localStorage.removeItem('arcade:state:' + url); } catch (_) {} });
+  }
+  function clearAll() {
+    var p = window.caches ? caches.delete(ROM_CACHE).catch(function () {}) : Promise.resolve();
+    return p.then(function () {
+      try {
+        Object.keys(localStorage).forEach(function (k) { if (k.indexOf('arcade:state:') === 0) localStorage.removeItem(k); });
+        sessionStorage.removeItem('arcade:resume');
+      } catch (_) {}
+    });
+  }
+
+  // Show a "cached — clear" control on each game that's stored offline.
+  function markCached() {
+    cachedUrls().then(function (urls) {
+      var set = {}; urls.forEach(function (u) { set[u] = true; });
+      [].slice.call(grid.querySelectorAll('.psx-card')).forEach(function (card) {
+        var old = card.querySelector('.psx-cached'); if (old) old.remove();
+        var rom = card.getAttribute('data-rom');
+        var cached = rom && set[rom], saved = rom && hasSave(rom);
+        if (cached || saved) {
+          var tag = document.createElement('span');
+          tag.className = 'psx-cached';
+          tag.textContent = '● ' + (cached && saved ? 'cached + save' : cached ? 'cached' : 'saved') + ' · clear';
+          tag.title = 'Clear this game\'s cached data and saved progress';
+          tag.style.cssText = 'display:block;margin-top:.25rem;font-size:.72rem;color:#4ade80;cursor:pointer;opacity:.85;';
+          tag.addEventListener('click', function (e) {
+            e.stopPropagation();
+            tag.textContent = 'clearing…';
+            clearOne(rom).then(markCached);
+          });
+          card.appendChild(tag);
+        }
+      });
+    });
+  }
+
+  var clearBtn = document.createElement('button');
+  clearBtn.type = 'button';
+  clearBtn.className = 'psx-clear';
+  clearBtn.textContent = 'Clear game data';
+  clearBtn.title = 'Clear all cached games and saved progress';
+  clearBtn.addEventListener('click', function () {
+    clearBtn.disabled = true; clearBtn.textContent = 'Clearing…';
+    clearAll().then(function () { clearBtn.disabled = false; clearBtn.textContent = 'Clear game data'; markCached(); });
+  });
+  bar.appendChild(clearBtn);
+
+  // ---- wire up ------------------------------------------------------------
+  search.addEventListener('input', function () { render(search.value); markCached(); });
+  gfx.addEventListener('change', function () { changeMode(gfx.value); });
+  render('');
+  markCached();
+
+  // Resume: the arcade is cross-origin-isolated, so the browser discards this
+  // iframe when the WM window is minimized/hidden. On the reload, re-open the
+  // game that was playing (player.html then restores its own autosaved state)
+  // instead of dropping the visitor back on the grid — "reopen where I left off".
+  try {
+    var resumeRom = sessionStorage.getItem('arcade:resume');
+    if (resumeRom) {
+      for (var gi = 0; gi < GAMES.length; gi++) {
+        if (GAMES[gi].rom === resumeRom) { openPlayer(GAMES[gi]); break; }
+      }
+    }
+  } catch (e) {}
+})();
+</script>
+<!-- =======================================================================
+     PSX CATALOGUE EMBED — END
+     ======================================================================= -->
+
+</body>
+</html>

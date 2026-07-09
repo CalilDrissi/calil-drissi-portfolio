@@ -1,0 +1,12 @@
+# Cross-origin isolation (COOP/COEP) — kept ON so EmulatorJS can use threads
+# (SharedArrayBuffer) for the PS1 core. It is NOT what made the arcade iframe
+# reload on minimize — that was the CSS `transform` in `.win.minimized`. The
+# arcade window is now minimized via `display:none` (`.win-arcade.minimized`),
+# which keeps the iframe (and the paused game) alive. COEP: credentialless lets
+# cross-origin scripts/fonts/images (GSAP, Google Fonts, Unsplash) still load.
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: credentialless
+
+/arcade/*
+  X-Robots-Tag: noindex, nofollow
