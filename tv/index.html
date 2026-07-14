@@ -240,7 +240,8 @@
     return host + '/player_api.php?username=' + encodeURIComponent(user) + '&password=' + encodeURIComponent(pass) + (action ? '&action=' + action : '');
   }
   function xtreamLiveUrl(host, user, pass, id){
-    return host + '/live/' + encodeURIComponent(user) + '/' + encodeURIComponent(pass) + '/' + id + '.ts';
+    // .m3u8 (HLS) — hls.js plays this; the proxy rewrites its segments. (.ts is raw MPEG-TS, unplayable in-browser.)
+    return host + '/live/' + encodeURIComponent(user) + '/' + encodeURIComponent(pass) + '/' + id + '.m3u8';
   }
 
   // ---- Ready-to-watch free channels (public free-to-air HLS). Played through
@@ -400,7 +401,7 @@
   function saveUser(list){ try { localStorage.setItem(USER_KEY, JSON.stringify(list)); } catch(_){} }
   // Owner convenience: remember the password + the loaded channels in localStorage so the app
   // reopens straight into the playlist. (Relaxes the old transient-privacy model, by request.)
-  var PASS_KEY = 'tv:pass', CHANS_KEY = 'tv:chans';
+  var PASS_KEY = 'tv:pass', CHANS_KEY = 'tv:chans2';   // v2: channels now use .m3u8 URLs (old .ts cache invalid)
   function loadChanCache(){ try { return JSON.parse(localStorage.getItem(CHANS_KEY) || '[]'); } catch(_){ return []; } }
   function saveChanCache(){ try { localStorage.setItem(CHANS_KEY, JSON.stringify(privateChans)); } catch(_){ try { localStorage.removeItem(CHANS_KEY); } catch(__){} } }
   var channels = [], privateChans = loadChanCache();   // restored from localStorage → channels persist across reloads
