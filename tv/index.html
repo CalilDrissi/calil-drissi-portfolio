@@ -104,7 +104,21 @@
   .chan .rm{ color:var(--fg-faint); font-size:14px; padding:2px 6px; border-radius:6px; }
   .chan .rm:hover{ color:#ff8a8a; }
   .cbtn.on{ color:var(--accent); opacity:1; }
-  .empty{ padding:18px; color:var(--fg-faint); font-size:12px; text-align:center; }
+  .empty{ padding:18px; color:var(--fg-faint); font-size:12px; text-align:center; line-height:1.5; }
+
+  /* Catalog browse: content-type tabs + category select + load more */
+  .mode-tabs{ display:flex; gap:4px; padding:8px 10px 2px; }
+  .mtab{ flex:1; font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--fg-faint);
+    background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:8px; padding:7px 3px; cursor:pointer; transition:.15s; }
+  .mtab:hover{ color:#fff; } .mtab.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .cat-select{ flex:1; min-width:0; background:rgba(255,255,255,.04); border:1px solid var(--border); color:var(--fg);
+    border-radius:9999px; padding:8px 12px; font-size:12px; outline:none; cursor:pointer; }
+  .cat-select option{ background:#17171b; }
+  .load-more{ padding:8px 10px 12px; flex:none; }
+  .load-more .pill{ width:100%; text-align:center; padding:10px; }
+  .ep-head{ display:flex; align-items:center; gap:8px; padding:9px 12px; border-bottom:1px solid var(--border); }
+  .ep-back{ background:none; border:0; color:var(--accent); cursor:pointer; font-size:12px; padding:2px 4px; }
+  .ep-title{ font-size:12px; color:var(--fg-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
   /* Add-source modal */
   .modal{ position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.6); padding:20px; }
@@ -165,10 +179,18 @@
     <div class="tv-status" id="tvStatus">Ready.</div>
   </div>
   <aside class="tv-side">
+    <div class="mode-tabs" id="modeTabs">
+      <button class="mtab on" data-mode="fav">Favorites</button>
+      <button class="mtab" data-mode="live">Live</button>
+      <button class="mtab" data-mode="movies">Movies</button>
+      <button class="mtab" data-mode="series">Series</button>
+    </div>
     <div class="bar">
-      <input class="search" id="tvSearch" type="search" placeholder="Search channels…">
+      <select class="cat-select" id="tvCat" style="display:none"></select>
+      <input class="search" id="tvSearch" type="search" placeholder="Search…">
     </div>
     <div class="chan-list" id="tvList"></div>
+    <div class="load-more" id="tvMore" style="display:none"><button class="pill" id="btnMore">Load 20 more</button></div>
   </aside>
 </div>
 
@@ -388,72 +410,134 @@
   var FAV_KEY = 'tv:favorites';
   function favs(){ try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); } catch(_){ return []; } }
   function saveFavs(f){ try { localStorage.setItem(FAV_KEY, JSON.stringify(f)); } catch(_){} }
-  function isFav(c){ return favs().some(function(x){ return x.url === c.url; }); }
-  function toggleFav(c){
+  function isFav(it){ return !!it.url && favs().some(function(x){ return x.url === it.url; }); }
+  function toggleFav(it){
+    if (!it.url) return;
     var f = favs();
-    if (isFav(c)) f = f.filter(function(x){ return x.url !== c.url; });
-    else f.unshift({ name:c.name, group:c.group, logo:c.logo, url:c.url });
+    if (isFav(it)) f = f.filter(function(x){ return x.url !== it.url; });
+    else f.unshift({ type:it.type, name:it.name, group:it.group, logo:it.logo, url:it.url, ext:it.ext });
     saveFavs(f); render();
   }
 
   // channels = READY + user-loaded, tagged with source so user ones show a remove control.
   function loadUser(){ try { return JSON.parse(localStorage.getItem(USER_KEY) || '[]'); } catch(_){ return []; } }
   function saveUser(list){ try { localStorage.setItem(USER_KEY, JSON.stringify(list)); } catch(_){} }
-  // Owner convenience: remember the password + the loaded channels in localStorage so the app
-  // reopens straight into the playlist. (Relaxes the old transient-privacy model, by request.)
-  var PASS_KEY = 'tv:pass', CHANS_KEY = 'tv:chans2';   // v2: channels now use .m3u8 URLs (old .ts cache invalid)
-  function loadChanCache(){ try { return JSON.parse(localStorage.getItem(CHANS_KEY) || '[]'); } catch(_){ return []; } }
-  function saveChanCache(){ try { localStorage.setItem(CHANS_KEY, JSON.stringify(privateChans)); } catch(_){ try { localStorage.removeItem(CHANS_KEY); } catch(__){} } }
-  var channels = [], privateChans = loadChanCache();   // restored from localStorage → channels persist across reloads
-  function rebuild(){
-    channels = READY.map(function(c){ return Object.assign({ _src:'ready' }, c); })
-      .concat(privateChans);   // privateChans = password-unlocked, transient (watching stays private)
-    channels.sort(function(a,b){ return gpos(a.group) - gpos(b.group); });   // stable: keeps within-group order
-    render();
+  // ---- Catalog browse (Favorites | Live | Movies | Series) ----
+  var PASS_KEY = 'tv:pass';                    // remember the unlock password
+  var PAGE = 20;                               // items per page; "Load more" reveals another PAGE
+  var xc = null, unlocked = false;             // Xtream creds {host,user,pass}
+  var mode = 'fav';                            // default view = favorites only (no giant load)
+  var curCat = '', catItems = [], shown = PAGE, seriesView = null, pendingMode = null;
+  var catsByType = {}, itemCacheByCat = {};    // caches
+  var privateChans = [];                       // channels from a plain M3U source (url/paste/upload)
+  var activeUrl = null;
+  var catSel = document.getElementById('tvCat'), moreWrap = document.getElementById('tvMore');
+
+  // Unified item: {type:'live'|'movie'|'series'|'episode', name, logo, group, url?, ext?, series_id?}
+  function readyItem(c){ return { type:'live', name:c.name, logo:c.logo, group:c.group, url:c.url }; }
+  function xApi(action, extra){ return xc.host + '/player_api.php?username=' + encodeURIComponent(xc.user) + '&password=' + encodeURIComponent(xc.pass) + '&action=' + action + (extra || ''); }
+  function xStream(kind, id, ext){ return xc.host + '/' + kind + '/' + encodeURIComponent(xc.user) + '/' + encodeURIComponent(xc.pass) + '/' + id + '.' + ext; }
+
+  function loadCats(type){
+    if (catsByType[type]) return Promise.resolve(catsByType[type]);
+    var action = type === 'movies' ? 'get_vod_categories' : type === 'series' ? 'get_series_categories' : 'get_live_categories';
+    return fetchRaw(xApi(action)).then(function(r){
+      var arr = parseJsonSafe(r.text) || [];
+      catsByType[type] = arr.map(function(c){ return { id:String(c.category_id), name:c.category_name || 'Category' }; });
+      return catsByType[type];
+    });
+  }
+  function loadCatItems(type, catId){
+    var key = type + ':' + catId;
+    if (itemCacheByCat[key]) return Promise.resolve(itemCacheByCat[key]);
+    var action = type === 'movies' ? 'get_vod_streams' : type === 'series' ? 'get_series' : 'get_live_streams';
+    return fetchRaw(xApi(action, '&category_id=' + encodeURIComponent(catId))).then(function(r){
+      var arr = parseJsonSafe(r.text) || [], out;
+      if (type === 'movies') out = arr.map(function(s){ return { type:'movie', name:s.name||'Movie', logo:s.stream_icon||'', group:'Movie', url:xStream('movie', s.stream_id, s.container_extension||'mp4'), ext:s.container_extension||'mp4' }; });
+      else if (type === 'series') out = arr.map(function(s){ return { type:'series', name:s.name||'Series', logo:s.cover||'', group:'Series', series_id:s.series_id }; });
+      else out = arr.map(function(s){ return { type:'live', name:s.name||'Channel', logo:s.stream_icon||'', group:'Live', url:xStream('live', s.stream_id, 'm3u8') }; });
+      itemCacheByCat[key] = out; return out;
+    });
+  }
+  function loadEpisodes(sid, seriesName){
+    showListLoading();
+    return fetchRaw(xApi('get_series_info', '&series_id=' + encodeURIComponent(sid))).then(function(r){
+      var info = parseJsonSafe(r.text) || {}, eps = info.episodes || {}, out = [];
+      Object.keys(eps).forEach(function(season){
+        (eps[season] || []).forEach(function(e){
+          out.push({ type:'episode', name: e.title || ('S'+season+' E'+(e.episode_num||'')), logo:'', group:'S'+season, url:xStream('series', e.id, e.container_extension||'mp4'), ext:e.container_extension||'mp4' });
+        });
+      });
+      seriesView = { name: seriesName, episodes: out }; shown = PAGE; render();
+    });
   }
 
-  var activeUrl = null;
+  function currentList(){
+    if (seriesView) return seriesView.episodes;
+    if (mode === 'fav') return favs().concat(READY.map(readyItem)).concat(privateChans);
+    return catItems;
+  }
+  function showListLoading(){ listEl.innerHTML = '<div class="empty"><span class="msgspin" style="display:inline-block;vertical-align:middle"></span> Loading…</div>'; moreWrap.style.display = 'none'; }
+
   function render(){
-    var q = (searchEl.value||'').toLowerCase();
-    var shown = channels.filter(function(c){
-      return !q || (c.name||'').toLowerCase().indexOf(q) !== -1;
-    });
+    var q = (searchEl.value || '').toLowerCase();
+    var all = currentList().filter(function(it){ return !q || (it.name || '').toLowerCase().indexOf(q) !== -1; });
+    var slice = all.slice(0, shown);
     listEl.innerHTML = '';
-    if (!shown.length){ listEl.innerHTML = '<div class="empty">No channels. Add a playlist →</div>'; return; }
-    var capped = shown.length > 600, total = shown.length;
-    if (capped) shown = shown.slice(0, 600);
-    shown.forEach(function(c){
+    if (seriesView){
+      var head = document.createElement('div'); head.className = 'ep-head';
+      head.innerHTML = '<button class="ep-back">&larr; Back</button><span class="ep-title"></span>';
+      head.querySelector('.ep-title').textContent = seriesView.name;
+      head.querySelector('.ep-back').addEventListener('click', function(){ seriesView = null; shown = PAGE; render(); });
+      listEl.appendChild(head);
+    }
+    if (!slice.length){
+      var e = document.createElement('div'); e.className = 'empty';
+      e.textContent = (mode === 'fav' && !seriesView) ? 'No favorites yet. Unlock a tab and star channels, movies or shows to keep them here.' : 'Nothing here — try another category or search.';
+      listEl.appendChild(e); moreWrap.style.display = 'none'; return;
+    }
+    slice.forEach(function(it){
       var row = document.createElement('div');
-      row.className = 'chan' + (c.url === activeUrl ? ' active' : '');
+      row.className = 'chan' + (it.url && it.url === activeUrl ? ' active' : '');
+      var fav = it.url && isFav(it);
       row.innerHTML =
-        (c.logo ? '<img class="logo" src="'+c.logo+'" onerror="this.style.visibility=\'hidden\'">' : '<div class="logo"></div>') +
+        (it.logo ? '<img class="logo" src="'+it.logo+'" onerror="this.style.visibility=\'hidden\'">' : '<div class="logo"></div>') +
         '<div class="meta"><div class="name"></div><div class="grp"></div></div>' +
-        '<span class="fav'+(isFav(c)?' on':'')+'" title="Favorite">'+(isFav(c)?'★':'☆')+'</span>' +
-        (c._src === 'user' ? '<span class="rm" title="Remove">✕</span>' : '');
-      row.querySelector('.name').textContent = c.name || 'Channel';
-      row.querySelector('.grp').textContent = c.group || '';
+        (it.type === 'series' ? '<span class="grp" style="color:var(--fg-faint);font-size:16px">&rsaquo;</span>' : ('<span class="fav'+(fav?' on':'')+'" title="Favorite">'+(fav?'★':'☆')+'</span>'));
+      row.querySelector('.name').textContent = it.name;
+      row.querySelector('.meta .grp').textContent = it.type === 'movie' ? 'Movie' : (it.group || '');
       row.addEventListener('click', function(e){
-        if (e.target.classList.contains('fav')){ e.stopPropagation(); toggleFav(c); return; }
-        if (e.target.classList.contains('rm')){ e.stopPropagation(); removeUser(c); return; }
-        play(c);
+        if (e.target.classList.contains('fav')){ e.stopPropagation(); toggleFav(it); return; }
+        if (it.type === 'series'){ loadEpisodes(it.series_id, it.name).catch(function(){ setStatus('Could not load episodes.', true); }); return; }
+        play(it);
       });
       listEl.appendChild(row);
     });
-    if (capped){
-      var note = document.createElement('div');
-      note.className = 'empty';
-      note.textContent = 'Showing 600 of ' + total + ' — search to narrow down.';
-      listEl.appendChild(note);
-    }
+    moreWrap.style.display = all.length > shown ? '' : 'none';
   }
-  function removeUser(c){
-    var list = loadUser().filter(function(x){ return x.url !== c.url; });
-    saveUser(list); rebuild();
+
+  // Mode tabs / category select / load more
+  function setActiveTab(){ [].forEach.call(document.querySelectorAll('#modeTabs .mtab'), function(t){ t.classList.toggle('on', t.getAttribute('data-mode') === mode); }); }
+  function setMode(m){
+    if (m !== 'fav' && !unlocked){ pendingMode = m; openModal(); return; }
+    mode = m; seriesView = null; shown = PAGE; searchEl.value = ''; setActiveTab();
+    if (m === 'fav'){ catSel.style.display = 'none'; catItems = []; render(); return; }
+    catSel.style.display = ''; showListLoading();
+    loadCats(m).then(function(cats){
+      catSel.innerHTML = cats.map(function(c){ return '<option value="'+c.id+'">'+ (c.name||'').replace(/[<>]/g,'') +'</option>'; }).join('');
+      curCat = cats[0] ? cats[0].id : '';
+      return loadCatItems(m, curCat);
+    }).then(function(its){ catItems = its; shown = PAGE; render(); })
+      .catch(function(){ listEl.innerHTML = '<div class="empty">Could not load — the provider may be busy. Try again in a moment.</div>'; });
   }
+  [].forEach.call(document.querySelectorAll('#modeTabs .mtab'), function(t){ t.addEventListener('click', function(){ setMode(t.getAttribute('data-mode')); }); });
+  catSel.addEventListener('change', function(){ curCat = catSel.value; showListLoading(); loadCatItems(mode, curCat).then(function(its){ catItems = its; shown = PAGE; render(); }); });
+  document.getElementById('btnMore').addEventListener('click', function(){ shown += PAGE; render(); });
 
   // ---- Playback (hls.js, all traffic via the proxy) ----
   var hls = null;
   function play(c){
+    if (!c.url) return;
     activeUrl = c.url;
     nowName.textContent = c.name;
     if (c.logo){ nowLogo.src = c.logo; nowLogo.classList.add('show'); nowLogo.onerror = function(){ nowLogo.classList.remove('show'); }; }
@@ -462,9 +546,10 @@
     poster.classList.add('hide'); showSpin(true);
     setStatus('Loading ' + c.name + '…'); render();
     if (hls){ try { hls.destroy(); } catch(_){} hls = null; }
+    try { video.removeAttribute('src'); video.load(); } catch(_){}
     var src = proxied(c.url);
-    var isHls = /\.m3u8($|\?)/i.test(c.url) || /get\.php|type=m3u/i.test(c.url) || true; // proxy serves m3u8 as hls
-    if (window.Hls && Hls.isSupported()){
+    var isHls = c.type === 'live' || c.type === undefined || /\.m3u8($|\?)/i.test(c.url);
+    if (isHls && window.Hls && Hls.isSupported()){
       hls = new Hls({ maxBufferLength: 20, manifestLoadingTimeOut: 15000, fragLoadingTimeOut: 25000 });
       var netRetried = false;
       hls.loadSource(src);
@@ -480,10 +565,15 @@
           else { showSpin(false); setStatus('Could not play this channel.', true); }
         }
       });
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')){
+    } else if (isHls && video.canPlayType('application/vnd.apple.mpegurl')){
       video.src = src; video.play().catch(function(){}); setStatus('Playing ' + c.name);
     } else {
-      setStatus('HLS not supported in this browser.', true);
+      // Movie / episode: a direct file (.mp4 plays; .mkv usually can't in a browser).
+      var failed = false;
+      video.onerror = function(){ if (failed) return; failed = true; showSpin(false);
+        setStatus('This “.' + (c.ext || 'file') + '” won’t play in a browser — open “' + c.name + '” in your IPTV app (Smarters).', true); };
+      video.src = src; video.play().catch(function(){});
+      setStatus(/mp4|m4v|mov|webm/i.test(c.ext || '') ? ('Playing ' + c.name) : ('Trying ' + c.name + ' (.' + (c.ext || '?') + ') — browsers often can’t play this; use your app if it stalls.'));
     }
   }
 
@@ -554,8 +644,8 @@
   function applyPrivate(text){
     var body = (text || '').trim();
     if (!body || body.indexOf('#EXTINF') === -1) return 0;
-    privateChans = parseM3U(body, 'Private').map(function(c){ return Object.assign({ _src:'private' }, c); });
-    rebuild(); saveChanCache();
+    privateChans = parseM3U(body, 'Private').map(function(c){ return { type:'live', name:c.name, logo:c.logo, group:c.group, url:c.url }; });
+    if (mode === 'fav') render();
     return privateChans.length;
   }
   function loadLink(u){                                  // fetch a link via the raw proxy, load its channels
@@ -573,12 +663,11 @@
         setTimeout(closeModal, 800);
       });
   }
-  // Load an Xtream line via the JSON API (works when get.php is throttled). Distinguishes
-  // busy/throttle vs wrong-creds vs expired so the message is honest, not "server returned nothing".
+  // Validate an Xtream line and unlock the catalog (Live/Movies/Series browse per-category).
+  // player_api base info tells creds/expiry honestly; the actual lists load per category on demand.
   function loadXtream(host, user, pass){
     host = (host || '').replace(/\/+$/, '');
-    var staleNote = '';
-    modalMsg('Connecting to your Xtream server…', 'loading');
+    xc = { host: host, user: user, pass: pass };
     return fetchRaw(xtreamApi(host, user, pass, '')).then(function(res){
       if (!(res.text || '').trim()) throw new Error('the server returned nothing — it may be busy (single-connection line). Close other players, wait ~30s, and retry.');
       var info = parseJsonSafe(res.text);
@@ -590,30 +679,8 @@
         var exp = ui.exp_date ? new Date(parseInt(ui.exp_date, 10) * 1000).toLocaleDateString() : '';
         throw new Error('this subscription is ' + ui.status + (exp ? ' (expired ' + exp + ')' : '') + '.');
       }
-      if (res.source === 'stale') staleNote = ' (from your saved list — the provider was busy)';
-      modalMsg('Loading categories…', 'loading');
-      return fetchRaw(xtreamApi(host, user, pass, 'get_live_categories'));
-    }).then(function(res){
-      var cats = parseJsonSafe(res.text) || [];
-      var catMap = {};
-      cats.forEach(function(c){ catMap[String(c.category_id)] = c.category_name; });
-      modalMsg('Loading channels…', 'loading');
-      return fetchRaw(xtreamApi(host, user, pass, 'get_live_streams')).then(function(sres){
-        return { catMap: catMap, streams: parseJsonSafe(sres.text) };
-      });
-    }).then(function(r){
-      var streams = r.streams;
-      if (!Array.isArray(streams) || !streams.length) throw new Error('connected, but no live channels came back (the line may be busy — retry shortly).');
-      privateChans = streams.map(function(s){
-        var cid = s.category_id != null ? String(s.category_id) : (s.category_ids && s.category_ids[0] != null ? String(s.category_ids[0]) : '');
-        return { _src: 'private', name: s.name || 'Channel', logo: s.stream_icon || '', group: r.catMap[cid] || 'Xtream', url: xtreamLiveUrl(host, user, pass, s.stream_id) };
-      });
-      rebuild(); saveChanCache();
-      var n = privateChans.length;
-      modalMsg(n.toLocaleString() + ' channels loaded' + staleNote + '. Opening…', 'ok');
-      setStatus(n + ' private channels loaded.');
-      setTimeout(closeModal, 900);
-      return n;
+      unlocked = true; catsByType = {}; itemCacheByCat = {};   // ready to browse; fresh caches for these creds
+      return true;
     });
   }
 
@@ -631,14 +698,18 @@
         btnUnlock.style.display = 'none'; btnSaveLoad.style.display = '';
         if (d && d.value){
           if (d.kind === 'text' && d.value.indexOf('XTREAM\n') === 0){
-            var xc = parseJsonSafe(d.value.slice(7)) || {};
-            setMethod('xtream'); pvXhostEl.value = xc.host || ''; pvXuserEl.value = xc.user || ''; pvXpassEl.value = xc.pass || '';
-            loadXtream(xc.host, xc.user, xc.pass).catch(function(e){ modalMsg('Saved Xtream did not load: ' + e.message, 'err'); });
+            var creds = parseJsonSafe(d.value.slice(7)) || {};
+            setMethod('xtream'); pvXhostEl.value = creds.host || ''; pvXuserEl.value = creds.user || ''; pvXpassEl.value = creds.pass || '';
+            modalMsg('Unlocking your catalog…', 'loading');
+            loadXtream(creds.host, creds.user, creds.pass).then(function(){
+              var target = pendingMode || 'live'; pendingMode = null;
+              closeModal(); setMode(target);
+            }).catch(function(e){ modalMsg('Saved Xtream did not connect: ' + e.message, 'err'); });
           }
-          else if (d.kind === 'text'){ setMethod('paste'); pvTextEl.value = d.value; var n = applyPrivate(d.value); modalMsg(n + ' channels loaded — edit or close to watch.', 'ok'); setStatus(n + ' private channels loaded.'); }
+          else if (d.kind === 'text'){ setMethod('paste'); pvTextEl.value = d.value; var n = applyPrivate(d.value); modalMsg((n||0) + ' channels loaded — close to browse (Favorites tab).', 'ok'); }
           else { setMethod('url'); pvUrlEl.value = d.value; loadLink(d.value).catch(function(e){ modalMsg('Saved link did not load: ' + e.message, 'err'); }); }
         } else {
-          modalMsg('No playlist saved yet — pick a method below, then Save and load.', '');
+          modalMsg('No source saved yet — add your Xtream login below, then Save and load.', '');
         }
       })
       .catch(function(e){ busy(btnUnlock, false); modalMsg(e.message === 'wrong password' ? 'Wrong password.' : ('Could not unlock: ' + e.message), 'err'); });
@@ -669,19 +740,19 @@
         .then(function(r){ if (r.status === 401) throw new Error('wrong password'); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .then(function(){
           busy(btnSaveLoad, false);
-          if (src.kind === 'xtream'){ loadXtream(src.host, src.user, src.pass).catch(function(e){ modalMsg('Saved, but could not load: ' + e.message, 'err'); }); }
-          else if (src.kind === 'text'){ var n = applyPrivate(src.value); if (!n){ modalMsg('Saved, but no channels found in that M3U.', 'err'); return; } modalMsg(n + ' channels saved and loaded. Opening…', 'ok'); setStatus(n + ' private channels loaded.'); setTimeout(closeModal, 800); }
+          if (src.kind === 'xtream'){ modalMsg('Saved — connecting…', 'loading'); loadXtream(src.host, src.user, src.pass).then(function(){ closeModal(); setMode('live'); }).catch(function(e){ modalMsg('Saved, but could not connect: ' + e.message, 'err'); }); }
+          else if (src.kind === 'text'){ var n = applyPrivate(src.value); if (!n){ modalMsg('Saved, but no channels found in that M3U.', 'err'); return; } modalMsg(n + ' channels saved. Close to browse (Favorites tab).', 'ok'); setTimeout(closeModal, 900); }
           else { loadLink(src.value).catch(function(e){ modalMsg('Saved, but could not load: ' + e.message, 'err'); }); }
         });
     }).catch(function(e){ busy(btnSaveLoad, false); modalMsg(e.message, 'err'); });
   });
 
   searchEl.addEventListener('input', render);
-  rebuild();
-  setStatus('Ready — pick a channel, search, or add your own playlist.');
+  setActiveTab(); render();
+  setStatus('Favorites shown. Unlock (My playlist) to browse all channels, movies & series.');
 
-  // Auto-restore: if a password was saved, silently unlock and reload the stored playlist
-  // (the proxy cache makes this near-instant and doesn't re-hit the provider).
+  // Auto-restore: if a password was saved, silently unlock (creds validated) so the Live/Movies/
+  // Series tabs work without re-entering the password. Default view stays on Favorites.
   (function autoRestore(){
     var pass = ''; try { pass = localStorage.getItem(PASS_KEY) || ''; } catch(_){}
     if (!pass) return;
@@ -690,7 +761,7 @@
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(d){
         if (!d || !d.value) return;
-        if (d.kind === 'text' && d.value.indexOf('XTREAM\n') === 0){ var xc = parseJsonSafe(d.value.slice(7)) || {}; return loadXtream(xc.host, xc.user, xc.pass); }
+        if (d.kind === 'text' && d.value.indexOf('XTREAM\n') === 0){ var creds = parseJsonSafe(d.value.slice(7)) || {}; return loadXtream(creds.host, creds.user, creds.pass); }
         if (d.kind === 'text'){ applyPrivate(d.value); return; }
         return loadLink(d.value);
       })
