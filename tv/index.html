@@ -107,9 +107,10 @@
   .empty{ padding:18px; color:var(--fg-faint); font-size:12px; text-align:center; line-height:1.5; }
 
   /* Catalog browse: content-type tabs + category select + load more */
-  .mode-tabs{ display:flex; gap:4px; padding:8px 10px 2px; }
-  .mtab{ flex:1; font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--fg-faint);
-    background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:8px; padding:7px 3px; cursor:pointer; transition:.15s; }
+  .tv-head{ flex-wrap:wrap; }
+  .mode-tabs{ display:flex; gap:4px; }
+  .mtab{ font-size:10px; text-transform:uppercase; letter-spacing:.03em; color:var(--fg-faint); white-space:nowrap;
+    background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:8px; padding:6px 9px; cursor:pointer; transition:.15s; }
   .mtab:hover{ color:#fff; } .mtab.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
   .cat-select{ flex:1; min-width:0; background:rgba(255,255,255,.04); border:1px solid var(--border); color:var(--fg);
     border-radius:9999px; padding:8px 12px; font-size:12px; outline:none; cursor:pointer; }
@@ -153,6 +154,12 @@
     <span class="now-name" id="nowName">Pick a channel →</span>
     <span class="live" id="nowLive">Live</span>
   </div>
+  <div class="mode-tabs" id="modeTabs">
+    <button class="mtab on" data-mode="fav">Favorites</button>
+    <button class="mtab" data-mode="live">Live</button>
+    <button class="mtab" data-mode="movies">Movies</button>
+    <button class="mtab" data-mode="series">Series</button>
+  </div>
   <button class="pill add" id="btnAdd">My playlist</button>
 </div>
 
@@ -179,15 +186,9 @@
     <div class="tv-status" id="tvStatus">Ready.</div>
   </div>
   <aside class="tv-side">
-    <div class="mode-tabs" id="modeTabs">
-      <button class="mtab on" data-mode="fav">Favorites</button>
-      <button class="mtab" data-mode="live">Live</button>
-      <button class="mtab" data-mode="movies">Movies</button>
-      <button class="mtab" data-mode="series">Series</button>
-    </div>
     <div class="bar">
       <select class="cat-select" id="tvCat" style="display:none"></select>
-      <input class="search" id="tvSearch" type="search" placeholder="Search…">
+      <input class="search" id="tvSearch" type="search" placeholder="Search all…">
     </div>
     <div class="chan-list" id="tvList"></div>
     <div class="load-more" id="tvMore" style="display:none"><button class="pill" id="btnMore">Load 20 more</button></div>
@@ -410,12 +411,12 @@
   var FAV_KEY = 'tv:favorites';
   function favs(){ try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); } catch(_){ return []; } }
   function saveFavs(f){ try { localStorage.setItem(FAV_KEY, JSON.stringify(f)); } catch(_){} }
-  function isFav(it){ return !!it.url && favs().some(function(x){ return x.url === it.url; }); }
+  function isFav(it){ var u = itUrl(it); return !!u && favs().some(function(x){ return x.url === u; }); }
   function toggleFav(it){
-    if (!it.url) return;
+    var u = itUrl(it); if (!u) return;
     var f = favs();
-    if (isFav(it)) f = f.filter(function(x){ return x.url !== it.url; });
-    else f.unshift({ type:it.type, name:it.name, group:it.group, logo:it.logo, url:it.url, ext:it.ext });
+    if (favs().some(function(x){ return x.url === u; })) f = f.filter(function(x){ return x.url !== u; });
+    else f.unshift({ type:it.type, name:it.name, group:it.group, logo:it.logo, url:u, ext:it.ext });
     saveFavs(f); render();
   }
 
@@ -427,8 +428,8 @@
   var PAGE = 20;                               // items per page; "Load more" reveals another PAGE
   var xc = null, unlocked = false;             // Xtream creds {host,user,pass}
   var mode = 'fav';                            // default view = favorites only (no giant load)
-  var curCat = '', catItems = [], shown = PAGE, seriesView = null, pendingMode = null;
-  var catsByType = {}, itemCacheByCat = {};    // caches
+  var curCat = '', shown = PAGE, seriesView = null, pendingMode = null;
+  var catsByType = {}, fullByType = {};        // categories + full item lists, cached once per type
   var privateChans = [];                       // channels from a plain M3U source (url/paste/upload)
   var activeUrl = null;
   var catSel = document.getElementById('tvCat'), moreWrap = document.getElementById('tvMore');
@@ -438,34 +439,37 @@
   function xApi(action, extra){ return xc.host + '/player_api.php?username=' + encodeURIComponent(xc.user) + '&password=' + encodeURIComponent(xc.pass) + '&action=' + action + (extra || ''); }
   function xStream(kind, id, ext){ return xc.host + '/' + kind + '/' + encodeURIComponent(xc.user) + '/' + encodeURIComponent(xc.pass) + '/' + id + '.' + ext; }
 
-  function loadCats(type){
-    if (catsByType[type]) return Promise.resolve(catsByType[type]);
-    var action = type === 'movies' ? 'get_vod_categories' : type === 'series' ? 'get_series_categories' : 'get_live_categories';
-    return fetchRaw(xApi(action)).then(function(r){
-      var arr = parseJsonSafe(r.text) || [];
-      catsByType[type] = arr.map(function(c){ return { id:String(c.category_id), name:c.category_name || 'Category' }; });
-      return catsByType[type];
-    });
+  // Item url is computed on demand (favorites/ready carry it; catalog items build it from sid).
+  function itUrl(it){
+    if (it.url) return it.url;
+    if (it.type === 'live') return xStream('live', it.sid, 'm3u8');
+    if (it.type === 'movie') return xStream('movie', it.sid, it.ext || 'mp4');
+    if (it.type === 'episode') return xStream('series', it.sid, it.ext || 'mp4');
+    return null;
   }
-  function loadCatItems(type, catId){
-    var key = type + ':' + catId;
-    if (itemCacheByCat[key]) return Promise.resolve(itemCacheByCat[key]);
-    var action = type === 'movies' ? 'get_vod_streams' : type === 'series' ? 'get_series' : 'get_live_streams';
-    return fetchRaw(xApi(action, '&category_id=' + encodeURIComponent(catId))).then(function(r){
-      var arr = parseJsonSafe(r.text) || [], out;
-      if (type === 'movies') out = arr.map(function(s){ return { type:'movie', name:s.name||'Movie', logo:s.stream_icon||'', group:'Movie', url:xStream('movie', s.stream_id, s.container_extension||'mp4'), ext:s.container_extension||'mp4' }; });
-      else if (type === 'series') out = arr.map(function(s){ return { type:'series', name:s.name||'Series', logo:s.cover||'', group:'Series', series_id:s.series_id }; });
-      else out = arr.map(function(s){ return { type:'live', name:s.name||'Channel', logo:s.stream_icon||'', group:'Live', url:xStream('live', s.stream_id, 'm3u8') }; });
-      itemCacheByCat[key] = out; return out;
+  // Load the FULL list of a type ONCE (categories + all streams) and cache it, so the category
+  // dropdown and search both filter locally — no re-pinging the provider, and search spans everything.
+  function loadFull(type){
+    if (fullByType[type]) return Promise.resolve();
+    var catAction = type === 'movies' ? 'get_vod_categories' : type === 'series' ? 'get_series_categories' : 'get_live_categories';
+    var strAction = type === 'movies' ? 'get_vod_streams'    : type === 'series' ? 'get_series'            : 'get_live_streams';
+    return Promise.all([ fetchRaw(xApi(catAction)), fetchRaw(xApi(strAction)) ]).then(function(rs){
+      var cats = parseJsonSafe(rs[0].text) || [];
+      catsByType[type] = cats.map(function(c){ return { id:String(c.category_id), name:c.category_name || 'Category' }; });
+      var arr = parseJsonSafe(rs[1].text) || [], out;
+      if (type === 'movies') out = arr.map(function(s){ return { type:'movie', name:s.name||'Movie', logo:s.stream_icon||'', cat:String(s.category_id), sid:s.stream_id, ext:s.container_extension||'mp4' }; });
+      else if (type === 'series') out = arr.map(function(s){ return { type:'series', name:s.name||'Series', logo:s.cover||'', cat:String(s.category_id), series_id:s.series_id }; });
+      else out = arr.map(function(s){ return { type:'live', name:s.name||'Channel', logo:s.stream_icon||'', cat:String(s.category_id), sid:s.stream_id }; });
+      fullByType[type] = out;
     });
   }
   function loadEpisodes(sid, seriesName){
-    showListLoading();
+    showListLoading('Loading episodes…');
     return fetchRaw(xApi('get_series_info', '&series_id=' + encodeURIComponent(sid))).then(function(r){
       var info = parseJsonSafe(r.text) || {}, eps = info.episodes || {}, out = [];
       Object.keys(eps).forEach(function(season){
         (eps[season] || []).forEach(function(e){
-          out.push({ type:'episode', name: e.title || ('S'+season+' E'+(e.episode_num||'')), logo:'', group:'S'+season, url:xStream('series', e.id, e.container_extension||'mp4'), ext:e.container_extension||'mp4' });
+          out.push({ type:'episode', name: e.title || ('S'+season+' E'+(e.episode_num||'')), logo:'', group:'S'+season, sid:e.id, ext:e.container_extension||'mp4' });
         });
       });
       seriesView = { name: seriesName, episodes: out }; shown = PAGE; render();
@@ -475,9 +479,11 @@
   function currentList(){
     if (seriesView) return seriesView.episodes;
     if (mode === 'fav') return favs().concat(READY.map(readyItem)).concat(privateChans);
-    return catItems;
+    var full = fullByType[mode] || [];
+    if ((searchEl.value || '').trim()) return full;               // search spans ALL categories
+    return curCat ? full.filter(function(it){ return it.cat === curCat; }) : full;
   }
-  function showListLoading(){ listEl.innerHTML = '<div class="empty"><span class="msgspin" style="display:inline-block;vertical-align:middle"></span> Loading…</div>'; moreWrap.style.display = 'none'; }
+  function showListLoading(msg){ listEl.innerHTML = '<div class="empty"><span class="msgspin" style="display:inline-block;vertical-align:middle"></span> ' + (msg || 'Loading…') + '</div>'; moreWrap.style.display = 'none'; }
 
   function render(){
     var q = (searchEl.value || '').toLowerCase();
@@ -497,9 +503,9 @@
       listEl.appendChild(e); moreWrap.style.display = 'none'; return;
     }
     slice.forEach(function(it){
+      var url = itUrl(it), fav = url && isFav(it);
       var row = document.createElement('div');
-      row.className = 'chan' + (it.url && it.url === activeUrl ? ' active' : '');
-      var fav = it.url && isFav(it);
+      row.className = 'chan' + (url && url === activeUrl ? ' active' : '');
       row.innerHTML =
         (it.logo ? '<img class="logo" src="'+it.logo+'" onerror="this.style.visibility=\'hidden\'">' : '<div class="logo"></div>') +
         '<div class="meta"><div class="name"></div><div class="grp"></div></div>' +
@@ -521,24 +527,25 @@
   function setMode(m){
     if (m !== 'fav' && !unlocked){ pendingMode = m; openModal(); return; }
     mode = m; seriesView = null; shown = PAGE; searchEl.value = ''; setActiveTab();
-    if (m === 'fav'){ catSel.style.display = 'none'; catItems = []; render(); return; }
-    catSel.style.display = ''; showListLoading();
-    loadCats(m).then(function(cats){
-      catSel.innerHTML = cats.map(function(c){ return '<option value="'+c.id+'">'+ (c.name||'').replace(/[<>]/g,'') +'</option>'; }).join('');
-      curCat = cats[0] ? cats[0].id : '';
-      return loadCatItems(m, curCat);
-    }).then(function(its){ catItems = its; shown = PAGE; render(); })
-      .catch(function(){ listEl.innerHTML = '<div class="empty">Could not load — the provider may be busy. Try again in a moment.</div>'; });
+    if (m === 'fav'){ catSel.style.display = 'none'; render(); return; }
+    catSel.style.display = ''; showListLoading('Loading catalog…');
+    loadFull(m).then(function(){
+      var cats = catsByType[m] || [];
+      catSel.innerHTML = '<option value="">All categories</option>' + cats.map(function(c){ return '<option value="'+c.id+'">'+ (c.name||'').replace(/[<>]/g,'') +'</option>'; }).join('');
+      curCat = ''; shown = PAGE; render();
+    }).catch(function(){ listEl.innerHTML = '<div class="empty">Could not load — the provider may be busy. Try again in a moment.</div>'; });
   }
   [].forEach.call(document.querySelectorAll('#modeTabs .mtab'), function(t){ t.addEventListener('click', function(){ setMode(t.getAttribute('data-mode')); }); });
-  catSel.addEventListener('change', function(){ curCat = catSel.value; showListLoading(); loadCatItems(mode, curCat).then(function(its){ catItems = its; shown = PAGE; render(); }); });
+  catSel.addEventListener('change', function(){ curCat = catSel.value; shown = PAGE; render(); });
   document.getElementById('btnMore').addEventListener('click', function(){ shown += PAGE; render(); });
 
   // ---- Playback (hls.js, all traffic via the proxy) ----
   var hls = null;
   function play(c){
-    if (!c.url) return;
-    activeUrl = c.url;
+    var purl = itUrl(c);
+    if (!purl) return;
+    activeUrl = purl;
+    video.muted = false;                          // ensure audio is on for VOD/series
     nowName.textContent = c.name;
     if (c.logo){ nowLogo.src = c.logo; nowLogo.classList.add('show'); nowLogo.onerror = function(){ nowLogo.classList.remove('show'); }; }
     else nowLogo.classList.remove('show');
@@ -547,8 +554,8 @@
     setStatus('Loading ' + c.name + '…'); render();
     if (hls){ try { hls.destroy(); } catch(_){} hls = null; }
     try { video.removeAttribute('src'); video.load(); } catch(_){}
-    var src = proxied(c.url);
-    var isHls = c.type === 'live' || c.type === undefined || /\.m3u8($|\?)/i.test(c.url);
+    var src = proxied(purl);
+    var isHls = c.type === 'live' || c.type === undefined || /\.m3u8($|\?)/i.test(purl);
     if (isHls && window.Hls && Hls.isSupported()){
       hls = new Hls({ maxBufferLength: 20, manifestLoadingTimeOut: 15000, fragLoadingTimeOut: 25000 });
       var netRetried = false;
@@ -679,7 +686,7 @@
         var exp = ui.exp_date ? new Date(parseInt(ui.exp_date, 10) * 1000).toLocaleDateString() : '';
         throw new Error('this subscription is ' + ui.status + (exp ? ' (expired ' + exp + ')' : '') + '.');
       }
-      unlocked = true; catsByType = {}; itemCacheByCat = {};   // ready to browse; fresh caches for these creds
+      unlocked = true; catsByType = {}; fullByType = {};   // ready to browse; fresh caches for these creds
       return true;
     });
   }
