@@ -225,6 +225,23 @@
   // VPS proxy (regular IP, reaches far more IPTV than Cloudflare's blocked egress).
   var PROXY = 'https://tvproxy.khalildrissi.com/?url=';
   var proxied = function(u){ return PROXY + encodeURIComponent(u); };
+  // Fetch a URL through the proxy's cached raw mode; also returns X-TV-Source (live|cache|stale|empty).
+  function fetchRaw(u){
+    return fetch(proxied(u) + '&raw=1').then(function(r){
+      if (!r.ok) throw new Error('proxy returned HTTP ' + r.status);
+      var source = r.headers.get('X-TV-Source') || '';
+      return r.text().then(function(t){ return { text: t, source: source }; });
+    });
+  }
+  function parseJsonSafe(t){ try { return JSON.parse(t); } catch(e){ return null; } }
+  // Xtream Codes API: player_api.php is tiny JSON (categories/streams) with looser rate limits than the
+  // 18MB get.php dump — it still works when get.php throttles to empty. Live stream URL = /live/U/P/id.ts
+  function xtreamApi(host, user, pass, action){
+    return host + '/player_api.php?username=' + encodeURIComponent(user) + '&password=' + encodeURIComponent(pass) + (action ? '&action=' + action : '');
+  }
+  function xtreamLiveUrl(host, user, pass, id){
+    return host + '/live/' + encodeURIComponent(user) + '/' + encodeURIComponent(pass) + '/' + id + '.ts';
+  }
 
   // ---- Ready-to-watch free channels (public free-to-air HLS). Played through
   //      the proxy so CORS is handled. Some may be geo-limited or occasionally down. ----
@@ -381,7 +398,12 @@
   // channels = READY + user-loaded, tagged with source so user ones show a remove control.
   function loadUser(){ try { return JSON.parse(localStorage.getItem(USER_KEY) || '[]'); } catch(_){ return []; } }
   function saveUser(list){ try { localStorage.setItem(USER_KEY, JSON.stringify(list)); } catch(_){} }
-  var channels = [], privateChans = [];   // privateChans = password-loaded, transient (not saved per-browser)
+  // Owner convenience: remember the password + the loaded channels in localStorage so the app
+  // reopens straight into the playlist. (Relaxes the old transient-privacy model, by request.)
+  var PASS_KEY = 'tv:pass', CHANS_KEY = 'tv:chans';
+  function loadChanCache(){ try { return JSON.parse(localStorage.getItem(CHANS_KEY) || '[]'); } catch(_){ return []; } }
+  function saveChanCache(){ try { localStorage.setItem(CHANS_KEY, JSON.stringify(privateChans)); } catch(_){ try { localStorage.removeItem(CHANS_KEY); } catch(__){} } }
+  var channels = [], privateChans = loadChanCache();   // restored from localStorage → channels persist across reloads
   function rebuild(){
     channels = READY.map(function(c){ return Object.assign({ _src:'ready' }, c); })
       .concat(privateChans);   // privateChans = password-unlocked, transient (watching stays private)
@@ -443,12 +465,16 @@
     var isHls = /\.m3u8($|\?)/i.test(c.url) || /get\.php|type=m3u/i.test(c.url) || true; // proxy serves m3u8 as hls
     if (window.Hls && Hls.isSupported()){
       hls = new Hls({ maxBufferLength: 20, manifestLoadingTimeOut: 15000, fragLoadingTimeOut: 25000 });
+      var netRetried = false;
       hls.loadSource(src);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, function(){ video.play().catch(function(){}); setStatus('Playing ' + c.name); });
       hls.on(Hls.Events.ERROR, function(_, data){
         if (data.fatal){
-          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { showSpin(false); setStatus('Stream unreachable — it may be offline or region-locked.', true); }
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+            if (!netRetried){ netRetried = true; setStatus('Stream busy — retrying…'); setTimeout(function(){ try { hls.startLoad(); } catch(_){} }, 6000); }
+            else { showSpin(false); setStatus('Stream unreachable — offline, busy (single-connection line), or region-locked.', true); }
+          }
           else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { try { hls.recoverMediaError(); } catch(_){} }
           else { showSpin(false); setStatus('Could not play this channel.', true); }
         }
@@ -528,7 +554,7 @@
     var body = (text || '').trim();
     if (!body || body.indexOf('#EXTINF') === -1) return 0;
     privateChans = parseM3U(body, 'Private').map(function(c){ return Object.assign({ _src:'private' }, c); });
-    rebuild();
+    rebuild(); saveChanCache();
     return privateChans.length;
   }
   function loadLink(u){                                  // fetch a link via the raw proxy, load its channels
@@ -546,6 +572,49 @@
         setTimeout(closeModal, 800);
       });
   }
+  // Load an Xtream line via the JSON API (works when get.php is throttled). Distinguishes
+  // busy/throttle vs wrong-creds vs expired so the message is honest, not "server returned nothing".
+  function loadXtream(host, user, pass){
+    host = (host || '').replace(/\/+$/, '');
+    var staleNote = '';
+    modalMsg('Connecting to your Xtream server…', 'loading');
+    return fetchRaw(xtreamApi(host, user, pass, '')).then(function(res){
+      if (!(res.text || '').trim()) throw new Error('the server returned nothing — it may be busy (single-connection line). Close other players, wait ~30s, and retry.');
+      var info = parseJsonSafe(res.text);
+      if (!info || !info.user_info) throw new Error("that server didn't return valid Xtream data — check the address (it may not be an Xtream Codes line).");
+      var ui = info.user_info;
+      if (String(ui.auth) !== '1') throw new Error('login rejected — check the username and password.');
+      var st = (ui.status || '').toLowerCase();
+      if (st && st !== 'active'){
+        var exp = ui.exp_date ? new Date(parseInt(ui.exp_date, 10) * 1000).toLocaleDateString() : '';
+        throw new Error('this subscription is ' + ui.status + (exp ? ' (expired ' + exp + ')' : '') + '.');
+      }
+      if (res.source === 'stale') staleNote = ' (from your saved list — the provider was busy)';
+      modalMsg('Loading categories…', 'loading');
+      return fetchRaw(xtreamApi(host, user, pass, 'get_live_categories'));
+    }).then(function(res){
+      var cats = parseJsonSafe(res.text) || [];
+      var catMap = {};
+      cats.forEach(function(c){ catMap[String(c.category_id)] = c.category_name; });
+      modalMsg('Loading channels…', 'loading');
+      return fetchRaw(xtreamApi(host, user, pass, 'get_live_streams')).then(function(sres){
+        return { catMap: catMap, streams: parseJsonSafe(sres.text) };
+      });
+    }).then(function(r){
+      var streams = r.streams;
+      if (!Array.isArray(streams) || !streams.length) throw new Error('connected, but no live channels came back (the line may be busy — retry shortly).');
+      privateChans = streams.map(function(s){
+        var cid = s.category_id != null ? String(s.category_id) : (s.category_ids && s.category_ids[0] != null ? String(s.category_ids[0]) : '');
+        return { _src: 'private', name: s.name || 'Channel', logo: s.stream_icon || '', group: r.catMap[cid] || 'Xtream', url: xtreamLiveUrl(host, user, pass, s.stream_id) };
+      });
+      rebuild(); saveChanCache();
+      var n = privateChans.length;
+      modalMsg(n.toLocaleString() + ' channels loaded' + staleNote + '. Opening…', 'ok');
+      setStatus(n + ' private channels loaded.');
+      setTimeout(closeModal, 900);
+      return n;
+    });
+  }
 
   btnUnlock.addEventListener('click', function(){
     var pass = pvPassEl.value;
@@ -556,10 +625,16 @@
       .then(function(d){
         busy(btnUnlock, false);
         unlockedPass = pass;
+        try { localStorage.setItem(PASS_KEY, pass); } catch(_){}   // remember for next open (by request)
         pvLock.style.display = 'none'; pvPanel.style.display = 'block';
         btnUnlock.style.display = 'none'; btnSaveLoad.style.display = '';
         if (d && d.value){
-          if (d.kind === 'text'){ setMethod('paste'); pvTextEl.value = d.value; var n = applyPrivate(d.value); modalMsg(n + ' channels loaded — edit or close to watch.', 'ok'); setStatus(n + ' private channels loaded.'); }
+          if (d.kind === 'text' && d.value.indexOf('XTREAM\n') === 0){
+            var xc = parseJsonSafe(d.value.slice(7)) || {};
+            setMethod('xtream'); pvXhostEl.value = xc.host || ''; pvXuserEl.value = xc.user || ''; pvXpassEl.value = xc.pass || '';
+            loadXtream(xc.host, xc.user, xc.pass).catch(function(e){ modalMsg('Saved Xtream did not load: ' + e.message, 'err'); });
+          }
+          else if (d.kind === 'text'){ setMethod('paste'); pvTextEl.value = d.value; var n = applyPrivate(d.value); modalMsg(n + ' channels loaded — edit or close to watch.', 'ok'); setStatus(n + ' private channels loaded.'); }
           else { setMethod('url'); pvUrlEl.value = d.value; loadLink(d.value).catch(function(e){ modalMsg('Saved link did not load: ' + e.message, 'err'); }); }
         } else {
           modalMsg('No playlist saved yet — pick a method below, then Save and load.', '');
@@ -576,7 +651,7 @@
       var host = pvXhostEl.value.trim().replace(/\/+$/,''), user = pvXuserEl.value.trim(), pass = pvXpassEl.value.trim();
       if (!host || !user || !pass) return Promise.reject(new Error('Fill server, username and password.'));
       if (!/^https?:\/\//i.test(host)) return Promise.reject(new Error('Server must start with http:// or https://'));
-      return Promise.resolve({ kind:'url', value: host + '/get.php?username=' + encodeURIComponent(user) + '&password=' + encodeURIComponent(pass) + '&type=m3u_plus&output=ts' });
+      return Promise.resolve({ kind:'xtream', host:host, user:user, pass:pass });
     }
     var f = pvFileEl.files && pvFileEl.files[0];
     if (!f) return Promise.reject(new Error('Choose an .m3u file.'));
@@ -587,11 +662,14 @@
     if (!unlockedPass){ modalMsg('Unlock first.', 'err'); return; }
     modalMsg('Saving…', 'loading'); busy(btnSaveLoad, true, 'Saving…');
     gatherSource().then(function(src){
-      return fetch(STORE, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: unlockedPass, kind: src.kind, value: src.value }) })
+      var storeKind = src.kind, storeValue = src.value;
+      if (src.kind === 'xtream'){ storeKind = 'text'; storeValue = 'XTREAM\n' + JSON.stringify({ host:src.host, user:src.user, pass:src.pass }); }
+      return fetch(STORE, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: unlockedPass, kind: storeKind, value: storeValue }) })
         .then(function(r){ if (r.status === 401) throw new Error('wrong password'); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .then(function(){
           busy(btnSaveLoad, false);
-          if (src.kind === 'text'){ var n = applyPrivate(src.value); if (!n){ modalMsg('Saved, but no channels found in that M3U.', 'err'); return; } modalMsg(n + ' channels saved and loaded. Opening…', 'ok'); setStatus(n + ' private channels loaded.'); setTimeout(closeModal, 800); }
+          if (src.kind === 'xtream'){ loadXtream(src.host, src.user, src.pass).catch(function(e){ modalMsg('Saved, but could not load: ' + e.message, 'err'); }); }
+          else if (src.kind === 'text'){ var n = applyPrivate(src.value); if (!n){ modalMsg('Saved, but no channels found in that M3U.', 'err'); return; } modalMsg(n + ' channels saved and loaded. Opening…', 'ok'); setStatus(n + ' private channels loaded.'); setTimeout(closeModal, 800); }
           else { loadLink(src.value).catch(function(e){ modalMsg('Saved, but could not load: ' + e.message, 'err'); }); }
         });
     }).catch(function(e){ busy(btnSaveLoad, false); modalMsg(e.message, 'err'); });
@@ -600,6 +678,23 @@
   searchEl.addEventListener('input', render);
   rebuild();
   setStatus('Ready — pick a channel, search, or add your own playlist.');
+
+  // Auto-restore: if a password was saved, silently unlock and reload the stored playlist
+  // (the proxy cache makes this near-instant and doesn't re-hit the provider).
+  (function autoRestore(){
+    var pass = ''; try { pass = localStorage.getItem(PASS_KEY) || ''; } catch(_){}
+    if (!pass) return;
+    unlockedPass = pass;
+    fetch(STORE + '?p=' + encodeURIComponent(pass))
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if (!d || !d.value) return;
+        if (d.kind === 'text' && d.value.indexOf('XTREAM\n') === 0){ var xc = parseJsonSafe(d.value.slice(7)) || {}; return loadXtream(xc.host, xc.user, xc.pass); }
+        if (d.kind === 'text'){ applyPrivate(d.value); return; }
+        return loadLink(d.value);
+      })
+      .catch(function(){});
+  })();
 })();
 </script>
 </body>
