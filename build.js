@@ -1839,11 +1839,10 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
     var WP_URL = '${wpUrl}';
     var I18N = ${JSON.stringify(i18n)};
 
-    // ---- Listen (self-hosted Kokoro neural TTS — voice.khalildrissi.com) ----
+    // ---- Listen (browser Web Speech API — speechSynthesis, no server) ----
     (function() {
-      var TTS_URL = 'https://voice.khalildrissi.com/v1/audio/speech';
-      var TTS_MODEL = 'speaches-ai/Kokoro-82M-v1.0-ONNX';
-      var TTS_VOICE = '${lang === 'fr' ? 'ff_siwis' : 'bm_george'}';
+      var synth = window.speechSynthesis;
+      var LANG = '${lang === 'fr' ? 'fr-FR' : 'en-US'}';
 
       var btn = document.getElementById('listenBtn');
       var icon = document.getElementById('listenIcon');
@@ -1859,11 +1858,11 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
         textContent = body.innerText || body.textContent || '';
         textContent = textContent.replace(/\\s+/g, ' ').trim();
       }
-      if (!textContent) { document.getElementById('listenPlayer').style.display = 'none'; return; }
+      if (!textContent || !synth || typeof SpeechSynthesisUtterance === 'undefined') { document.getElementById('listenPlayer').style.display = 'none'; return; }
 
       // Small sentence-grouped chunks so the FIRST chunk synthesizes in ~1-2s and
       // playback starts fast; the next chunk is prefetched while one plays.
-      var maxLen = 320;
+      var maxLen = 200;   // keep each utterance short so speechSynthesis starts fast and never hits Chrome's long-utterance cutoff
       var chunks = [];
       var sentences = textContent.match(/[^.!?…]+[.!?…]+(\\s|$)|.+$/g) || [textContent];
       var chunk = '';
@@ -1883,11 +1882,8 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
 
       var speeds = [1, 1.25, 1.5, 1.75, 2];
       var speedIdx = 0;
-      var playing = false, paused = false, loading = false;
+      var playing = false, paused = false;
       var curIdx = 0, doneLen = 0, generation = 0;
-      var curURL = null;
-      var audio = new Audio();
-      audio.preload = 'auto';
 
       function fmt(secs) {
         var m = Math.floor(secs / 60);
@@ -1900,72 +1896,62 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
       var playPath = '<polygon points="6,4 20,12 6,20" />';
       var pausePath = '<rect x="5" y="4" width="4" height="16" /><rect x="13" y="4" width="4" height="16" />';
 
-      audio.addEventListener('timeupdate', function() {
-        if (!audio.duration || !isFinite(audio.duration)) return;
-        var frac = audio.currentTime / audio.duration;
-        var pct = Math.min(100, ((doneLen + chunkLens[curIdx] * frac) / totalLen) * 100);
+      // Pick a voice that matches the article language; prefer a natural/local one.
+      var voice = null;
+      function pickVoice() {
+        var vs = (synth.getVoices && synth.getVoices()) || [];
+        var two = LANG.slice(0, 2).toLowerCase();
+        var same = vs.filter(function(v) { return v.lang && v.lang.toLowerCase().indexOf(two) === 0; });
+        voice = same.filter(function(v) { return /google|natural|premium|siri|enhanced/i.test(v.name); })[0] || same[0] || null;
+      }
+      pickVoice();
+      if (typeof synth.onvoiceschanged !== 'undefined') synth.addEventListener('voiceschanged', pickVoice);
+
+      function setProgress(pct) {
         progress.style.width = pct + '%';
         timeEl.textContent = fmt(Math.max(0, totalEstimate * (1 - pct / 100)));
-      });
-
-      audio.addEventListener('ended', function() {
-        doneLen += chunkLens[curIdx];
-        curIdx++;
-        if (curIdx >= chunks.length) { stopSpeech(); return; }
-        playChunk(curIdx);
-      });
-
-      // Cache TTS blobs by chunk index so the NEXT chunk can be prefetched while
-      // the current one plays (gapless, and the first chunk is small = fast start).
-      var blobCache = {};
-      function fetchChunk(idx) {
-        if (idx < 0 || idx >= chunks.length) return null;
-        if (!blobCache[idx]) {
-          blobCache[idx] = fetch(TTS_URL, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ model: TTS_MODEL, voice: TTS_VOICE, input: chunks[idx], response_format: 'mp3' })
-          }).then(function(r) { if (!r.ok) throw new Error('tts ' + r.status); return r.blob(); });
-        }
-        return blobCache[idx];
       }
-      function playChunk(idx) {
+
+      function speakChunk(idx) {
         var gen = generation;
-        loading = true;
-        var p = fetchChunk(idx);
-        fetchChunk(idx + 1);        // prefetch the next chunk while this one plays
-        return p.then(function(blob) {
+        if (idx >= chunks.length) { stopSpeech(); return; }
+        curIdx = idx;
+        var u = new SpeechSynthesisUtterance(chunks[idx]);
+        u.lang = LANG;
+        if (voice) u.voice = voice;
+        u.rate = speeds[speedIdx];
+        u.onstart = function() { if (gen === generation) titleEl.textContent = '${lang === 'fr' ? 'Lecture en cours...' : 'Playing...'}'; };
+        u.onboundary = function(e) {
           if (gen !== generation) return;
-          loading = false;
-          if (curURL) URL.revokeObjectURL(curURL);
-          curURL = URL.createObjectURL(blob);
-          audio.src = curURL;
-          audio.playbackRate = speeds[speedIdx];
-          titleEl.textContent = '${lang === 'fr' ? 'Lecture en cours...' : 'Playing...'}';
-          return audio.play();
-        }).catch(function() {
+          var frac = (e.charIndex || 0) / (chunks[idx].length || 1);
+          setProgress(Math.min(100, ((doneLen + chunkLens[idx] * frac) / totalLen) * 100));
+        };
+        u.onend = function() {
           if (gen !== generation) return;
-          loading = false;
-          titleEl.textContent = '${lang === 'fr' ? 'Erreur audio' : 'Playback error'}';
-          stopSpeech();
-        });
+          doneLen += chunkLens[idx];
+          setProgress(Math.min(100, (doneLen / totalLen) * 100));
+          speakChunk(idx + 1);
+        };
+        u.onerror = function() { if (gen === generation) stopSpeech(); };
+        synth.speak(u);
       }
 
       function startSpeech() {
         generation++;
+        synth.cancel();
         playing = true; paused = false;
         curIdx = 0; doneLen = 0;
         icon.innerHTML = pausePath;
         titleEl.textContent = '${lang === 'fr' ? 'Chargement...' : 'Loading...'}';
         progress.style.width = '0%';
-        playChunk(0);
+        // Chrome can drop a speak() fired immediately after cancel(); a tiny delay is reliable.
+        setTimeout(function() { if (playing) speakChunk(0); }, 60);
       }
 
       function stopSpeech() {
         generation++;
-        playing = false; paused = false; loading = false;
-        audio.pause();
-        audio.removeAttribute('src');
-        if (curURL) { URL.revokeObjectURL(curURL); curURL = null; }
+        playing = false; paused = false;
+        synth.cancel();
         icon.innerHTML = playPath;
         progress.style.width = '0%';
         timeEl.textContent = fmt(totalEstimate);
@@ -1977,25 +1963,34 @@ function blogPostHTML(data, post, lang, allPosts, postIndex) {
           startSpeech();
         } else if (!paused) {
           paused = true;
-          if (!loading) audio.pause();
+          synth.pause();
           icon.innerHTML = playPath;
           titleEl.textContent = '${lang === 'fr' ? 'En pause' : 'Paused'}';
         } else {
           paused = false;
+          synth.resume();
           icon.innerHTML = pausePath;
           titleEl.textContent = '${lang === 'fr' ? 'Lecture en cours...' : 'Playing...'}';
-          if (!loading) audio.play();
         }
       });
 
       speedBtn.addEventListener('click', function() {
         speedIdx = (speedIdx + 1) % speeds.length;
         speedBtn.textContent = speeds[speedIdx] + '\\u00d7';
-        audio.playbackRate = speeds[speedIdx];
+        // Rate can't change mid-utterance — restart the current chunk at the new speed.
+        if (playing) {
+          var idx = curIdx, dl = 0;
+          for (var i = 0; i < idx; i++) dl += chunkLens[i];
+          doneLen = dl;
+          generation++;
+          synth.cancel();
+          paused = false; icon.innerHTML = pausePath;
+          setTimeout(function() { if (playing) speakChunk(idx); }, 60);
+        }
       });
 
       // Cleanup on navigate away
-      window.addEventListener('beforeunload', function() { audio.pause(); });
+      window.addEventListener('beforeunload', function() { synth.cancel(); });
     })();
 
     // ---- TOC ----

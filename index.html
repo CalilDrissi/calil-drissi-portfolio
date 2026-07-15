@@ -4126,18 +4126,11 @@
     if (orbCtx) { orbCtx.close().catch(() => {}); orbCtx = null; }
     orbAnalyser = null; orbData = null; orbLevel = 0;
   }
-  // ---- Voice conversation: browser mic (STT) -> /api/chat (LLM) -> neural TTS,
-  // with a browser-speech fallback when the Workers AI voice quota is unavailable.
-  // Request/response replaces the real-time WebSocket call: it's reliable, and
-  // the LLM (Ollama via /api/chat) doesn't share the exhausted Workers AI budget.
-  // Self-hosted voice box (speaches: Kokoro TTS + whisper STT) — no quota, works
-  // in every browser. See voice.khalildrissi.com. TTS voice: British male
-  // (bm_george, JARVIS) for EN, French female (ff_siwis) for FR.
+  // ---- Voice conversation: browser mic (SpeechRecognition STT) -> /api/chat
+  // (LLM) -> browser speechSynthesis TTS. Fully client-side and free — no
+  // self-hosted voice box, no Workers AI quota. Voice input needs a browser with
+  // SpeechRecognition (Chrome, Edge, Safari); others fall back to typing.
   const VOICE_LANG = (typeof LANG !== 'undefined' && LANG === 'fr') ? 'fr' : 'en';
-  const VOICE_API = 'https://voice.khalildrissi.com';
-  const TTS_MODEL = 'speaches-ai/Kokoro-82M-v1.0-ONNX';
-  const STT_MODEL = 'Systran/faster-whisper-small';
-  const TTS_VOICE = VOICE_LANG === 'fr' ? 'ff_siwis' : 'bm_george';
   let convoActive = false;
   let voiceStream = null, voiceRec = null, voiceCtx = null, voiceAnalyser = null, voiceVADraf = 0, voiceAudio = null;
 
@@ -4158,11 +4151,7 @@
     let playIdx = 0, playing = false, finished = false, resolveDone;
     const donePromise = new Promise((r) => { resolveDone = r; });
     function ttsFetch(text) {
-      return fetch(VOICE_API + '/v1/audio/speech', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: TTS_MODEL, voice: TTS_VOICE, input: text, response_format: 'mp3' })
-      }).then((r) => { if (!r.ok) throw 0; return r.blob(); })
-        .then((blob) => ({ blob, text })).catch(() => ({ text }));   // no blob -> browser voice
+      return Promise.resolve({ text });   // no blob -> spoken by the browser voice in playOne
     }
     function playOne(it) {
       return new Promise((res) => {
@@ -4237,39 +4226,8 @@
     await speaker.done();                          // wait until all sentences have been spoken
     if (convoActive) listenTurn();                // hands-free: listen for the next turn
   }
-  // Upload recorded speech to the self-hosted whisper endpoint (works in every browser).
-  async function transcribe(blob) {
-    try {
-      const fd = new FormData();
-      fd.append('file', blob, 'speech.webm');
-      fd.append('model', STT_MODEL);
-      fd.append('language', VOICE_LANG);
-      const r = await fetch(VOICE_API + '/v1/audio/transcriptions', { method: 'POST', body: fd });
-      if (!r.ok) return '';
-      const d = await r.json();
-      return (d && d.text ? d.text : '').trim();
-    } catch (_) { return ''; }
-  }
-  function pickMime() {
-    const opts = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'];
-    for (const m of opts) { if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m; }
-    return '';
-  }
-  async function ensureMic() {
-    if (voiceStream) return true;
-    try {
-      voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const AC = window.AudioContext || window.webkitAudioContext;
-      voiceCtx = new AC(); await voiceCtx.resume().catch(() => {});
-      voiceAnalyser = voiceCtx.createAnalyser(); voiceAnalyser.fftSize = 256;
-      voiceCtx.createMediaStreamSource(voiceStream).connect(voiceAnalyser);
-      return true;
-    } catch (_) { voiceStream = null; return false; }
-  }
-  // Record a turn, auto-stopping on trailing silence (simple VAD off the analyser),
-  // then transcribe via whisper and hand the text to the agent. Loops hands-free.
   // Instant STT via the browser's native recognition (Chrome/Edge/Safari) — no
-  // record-upload-transcribe round trip. Falls back to whisper if unavailable/blocked.
+  // record-upload round trip and no server. Loops hands-free for a natural call.
   function srListen(SR) {
     orbState = 'listening'; setOrbText(ORB_T.listening);
     const rec = new SR();
@@ -4294,46 +4252,12 @@
     if (!convoActive) return;
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SR && !window.__srBroken) { srListen(SR); return; }
-    ensureMic().then((ok) => {
-      if (!ok || !convoActive) {
-        if (convoActive) setOrbText(VOICE_LANG === 'fr' ? 'Micro indisponible' : 'Mic unavailable');
-        return;
-      }
-      orbState = 'listening'; setOrbText(ORB_T.listening);
-      const mime = pickMime(), chunks = [];
-      let rec; try { rec = new MediaRecorder(voiceStream, mime ? { mimeType: mime } : undefined); } catch (_) { return; }
-      voiceRec = rec;
-      rec.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
-      rec.onstop = async () => {
-        cancelAnimationFrame(voiceVADraf);
-        if (!convoActive) return;
-        const blob = new Blob(chunks, { type: mime || 'audio/webm' });
-        if (blob.size < 1600) { listenTurn(); return; }        // basically silence → keep listening
-        orbState = 'speaking'; setOrbText(ORB_T.thinking);
-        const said = await transcribe(blob);
-        if (!convoActive) return;
-        if (said) handleVoiceTurn(said); else listenTurn();
-      };
-      rec.start();
-      const data = new Uint8Array(voiceAnalyser.frequencyBinCount);
-      let spoke = false, silenceSince = 0;
-      const t0 = performance.now();
-      const SPEAK = 0.045, SILENCE_MS = 1100, MAX_MS = 13000, PRESPEAK_MAX_MS = 8000;
-      const tick = () => {
-        if (!convoActive || !voiceRec || voiceRec.state !== 'recording') return;
-        voiceAnalyser.getByteFrequencyData(data);
-        let sum = 0; for (let i = 0; i < data.length; i++) sum += data[i];
-        const lvl = sum / data.length / 255, now = performance.now();
-        if (lvl > SPEAK) { spoke = true; silenceSince = 0; }
-        else if (spoke && !silenceSince) { silenceSince = now; }
-        const elapsed = now - t0;
-        const stop = (spoke && silenceSince && now - silenceSince > SILENCE_MS)
-          || elapsed > MAX_MS || (!spoke && elapsed > PRESPEAK_MAX_MS);
-        if (stop) { try { voiceRec.stop(); } catch (_) {} return; }
-        voiceVADraf = requestAnimationFrame(tick);
-      };
-      voiceVADraf = requestAnimationFrame(tick);
-    });
+    // No browser speech recognition (e.g. Firefox) — voice input isn't available
+    // without the removed self-hosted whisper box, so fall back to typing.
+    setOrbText(VOICE_LANG === 'fr'
+      ? 'Saisie vocale non prise en charge ici — écrivez plutôt'
+      : 'Voice input isn’t supported here — type instead');
+    convoActive = false;
   }
   function endConversation() {                   // stop the conversation, return to text input
     convoActive = false; conversationMode = false; micListening = false; orbState = 'idle';

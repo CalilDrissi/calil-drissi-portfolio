@@ -10,3 +10,4 @@ node_modules/
 test-win.js
 .env
 test-results/
+.wrangler/
